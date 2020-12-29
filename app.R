@@ -72,9 +72,12 @@ ui <- fluidPage(
                         # Show a plot of the generated distribution
                         mainPanel(
                           
-                          # plot of feature UMAPs by gene expression
+                          # plot of cell type UMAPs by gene expression
+                          h2("UMAP by Cell Type"),
                           plotlyOutput("umaps", width = '95%', height = '40%'),
-                          br(),
+                          br(), # blank space
+                          h2("Gene Expression Query"),
+                          # plot of feature UMAPs
                           plotlyOutput("feature", width = '95%', height = '40%')
                         )
                       )

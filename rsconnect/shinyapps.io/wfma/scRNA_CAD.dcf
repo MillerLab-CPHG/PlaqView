@@ -1,0 +1,12 @@
+name: scRNA_CAD
+title: scRNA_CAD
+username:
+account: wfma
+server: shinyapps.io
+hostUrl: https://api.shinyapps.io/v1
+appId: 3430304
+bundleId: 4031140
+url: https://wfma.shinyapps.io/scRNA_CAD/
+when: 1609019521.17067
+asMultiple: FALSE
+asStatic: FALSE
