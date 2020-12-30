@@ -46,44 +46,35 @@ ui <- fluidPage(
                
             # PANEL 1    
              tabPanel("Query Single Gene",
-                      # Sidebar with a slider input for number of bins
-                      sidebarLayout(
-                        
-                        # text box input
-                        sidebarPanel(
+                        # Show a plot of the generated distribution
+                        mainPanel(width = 12, # 12/12 is full panel
                           textInput("genes", 
                                     h3("Search for a Gene", 
                                        h5("please follow HUGO conventions")),
-                                    value = "ACTA2"), #default value
+                                    value = "ACTA2", #default value
+                                    ), 
                           
                           # 'go' button
                           actionButton(
                             inputId = "runcode",
                             label = "Run",
-                            width = '100'
-                          ),
+                            width = '100'),
+                            
+                            helpText("Please be patient, it might take a while to query."), 
+                            helpText("To compare multiple genes' expression pattern, use the 'Compare Genes' tab."),
+                            helpText("Relevant graphs will appear below the original UMAP. 
+                                   Hover over graphs for details or to zoom in/out."),
                           
-                          helpText("Please be patient, it might take a while to query."), 
-                          helpText("To compare multiple genes' expression pattern, use the 'Compare Genes' tab."),
-                          helpText("Relevant graphs will appear below the original UMAP. 
-                                   Hover over graphs for details or to zoom in/out.")
-                        ),
-                        
-                        # Show a plot of the generated distribution
-                        mainPanel(
-                          
-                          # plot of cell type UMAPs by gene expression
-                          h2("UMAP by Cell Type"),
-                          plotlyOutput("umaps", width = '95%', height = '40%'),
-                          br(), # blank space
-                          h2("Gene Expression Query"),
-                          # plot of feature UMAPs
-                          plotlyOutput("feature", width = '95%', height = '40%')
+                          # graphic layout
+                          splitLayout(cellWidths = c("50%", "50%"), # set size 50/50 split
+                                      plotlyOutput("umaps"),
+                                      plotlyOutput("feature"))
+            
                         )
-                      )
+                      ),
              
                       
-                      ),
+                      
             
             # PANEL 2    
             tabPanel("Compare Genes",
@@ -102,11 +93,11 @@ ui <- fluidPage(
                   mainPanel(
                     # descriptions
                     includeMarkdown("description.Rmd")
-                  )
+                  ))
                                 )
                       
             )
-  )
+
   
 
 
@@ -119,19 +110,22 @@ server <- function(input, output) {
             stanford,
             reduction = "umap",
             label = TRUE,
-            label.size = 6,
+            label.size = 3,
             repel = T,
             # repel labels
             pt.size = 1,
             cols = manual_color_list,
             group.by = "SingleR.calls" # group.by is important, use this to call metadata separation
-        )
+        ) + theme(legend.position="bottom", legend.box = "horizontal") +
+          ggtitle("UMAP by Cell Type") +
+          theme(plot.title = element_text(hjust = 0.5))
+        
     ))
     
    # Gene feature plot, interactive #
     observeEvent(input$runcode,{ # observe event puts a pause until pushed
         output$feature <- renderPlotly(print(FeaturePlot(stanford, 
-                                                    features = input$genes)
+                                                    features = input$genes) 
                                                     ))
     })
 
