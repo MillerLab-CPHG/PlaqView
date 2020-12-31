@@ -45,13 +45,14 @@ ui <- fluidPage(
     navbarPage("sCADView", # title 
                
             # PANEL 1    
-             tabPanel("Query Single Gene",
-                        # Show a plot of the generated distribution
+             tabPanel("Query Single Gene", 
+                      
                         mainPanel(width = 12, # 12/12 is full panel
-                          textInput("genes", 
+                                  
+                          textInput("genes", width = '60%',
                                     h3("Search for a Gene", 
                                        h5("please follow HUGO conventions")),
-                                    value = "ACTA2", #default value
+                                    placeholder = "e.g. MYH11", #default value
                                     ), 
                           
                           # 'go' button
@@ -60,9 +61,7 @@ ui <- fluidPage(
                             label = "Run",
                             width = '100'),
                             
-                            helpText("Please be patient, it might take a while to query."), 
-                            helpText("To compare multiple genes' expression pattern, use the 'Compare Genes' tab."),
-                            helpText("Relevant graphs will appear below the original UMAP. 
+                            helpText("Please be patient, it might take a while to query. To compare multiple genes' expression pattern, use the 'Compare Genes' tab. Relevant graphs will appear below the original UMAP. 
                                    Hover over graphs for details or to zoom in/out."),
                           
                           # graphic layout
@@ -105,6 +104,7 @@ ui <- fluidPage(
 # Define server logic required to draw a histogram
 server <- function(input, output) {
     # UMAP plot, interactive #
+  observeEvent(input$runcode,{ 
     output$umaps <- renderPlotly(print(
         DimPlot(
             stanford,
@@ -121,6 +121,7 @@ server <- function(input, output) {
           theme(plot.title = element_text(hjust = 0.5))
         
     ))
+  })
     
    # Gene feature plot, interactive #
     observeEvent(input$runcode,{ # observe event puts a pause until pushed
