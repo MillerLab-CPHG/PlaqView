@@ -4,6 +4,7 @@ library(shiny)
 library(shinythemes)
 library(Seurat)
 library(plotly)
+library(shinybusy) #install.packages("shinybusy")
 
 #### LOADING DATA ####
 stanford <- readRDS(file = "data/final_stanford_labeled.rds")
@@ -49,22 +50,29 @@ ui <- fluidPage(
                       
                         mainPanel(width = 12, # 12/12 is full panel
                                   
-                          textInput("genes", width = '60%',
-                                    h3("Search for a Gene", 
-                                       h5("please follow HUGO conventions")),
-                                    placeholder = "e.g. MYH11", #default value
-                                    ), 
-                          
-                          # 'go' button
-                          actionButton(
-                            inputId = "runcode",
-                            label = "Run",
-                            width = '100'),
-                            
-                            helpText("Please be patient, it might take a while to query. To compare multiple genes' expression pattern, use the 'Compare Genes' tab. Relevant graphs will appear below the original UMAP. 
-                                   Hover over graphs for details or to zoom in/out."),
-                          
-                          # graphic layout
+                                  
+                          splitLayout(cellWidths = c("30%", "70%"),
+                                      ## panel for gene input 
+                                      wellPanel(textInput("genes", width = '100%',
+                                                  h3("Search for a Gene", 
+                                                     h5("please follow HUGO conventions")),
+                                                  placeholder = "e.g. MYH11", #default value
+                                      ), 
+                                        
+                                        # 'go' button
+                                        actionButton(
+                                          inputId = "runcode",
+                                          label = "Run",
+                                          width = '100%')),
+                                      ## panel for description
+                                          wellPanel(
+                                            includeMarkdown("descriptionfiles/helptext_singlegenepage.Rmd")
+                                                  )
+                                              
+                                              ),   
+                        
+
+                          ## lower panel for graphic outputs
                           splitLayout(cellWidths = c("50%", "50%"), # set size 50/50 split
                                       plotlyOutput("umaps"),
                                       plotlyOutput("feature"))
@@ -91,7 +99,7 @@ ui <- fluidPage(
              tabPanel("About",
                   mainPanel(
                     # descriptions
-                    includeMarkdown("description.Rmd")
+                    includeMarkdown("descriptionfiles/aboutusdescription.Rmd")
                   ))
                                 )
                       
