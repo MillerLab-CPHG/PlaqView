@@ -41,41 +41,55 @@ ui <- fluidPage(
   
   # set theme
   theme = shinytheme("flatly"),
+  add_busy_bar(color = "#ff9142"), # THIS IS THE BUSY BAR
+  
   
   # defining each 'tab' here
     navbarPage("sCADView", # title 
                
             # PANEL 1    
              tabPanel("Query Single Gene", 
-                      
-                        mainPanel(width = 12, # 12/12 is full panel
-                                  
-                                  
-                          splitLayout(cellWidths = c("30%", "70%"),
-                                      ## panel for gene input 
-                                      wellPanel(textInput("genes", width = '100%',
-                                                  h3("Search for a Gene", 
-                                                     h5("please follow HUGO conventions")),
-                                                  placeholder = "e.g. MYH11", #default value
-                                      ), 
+                      mainPanel(width = 12, # 12/12 is full panel
+                                fluidRow(## panel for gene input
+                                    column(
+                                      width = 4,
+                                      wellPanel(                                      
+                                        # must add up to 12 all columns
+                                        textInput(
+                                          "genes",
+                                          width = '100%',
+                                          h3("Search for a Gene", h5("please follow HUGO conventions")),
+                                          placeholder = "try: MYH11"
+                                        ),
+                                        # example values
                                         
                                         # 'go' button
                                         actionButton(
                                           inputId = "runcode",
-                                          label = "Run",
-                                          width = '100%')),
-                                      ## panel for description
-                                          wellPanel(
-                                            includeMarkdown("descriptionfiles/helptext_singlegenepage.Rmd")
-                                                  )
-                                              
-                                              ),   
-                        
+                                          label = "Query Gene",
+                                          width = '100%'
+                                        ))
 
+                                    ),
+                                    
+                                    ## panel for description
+                                    column(
+                                      width = 8,
+                                      wellPanel(includeMarkdown("descriptionfiles/helptext_singlegenepage.Rmd"))
+                                    )
+                                  ),
+                                
+                                
+                                #spacer
+                                br(),
+                              
+                                
                           ## lower panel for graphic outputs
+                          wellPanel(
                           splitLayout(cellWidths = c("50%", "50%"), # set size 50/50 split
                                       plotlyOutput("umaps"),
                                       plotlyOutput("feature"))
+                          )
             
                         )
                       ),
