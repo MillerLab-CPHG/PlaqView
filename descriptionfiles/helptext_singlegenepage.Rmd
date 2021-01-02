@@ -1,7 +1,0 @@
----
-title: "helptext_singlegenepage.Rmd"
-author: "WeiMa"
-date: "1/2/2021"
-output: html_document
----
-Please be patient, it might take a while to query. To compare multiple genes' expression pattern, use the 'Compare Genes' tab. Relevant graphs will appear below the original UMAP. Hover over graphs for details or to zoom in/out.
