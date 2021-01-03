@@ -49,7 +49,7 @@ ui <- fluidPage(
   # defining each 'tab' here
     navbarPage("sCADView", # title 
                
-            # PANEL 1    
+            # PANEL 1    ----
              tabPanel("Query Single Gene", 
                       mainPanel(width = 12, # 12/12 is full panel
                                 fluidRow(## panel for gene input
