@@ -5,6 +5,7 @@ library(shinythemes)
 library(Seurat)
 library(plotly)
 library(shinybusy) #install.packages("shinybusy")
+library()
 
 #### LOADING DATA ####
 stanford <- readRDS(file = "data/final_stanford_labeled.rds")
@@ -12,6 +13,7 @@ stanford <- readRDS(file = "data/final_stanford_labeled.rds")
 #### SHINY OPTIONS, COLORs ####
 # make the graphs match color of the UI
 shinyOptions(plot.autocolors = TRUE)
+
 
 # color definitions
 manual_color_list <-
@@ -86,10 +88,12 @@ ui <- fluidPage(
                                 
                           ## lower panel for graphic outputs
                           wellPanel(
-                          splitLayout(cellWidths = c("50%", "50%"), # set size 50/50 split
-                                      plotlyOutput("umaps"),
-                                      plotlyOutput("feature"))
-                          )
+                          fluidRow(
+                                      column(width = 6, plotlyOutput("umaps")),
+                                      
+                                      column(width = 6, plotlyOutput("feature")),
+                                      ) # fluidrow
+                          )# wellpanel
             
                         )
                       ),
