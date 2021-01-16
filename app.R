@@ -65,11 +65,8 @@ ui <- fluidPage(
                                           h3("Search for a Gene", h5("please follow HUGO conventions")),
                                           placeholder = "try: MYH11"
                                         ),
-
-                                        # choose the type of output graph 
-                                        selectInput("select", label = h3("Dataset"), 
-                                                    choices = list("Wirka scRNA (2019)" = "BLANK"), 
-                                                    selected = "Wirka 2019"),                                        
+                                        # example values
+                                        
                                         # 'go' button
                                         actionButton(
                                           inputId = "runcode",
@@ -95,16 +92,22 @@ ui <- fluidPage(
                           wellPanel(
                           fluidRow(
                                       column(width = 6, plotlyOutput("umaps")),
+<<<<<<< HEAD
                                   
                                       column(width = 6, 
                                              tabsetPanel(tabPanel(plotlyOutput("FeaturePlot"))
                                              )
+=======
+                                      
+                                      column(width = 6, plotlyOutput("feature")),
+>>>>>>> parent of c4f6a8b... stable version b4 adding more features to panel
                                       ) # fluidrow
                           )# wellpanel
             
                         )
                       ),
-            
+             
+                      
                       
             
             # PANEL 2    
@@ -123,10 +126,7 @@ ui <- fluidPage(
              tabPanel("About",
                   mainPanel(
                     # descriptions
-                    includeMarkdown("descriptionfiles/aboutusdescription.Rmd"),
-                    br(),
-                    img(src = "MSTPlogo.png", width = 233, height = 83)
-                    
+                    includeMarkdown("descriptionfiles/aboutusdescription.Rmd")
                   ))
                                 )
                       
@@ -160,24 +160,9 @@ server <- function(input, output) {
     
    # Gene feature plot, interactive #
     observeEvent(input$runcode,{ # observe event puts a pause until pushed
-      
-        # feature plot
-        output$FeaturePlot <- renderPlotly(print(FeaturePlot(stanford, 
+        output$feature <- renderPlotly(print(FeaturePlot(stanford, 
                                                     features = input$genes) 
-                                                   ))
-        output$RidgePlot <- renderPlotly(print(RidgePlot(stanford, 
-                                                              features = input$genes) 
-        ))
-        output$VlnPlot <- renderPlotly(print(VlnPlot(stanford, 
-                                                              features = input$genes) 
-        ))
-        output$DotPlot <- renderPlotly(print(DotPlot(stanford, 
-                                                              features = input$genes) 
-        ))
-        
-        
- 
-        
+                                                    ))
     })
 
 }
