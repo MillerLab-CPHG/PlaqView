@@ -8,7 +8,9 @@ library(shinybusy) #install.packages("shinybusy")
 library()
 
 #### LOADING DATA ####
+# below line is commented for shinyapp.io deployment temp
 stanford <- readRDS(file = "data/final_stanford_labeled.rds")
+# stanford <- readRDS(file = url("https://virginia.box.com/shared/static/oyo1bicpvlxen940zmciqapvg0y3n6gb.rds"))
 
 #### SHINY OPTIONS, COLORs ####
 # make the graphs match color of the UI
@@ -93,7 +95,10 @@ ui <- fluidPage(
                           wellPanel(
                           fluidRow(
                                       column(width = 6, plotlyOutput("umaps")),
-                                      column(width = 6, plotlyOutput("FeaturePlot"))
+                                  
+                                      column(width = 6, 
+                                             tabsetPanel(tabPanel(plotlyOutput("FeaturePlot"))
+                                             )
                                       ) # fluidrow
                           )# wellpanel
             
