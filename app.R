@@ -65,8 +65,13 @@ ui <- fluidPage(
                                           h3("Search for a Gene", h5("please follow HUGO conventions")),
                                           placeholder = "try: MYH11"
                                         ),
-                                        # example values
-                                        
+
+                                        # choose the type of output graph 
+                                        selectInput("selectaplot", label = h5("Plot Type"), 
+                                                    choices = list("Feature Plot" = "Feature",
+                                                                   "Dot Plot" = "Dot",
+                                                                   "Ridge Plot" = "Ridge"), 
+                                                    selected = "Feature Plot"),                                        
                                         # 'go' button
                                         actionButton(
                                           inputId = "runcode",
@@ -92,22 +97,18 @@ ui <- fluidPage(
                           wellPanel(
                           fluidRow(
                                       column(width = 6, plotlyOutput("umaps")),
-<<<<<<< HEAD
-                                  
                                       column(width = 6, 
-                                             tabsetPanel(tabPanel(plotlyOutput("FeaturePlot"))
-                                             )
-=======
-                                      
-                                      column(width = 6, plotlyOutput("feature")),
->>>>>>> parent of c4f6a8b... stable version b4 adding more features to panel
+                                             conditionalPanel('input.selectaplot=="Ridge"', plotOutput("Ridge")),
+                                             conditionalPanel('input.selectaplot=="Dot"', plotlyOutput("Dot")), # conditonal panels allow rednering only if conditions are met
+                                             conditionalPanel('input.selectaplot=="Feature"', plotlyOutput("Feature"))
+                                      ) # column 
+                                             
                                       ) # fluidrow
                           )# wellpanel
             
                         )
                       ),
-             
-                      
+            
                       
             
             # PANEL 2    
@@ -126,7 +127,10 @@ ui <- fluidPage(
              tabPanel("About",
                   mainPanel(
                     # descriptions
-                    includeMarkdown("descriptionfiles/aboutusdescription.Rmd")
+                    includeMarkdown("descriptionfiles/aboutusdescription.Rmd"),
+                    br(),
+                    img(src = "MSTPlogo.png", width = 233, height = 83)
+                    
                   ))
                                 )
                       
@@ -160,9 +164,28 @@ server <- function(input, output) {
     
    # Gene feature plot, interactive #
     observeEvent(input$runcode,{ # observe event puts a pause until pushed
-        output$feature <- renderPlotly(print(FeaturePlot(stanford, 
-                                                    features = input$genes) 
-                                                    ))
+      
+      output$Dot <- renderPlotly({
+        validate(need(input$selectaplot=="Dot", message=FALSE))
+        print(DotPlot(stanford, 
+                          features = input$genes) 
+        )
+      })
+      output$Feature <- renderPlotly({
+        validate(need(input$selectaplot=="Feature", message=FALSE))
+        print(FeaturePlot(stanford, 
+                      features = input$genes) 
+        )
+      }) 
+    
+      output$Ridge <- renderPlot({
+        validate(need(input$selectaplot=="Ridge", message=FALSE))
+        RidgePlot(stanford, 
+                      features = input$genes) 
+      })
+      
+      
+      
     })
 
 }
