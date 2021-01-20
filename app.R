@@ -3,7 +3,6 @@ library(BiocManager)
 library(shiny)
 library(shinythemes)
 library(Seurat)
-library(plotly)
 library(shinybusy) #install.packages("shinybusy")
 
 
@@ -96,12 +95,12 @@ ui <- fluidPage(
                           ## lower panel for graphic outputs
                           wellPanel(
                           fluidRow(
-                                      column(width = 6, plotlyOutput("umaps")),
+                                      column(width = 6, plotOutput("umaps")),
                                       column(width = 6, 
                                              conditionalPanel('input.selectaplot=="Ridge"', plotOutput("Ridge")),
-                                             conditionalPanel('input.selectaplot=="Dot"', plotlyOutput("Dot")), # conditonal panels allow rednering only if conditions are met
-                                             conditionalPanel('input.selectaplot=="Feature"', plotlyOutput("Feature")),
-                                             conditionalPanel('input.selectaplot=="test"', plotlyOutput("test"))
+                                             conditionalPanel('input.selectaplot=="Dot"', plotOutput("Dot")), # conditonal panels allow rednering only if conditions are met
+                                             conditionalPanel('input.selectaplot=="Feature"', plotOutput("Feature")),
+                                             conditionalPanel('input.selectaplot=="test"', plotOutput("test"))
                                              
                                       ) # column 
                                              
@@ -146,7 +145,8 @@ ui <- fluidPage(
 server <- function(input, output) {
     # UMAP plot, interactive #
   observeEvent(input$runcode,{ 
-    output$umaps <- renderPlotly(print(
+    output$umaps <- 
+      renderPlot(
         DimPlot(
             stanford,
             reduction = "umap",
@@ -156,25 +156,24 @@ server <- function(input, output) {
             # repel labels
             pt.size = 1,
             cols = manual_color_list,
-            group.by = "SingleR.calls" # group.by is important, use this to call metadata separation
-        ) + theme(legend.position="bottom", legend.box = "horizontal") +
-          ggtitle("UMAP by Cell Type") +
-          theme(plot.title = element_text(hjust = 0.5))
-        
-    ))
+            group.by = "SingleR.calls" ) + # group.by is important, use this to call metadata separation
+              theme(legend.position="bottom", legend.box = "horizontal") +
+              ggtitle("UMAP by Cell Type") +
+              theme(plot.title = element_text(hjust = 0.5))
+      ) # closes renderPlot
   })
     
    # Gene feature plot, interactive #
     observeEvent(input$runcode,{ # observe event puts a pause until pushed
       
-      output$Dot <- renderPlotly({
+      output$Dot <- renderPlot({
         validate(need(input$selectaplot=="Dot", message=FALSE))
         print(DotPlot(stanford, 
                           features = input$genes) 
         )
       })
       
-      output$Feature <- renderPlotly({
+      output$Feature <- renderPlot({
         validate(need(input$selectaplot=="Feature", message=FALSE))
         print(FeaturePlot(stanford, 
                       features = input$genes) 
