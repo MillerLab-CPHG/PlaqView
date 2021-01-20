@@ -5,7 +5,7 @@ library(shinythemes)
 library(Seurat)
 library(plotly)
 library(shinybusy) #install.packages("shinybusy")
-library()
+
 
 #### LOADING DATA ####
 # below line is commented for shinyapp.io deployment temp
@@ -63,7 +63,7 @@ ui <- fluidPage(
                                           "genes",
                                           width = '100%',
                                           h3("Search for a Gene", h5("please follow HUGO conventions")),
-                                          placeholder = "try: MYH11"
+                                          placeholder = "try: CDH2"
                                         ),
 
                                         # choose the type of output graph 
@@ -100,7 +100,9 @@ ui <- fluidPage(
                                       column(width = 6, 
                                              conditionalPanel('input.selectaplot=="Ridge"', plotOutput("Ridge")),
                                              conditionalPanel('input.selectaplot=="Dot"', plotlyOutput("Dot")), # conditonal panels allow rednering only if conditions are met
-                                             conditionalPanel('input.selectaplot=="Feature"', plotlyOutput("Feature"))
+                                             conditionalPanel('input.selectaplot=="Feature"', plotlyOutput("Feature")),
+                                             conditionalPanel('input.selectaplot=="test"', plotlyOutput("test"))
+                                             
                                       ) # column 
                                              
                                       ) # fluidrow
@@ -171,6 +173,7 @@ server <- function(input, output) {
                           features = input$genes) 
         )
       })
+      
       output$Feature <- renderPlotly({
         validate(need(input$selectaplot=="Feature", message=FALSE))
         print(FeaturePlot(stanford, 
@@ -184,7 +187,7 @@ server <- function(input, output) {
                       features = input$genes) 
       })
       
-      
+      ### download datasets 
       
     })
 
