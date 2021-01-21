@@ -8,8 +8,8 @@ output: html_document
 
 **Please be patient, it might take a while to query.** 
 
-Use this module to explore gene expression of any gene in different human coronary artery cell populations
+Use this module to explore multiple genes' expression pattern. 'Feature Plot' and 'Feature Plot' will generate a UMAP for each gene you enter; 'Dot Plot' will generate one large graph that encompasses all of the queried genes.
 
-To compare multiple genes' expression pattern, use the 'Compare Genes' tab. Hover over graphs for details or to zoom in/out. Use the 'download as png' function to export UAMP graphs.
+If you encounter an error, make sure there is a space after each comma. e.g. NOX4, MYH11, CDH2.
 
 *to save plot, right-click and 'save image as'", please cite Ma et al., (2021) and Wirka et al., (2019) in your publications*

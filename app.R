@@ -4,6 +4,7 @@ library(shiny)
 library(shinythemes)
 library(Seurat)
 library(shinybusy) #install.packages("shinybusy")
+library(tidyverse)
 
 
 #### LOADING DATA ####
@@ -19,23 +20,23 @@ shinyOptions(plot.autocolors = TRUE)
 # color definitions
 manual_color_list <-
     c("rosybrown2",
-      "palevioletred1",
       "cadetblue1",
       "lemonchiffon3",
       "darkseagreen",
       "skyblue3",
+      "thistle3",
       "cadetblue3",
-      "lemonchiffon4",
       "darkseagreen1",
+      "palevioletred3",
+      "palevioletred1",
       "darkseagreen2",
       "rosybrown3",
       "thistle2",
-      "salmon1",
-      "palevioletred3",
-      "palevioletred4",
       "lightsteelblue3",
-      "cadetblue2",
-      "thistle3"
+      "salmon1",
+      "palevioletred4",
+      "lemonchiffon4",
+      "cadetblue2"
     )
 
 #### UI ####
@@ -50,7 +51,7 @@ ui <- fluidPage(
   # defining each 'tab' here
     navbarPage("sCADView", # title 
                
-            # PANEL 1    ----
+            # PANEL 1: QUERY 1 GENE   ----
              tabPanel("Query Single Gene", 
                       mainPanel(width = 12, # 12/12 is full panel
                                 fluidRow(## panel for gene input
@@ -98,7 +99,7 @@ ui <- fluidPage(
                                       column(width = 6, plotOutput("umaps")),
                                       column(width = 6, 
                                              conditionalPanel('input.selectaplot=="Ridge"', plotOutput("Ridge")),
-                                             conditionalPanel('input.selectaplot=="Dot"', plotOutput("Dot")), # conditonal panels allow rednering only if conditions are met
+                                             conditionalPanel('input.selectaplot=="Dot"', plotOutput("Dot")), # conditonal panels renders only if conditions are met
                                              conditionalPanel('input.selectaplot=="Feature"', plotOutput("Feature")),
                                              conditionalPanel('input.selectaplot=="test"', plotOutput("test"))
                                              
@@ -112,15 +113,21 @@ ui <- fluidPage(
             
                       
             
-            # PANEL 2    
-            tabPanel("Compare Genes",
-                         helpText("Support to compare genes will be coming soon")
+            # PANEL 2: MULTIPLE GENES ----   
+            tabPanel("Query Multiple Genes",
+                         helpText("Support coming soon!")
 
                      ),
                      
-            # PANEL 3    
+            # PANEL 3: TRAJECTORY MODELS  ----  
             tabPanel("Compare Trajectory Methods",
-                     helpText("Support to compare different trajectory methods will be coming soon")
+                     helpText("Support coming soon!")
+                     
+            ),
+            
+            # PANEL 4: EXPLORE YOUR OWN DATA ----  
+            tabPanel("Upload a dataset",
+                     helpText("Support coming soon!")
                      
             ),
             
@@ -143,6 +150,7 @@ ui <- fluidPage(
 #### SERVER ####
 # Define server logic required to draw a histogram
 server <- function(input, output) {
+  #### PANEL #1 FUNCTIONS ####
     # UMAP plot, interactive #
   observeEvent(input$runcode,{ 
     output$umaps <- 
@@ -157,38 +165,51 @@ server <- function(input, output) {
             pt.size = 1,
             cols = manual_color_list,
             group.by = "SingleR.calls" ) + # group.by is important, use this to call metadata separation
-              theme(legend.position="bottom", legend.box = "horizontal") +
-              ggtitle("UMAP by Cell Type") +
-              theme(plot.title = element_text(hjust = 0.5))
+            theme(legend.position="bottom", 
+                  legend.box = "vertical") +
+            ggtitle("UMAP by Cell Type") +
+            theme(plot.title = element_text(hjust = 1)) +
+            guides(color = guide_legend(nrow = 5))
       ) # closes renderPlot
-  })
+  })# closes observe event
     
    # Gene feature plot, interactive #
-    observeEvent(input$runcode,{ # observe event puts a pause until pushed
+  observeEvent(input$runcode,{ # observe event puts a pause until pushed
       
       output$Dot <- renderPlot({
         validate(need(input$selectaplot=="Dot", message=FALSE))
         print(DotPlot(stanford, 
-                          features = input$genes) 
+                          features = input$genes) + # group.by is important, use this to call metadata separation
+                ggtitle(paste(input$genes, "Expression Dot Plot")) +
+                theme(plot.title = element_text(hjust = 1)) 
         )
       })
       
       output$Feature <- renderPlot({
         validate(need(input$selectaplot=="Feature", message=FALSE))
         print(FeaturePlot(stanford, 
-                      features = input$genes) 
+                      features = input$genes)  + # group.by is important, use this to call metadata separation
+                theme(legend.position="bottom", legend.box = "horizontal") + # group.by is important, use this to call metadata separation
+                ggtitle(paste(input$genes, "Expression Feature Plot")) +
+                theme(plot.title = element_text(hjust = 1)) 
         )
       }) 
     
       output$Ridge <- renderPlot({
         validate(need(input$selectaplot=="Ridge", message=FALSE))
         RidgePlot(stanford, 
-                      features = input$genes) 
+                      features = input$genes)  + # group.by is important, use this to call metadata separation
+          theme(legend.position="bottom", legend.box = "horizontal") + # group.by is important, use this to call metadata separation
+          ggtitle(paste(input$genes, "Expression Ridge Plot")) +
+          theme(plot.title = element_text(hjust = 1)) 
       })
       
       ### download datasets 
       
     })
+
+    #### PANEL #2 FUNCTIONS ####
+    #### PANEL #3 FUNCTIONS ####
 
 }
 
