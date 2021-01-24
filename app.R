@@ -19,7 +19,7 @@ shinyOptions(plot.autocolors = TRUE)
 
 # color definitions
 manual_color_list <-
-    c("rosybrown2",
+    {c("rosybrown2",
       "cadetblue1",
       "lemonchiffon3",
       "darkseagreen",
@@ -37,7 +37,7 @@ manual_color_list <-
       "palevioletred4",
       "lemonchiffon4",
       "cadetblue2"
-    )
+    )}
 
 #### UI ####
 # Define UI for application that draws a histogram
@@ -49,10 +49,10 @@ ui <- fluidPage(
   
   
   # defining each 'tab' here
-    navbarPage("sCADView", # title 
+    navbarPage("PlaqView", # title 
                
             # PANEL 1: QUERY 1 GENE   ----
-             tabPanel("Query Single Gene", 
+             tabPanel("Quick Gene Lookup", 
                       mainPanel(width = 12, # 12/12 is full panel
                                 fluidRow(## panel for gene input
                                     column(
@@ -114,25 +114,83 @@ ui <- fluidPage(
                       
             
             # PANEL 2: MULTIPLE GENES ----   
-            tabPanel("Query Multiple Genes",
-                         helpText("Support coming soon!")
+            tabPanel("Compare Gene Expression", 
+                     mainPanel(width = 12, # 12/12 is full panel
+                               fluidRow(## panel for gene input
+                                 column(
+                                   width = 4,
+                                   wellPanel(                                      
+                                     # must add up to 12 all columns
+                                     textInput(
+                                       "genelist",
+                                       width = '100%',
+                                       h3("Enter Multiple Genes", h5("please follow HUGO conventions")),
+                                       placeholder = "try: CDH2, CYBB... (up to 6)"
+                                     ),
+                                     # choose the type of output graph 
+                                     selectInput("selectcompplot", label = h5("Plot Type"), 
+                                                 choices = list("Feature Plot" = "Feature.multi",
+                                                                "Dot Plot" = "Dot.multi",
+                                                                "Ridge Plot" = "Ridge.multi"), 
+                                                 selected = "Feature Plot"),                                        
+                                     # 'go' button
+                                     actionButton(
+                                       inputId = "runcode.multi",
+                                       label = "Compare Genes",
+                                       width = '100%'
+                                     ))
+                                   
+                                 ),
+                                 
+                                 ## panel for description
+                                 column(
+                                   width = 8,
+                                   wellPanel(includeMarkdown("descriptionfiles/helptext_multiplegenepage.Rmd"))
+                                 )
+                               ),
+                               
+                               
+                               #spacer
+                               br(),
+                               
+                               
+                               ## lower panel for graphic outputs
+                               wellPanel(
+                                 fluidRow(
+                                   column(width = 12, 
+                                          conditionalPanel('input.selectaplot=="Ridge.multi"', plotOutput("Ridge.multi")),
+                                          conditionalPanel('input.selectaplot=="Dot.multi"', 
+                                                           fluidRow(
+                                                             column(width = 6, plotOutput("umap.multi")),
+                                                             column(width = 6,  plotOutput("Dot.multi"))
+                                                           ) # fluid row (in conditional panel)
+                                                           ), # conditional panels, renders only if conditions are met
+                                          conditionalPanel('input.selectaplot=="Feature.multi"', plotOutput("Feature.multi"))
+                                          
+                                   ) # column 
+                                   
+                                 ) # fluidrow
+                               )# wellpanel
+                               
+                     )
+            ),
+            
+            
 
-                     ),
-                     
             # PANEL 3: TRAJECTORY MODELS  ----  
-            tabPanel("Compare Trajectory Methods",
+            tabPanel("Compare Labeling Methods",
                      helpText("Support coming soon!")
                      
             ),
             
             # PANEL 4: EXPLORE YOUR OWN DATA ----  
-            tabPanel("Upload a dataset",
+            tabPanel("Explore Your Own Dataset",
                      helpText("Support coming soon!")
                      
             ),
             
             # ABOUT PANEL
-             tabPanel("About",
+             tabPanel("About & Help",
                   mainPanel(
                     # descriptions
                     includeMarkdown("descriptionfiles/aboutusdescription.Rmd"),
@@ -178,38 +236,103 @@ server <- function(input, output) {
       
       output$Dot <- renderPlot({
         validate(need(input$selectaplot=="Dot", message=FALSE))
-        print(DotPlot(stanford, 
-                          features = input$genes) + # group.by is important, use this to call metadata separation
+        DotPlot(stanford, 
+                          features = (str_split(input$genes, ", "))[[1]])+ # a trick to sep long string input
                 ggtitle(paste(input$genes, "Expression Dot Plot")) +
                 theme(plot.title = element_text(hjust = 1)) 
-        )
+        
       })
       
       output$Feature <- renderPlot({
         validate(need(input$selectaplot=="Feature", message=FALSE))
-        print(FeaturePlot(stanford, 
-                      features = input$genes)  + # group.by is important, use this to call metadata separation
-                theme(legend.position="bottom", legend.box = "horizontal") + # group.by is important, use this to call metadata separation
+        FeaturePlot(stanford, 
+                          features = (str_split(input$genes, ", "))[[1]])+ # a trick to sep long string input
+                theme(legend.position="bottom", legend.box = "vertical") + # group.by is important, use this to call metadata separation
                 ggtitle(paste(input$genes, "Expression Feature Plot")) +
                 theme(plot.title = element_text(hjust = 1)) 
-        )
+        
       }) 
     
       output$Ridge <- renderPlot({
         validate(need(input$selectaplot=="Ridge", message=FALSE))
-        RidgePlot(stanford, 
-                      features = input$genes)  + # group.by is important, use this to call metadata separation
-          theme(legend.position="bottom", legend.box = "horizontal") + # group.by is important, use this to call metadata separation
+        RidgePlot(stanford,
+                  cols = manual_color_list,
+                  group.by = "SingleR.calls",
+                  features = (str_split(input$genes, ", "))[[1]],)+ # a trick to sep long string input
+          theme(legend.position="bottom", legend.box = "vertical") + # group.by is important, use this to call metadata separation
           ggtitle(paste(input$genes, "Expression Ridge Plot")) +
-          theme(plot.title = element_text(hjust = 1)) 
+          theme(plot.title = element_text(hjust = 1)) +
+          guides(color = guide_legend(nrow = 5))
+        
       })
       
       ### download datasets 
       
     })
 
-    #### PANEL #2 FUNCTIONS ####
-    #### PANEL #3 FUNCTIONS ####
+  #### PANEL #1 FUNCTIONS ####
+  # UMAP plot, interactive #
+  observeEvent(input$runcode,{ 
+    output$umaps <- 
+      renderPlot(
+        DimPlot(
+          stanford,
+          reduction = "umap",
+          label = TRUE,
+          label.size = 3,
+          repel = T,
+          # repel labels
+          pt.size = 1,
+          cols = manual_color_list,
+          group.by = "SingleR.calls" ) + # group.by is important, use this to call metadata separation
+          theme(legend.position="bottom", 
+                legend.box = "vertical") +
+          ggtitle("UMAP by Cell Type") +
+          theme(plot.title = element_text(hjust = 1)) +
+          guides(color = guide_legend(nrow = 5))
+      ) # closes renderPlot
+  })# closes observe event
+  
+  # Gene feature plot, interactive #
+  observeEvent(input$runcode,{ # observe event puts a pause until pushed
+    
+    output$Dot <- renderPlot({
+      validate(need(input$selectaplot=="Dot", message=FALSE))
+      DotPlot(stanford, 
+              features = (str_split(input$genes, ", "))[[1]])+ # a trick to sep long string input
+        ggtitle(paste(input$genes, "Expression Dot Plot")) +
+        theme(plot.title = element_text(hjust = 1)) 
+      
+    })
+    
+    output$Feature <- renderPlot({
+      validate(need(input$selectaplot=="Feature", message=FALSE))
+      FeaturePlot(stanford, 
+                  features = (str_split(input$genes, ", "))[[1]])+ # a trick to sep long string input
+        theme(legend.position="bottom", legend.box = "vertical") + # group.by is important, use this to call metadata separation
+        ggtitle(paste(input$genes, "Expression Feature Plot")) +
+        theme(plot.title = element_text(hjust = 1)) 
+      
+    }) 
+    
+    output$Ridge <- renderPlot({
+      validate(need(input$selectaplot=="Ridge", message=FALSE))
+      RidgePlot(stanford,
+                cols = manual_color_list,
+                group.by = "SingleR.calls",
+                features = (str_split(input$genes, ", "))[[1]],)+ # a trick to sep long string input
+        theme(legend.position="bottom", legend.box = "vertical") + # group.by is important, use this to call metadata separation
+        ggtitle(paste(input$genes, "Expression Ridge Plot")) +
+        theme(plot.title = element_text(hjust = 1)) +
+        guides(color = guide_legend(nrow = 5))
+      
+    })
+    
+    ### download datasets 
+    
+  })
+  
+  #### PANEL #3 FUNCTIONS ####
 
 }
 
