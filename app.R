@@ -157,8 +157,33 @@ ui <- fluidPage(
                                          label = "Upload .rds or count matrix",
                                          width = "100%",
                                          accept = c(".txt", ".rds")) 
-                     ) # close mainpanel
+                     ), # close mainpanel
                      
+                     mainPanel(
+                       fluidRow(
+                         column(width = 6, 
+                                selectInput("leftlabeloutput", 
+                                            choices = list(
+                                              "SingleR (Default)" = "SingleR",
+                                              "Manual (Unlabeled)" = "Unlabeled",
+                                              "scCATCH (Heart)" = "scheart",
+                                              "scCATCH (Blood Vessels)" = "scvessels"
+                                            ),
+                                            selected = "SingleR (Default)"),
+                                plotOutput("leftlabelplot")),
+                         column(width = 6,
+                                selectInput("leftlabelplot", 
+                                            choices = list(
+                                              "SingleR (Default)" = "SingleR",
+                                              "Manual (Unlabeled)" = "Unlabeled",
+                                              "scCATCH (Heart)" = "scheart",
+                                              "scCATCH (Blood Vessels)" = "scvessels"
+                                            ),
+                                            selected = "SingleR (Default)"),
+                                plotOutput("rightlabelplot")
+                                )
+                       )# fluidrow
+                     ) # close mainpanel
             ), # close tabPanel
             
             # ABOUT PANEL ----
@@ -250,7 +275,11 @@ server <- function(input, output) {
         output$enrichtable <- renderTable(enriched[[input$selectedenrichRdb]],
                                           striped = T,
                                           spacing = "xs",
-                                          align = 'l')
+                                          align = 'l',
+                                          width = "98%",
+                                          colnames = T,
+                                          digits = 3)
+        
         # Downloadable csv of selected dataset ----
         output$downloadenrichRdata <- downloadHandler(
           filename = function() {
