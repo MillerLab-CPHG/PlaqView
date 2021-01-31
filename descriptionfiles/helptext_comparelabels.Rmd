@@ -10,7 +10,7 @@ Use this module to **compare different cell annotation techniques.**
 
 By default, *Plaqview* uses *SingleR* (Aran et al.), which uses reference-based algorithm to deduce cell identity of individual cells. Other tools, such as *scCATCH* (Shao et al.) can also annotate cell types without user-input. Alternatively, users can download differential gene expression lists created by *Seurat V4* (Satija Lab) and manually define cells by clusters. 
 
-: Note: scCATCH requires user-defined tissue type reference
+Note: scCATCH requires user-defined tissue type reference (e.g. Heart, Blood Vessels)
 
 *to save plot, right-click and 'save image as'", please cite Ma et al., (2021) and Wirka et al., (2019) in your publications*
 

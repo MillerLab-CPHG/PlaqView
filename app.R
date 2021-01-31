@@ -57,7 +57,7 @@ manual_color_list <-
 ui <- fluidPage(
   
   # set theme
-  theme = shinytheme("flatly"),
+  theme = shinytheme("spacelab"),
   add_busy_bar(color = "#ff9142"), # THIS IS THE BUSY BAR
   
   
@@ -163,6 +163,7 @@ ui <- fluidPage(
                        fluidRow(
                          column(width = 6, 
                                 selectInput("leftlabeloutput", 
+                                            label = NULL,
                                             choices = list(
                                               "SingleR (Default)" = "SingleR",
                                               "Manual (Unlabeled)" = "Unlabeled",
@@ -173,6 +174,7 @@ ui <- fluidPage(
                                 plotOutput("leftlabelplot")),
                          column(width = 6,
                                 selectInput("leftlabelplot", 
+                                            label = NULL,
                                             choices = list(
                                               "SingleR (Default)" = "SingleR",
                                               "Manual (Unlabeled)" = "Unlabeled",
