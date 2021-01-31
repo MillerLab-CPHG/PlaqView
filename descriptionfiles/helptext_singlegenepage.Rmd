@@ -8,8 +8,9 @@ output: html_document
 
 **Please be patient, it might take a while to query.** 
 
-Use this module to explore gene expression of any **single** gene in different human coronary artery cell populations
+Use this module to explore gene expression of any gene in different human coronary artery cell populations
 
-To compare multiple genes' expression pattern, use the 'Compare Genes' tab. Hover over graphs for details or to zoom in/out. Use the 'download as png' function to export UAMP graphs.
+For a **single** gene, feature and ridge plots work well. For **multiple** genes, use dot plots.
 
 *to save plot, right-click and 'save image as'", please cite Ma et al., (2021) and Wirka et al., (2019) in your publications*
+
