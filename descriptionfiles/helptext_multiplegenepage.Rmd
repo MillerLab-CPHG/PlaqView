@@ -4,11 +4,11 @@ author: "WeiMa"
 date: "1/2/2021"
 output: html_document
 ---
-### sCADView: an interactive portal to explore single cell RNA-seq of human coronary artery.
+### PlaqView: an interactive portal to explore single cell RNA-seq of human coronary artery.
 
 **Please be patient, it might take a while to query.** 
 
-Use this module to explore multiple genes' expression pattern. 'Feature Plot' and 'Feature Plot' will generate a UMAP for each gene you enter; 'Dot Plot' will generate one large graph that encompasses all of the queried genes.
+Use this module to explore **multiple** genes' expression pattern. 'Feature Plot' and 'Feature Plot' will generate a UMAP for each gene you enter; 'Dot Plot' will generate one large graph that encompasses all of the queried genes.
 
 If you encounter an error, make sure there is a space after each comma. e.g. NOX4, MYH11, CDH2.
 

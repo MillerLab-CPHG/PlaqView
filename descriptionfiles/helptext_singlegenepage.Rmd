@@ -4,12 +4,13 @@ author: "WeiMa"
 date: "1/2/2021"
 output: html_document
 ---
-### sCADView: an interactive portal to explore single cell RNA-seq of human coronary artery.
+### PlaqView: an interactive portal to explore single cell RNA-seq of human coronary artery.
 
 **Please be patient, it might take a while to query.** 
 
 Use this module to explore gene expression of any gene in different human coronary artery cell populations
 
-To compare multiple genes' expression pattern, use the 'Compare Genes' tab. Hover over graphs for details or to zoom in/out. Use the 'download as png' function to export UAMP graphs.
+For a **single** gene, feature and ridge plots work well. For **multiple** genes, use dot plots.
 
 *to save plot, right-click and 'save image as'", please cite Ma et al., (2021) and Wirka et al., (2019) in your publications*
+
