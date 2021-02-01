@@ -7,9 +7,6 @@ library(shinybusy) #install.packages("shinybusy")
 library(tidyverse)
 library(enrichR) # install.packages("enrichR")
 
-#### extrasensory codes ####
-
-
 #### LOADING DATA ####
 # below line is commented for shinyapp.io deployment temp
 stanford <- readRDS(file = "data/final_stanford_labeled.rds")
@@ -61,7 +58,13 @@ ui <- fluidPage(
   # set theme
   theme = shinytheme("flatly"),
   add_busy_bar(color = "#ff9142"), # THIS IS THE BUSY BAR
-
+  tags$head(tags$script('$(document).on("shiny:connected", function(e) {
+                            Shiny.onInputChange("innerWidth", window.innerWidth);
+                            });
+                            $(window).resize(function(e) {
+                            Shiny.onInputChange("innerWidth", window.innerWidth);
+                            });
+                            ')),
   
   
   # defining each 'tab' here
@@ -116,21 +119,17 @@ ui <- fluidPage(
                           fluidRow( # top splite rows
                                       column(width = 6, align="center", plotOutput("umaps", 
                                                                    width = "auto",
-                                                                   height = '500px',
-                                                                   res = 300)),
+                                                                   height = '500px')),
                                       column(width = 6, align="center", 
                                              conditionalPanel('input.selectaplot=="Ridge"', plotOutput("Ridge",
                                                                                                        width = "auto",
-                                                                                                       height = '500px',
-                                                                                                       res = 300)),
+                                                                                                       height=reactive(ifelse(!is.null(input$innerWidth),input$innerWidth*3/5,0)))),
                                              conditionalPanel('input.selectaplot=="Dot"', plotOutput("Dot",
                                                                                                      width = "auto",
-                                                                                                     height = '500px',
-                                                                                                     res = 300)), # conditonal panels renders only if conditions are met
+                                                                                                     height=reactive(ifelse(!is.null(input$innerWidth),input$innerWidth*3/5,0)))), 
                                              conditionalPanel('input.selectaplot=="Feature"', plotOutput("Feature",
                                                                                                          width = "auto",
-                                                                                                         height = '500px',
-                                                                                                         res = 300))
+                                                                                                         height=reactive(ifelse(!is.null(input$innerWidth),input$innerWidth*3/5,0))))
                                              
                                       ) # column 
                                       
