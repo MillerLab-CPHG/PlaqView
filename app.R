@@ -84,7 +84,7 @@ ui <- fluidPage(
                                       ),
                                       
                                       # choose the type of output graph 
-                                      selectInput("selectaplot", label = h5("Plot Type"), 
+                                      selectInput("selectaplot", label = h4("Plot Type"), 
                                                   choices = list(
                                                     "Dot Plot (one or more genes)" = "Dot",
                                                     "Feature Plot (single gene)" = "Feature",
@@ -112,25 +112,21 @@ ui <- fluidPage(
                                 
                                 
                                 ## lower panel for graphic outputs
-                                wellPanel(
+                                wellPanel(width = 12,
                                   fluidRow( # top splite rows
                                     column(width = 6, align="center", plotOutput("umaps", 
                                                                                  width = "auto",
-                                                                                 height = '500px',
-                                                                                 res = 300)),
+                                                                                 height = '500px')),
                                     column(width = 6, align="center", 
                                            conditionalPanel('input.selectaplot=="Ridge"', plotOutput("Ridge",
                                                                                                      width = "auto",
-                                                                                                     height = '500px',
-                                                                                                     res = 300)),
+                                                                                                     height = '500px')),
                                            conditionalPanel('input.selectaplot=="Dot"', plotOutput("Dot",
                                                                                                    width = "auto",
-                                                                                                   height = '500px',
-                                                                                                   res = 300)), # conditonal panels renders only if conditions are met
+                                                                                                   height = '500px')), # conditonal panels renders only if conditions are met
                                            conditionalPanel('input.selectaplot=="Feature"', plotOutput("Feature",
                                                                                                        width = "auto",
-                                                                                                       height = '500px',
-                                                                                                       res = 300))
+                                                                                                       height = '500px'))
                                            
                                     ) # column 
                                     
@@ -159,36 +155,40 @@ ui <- fluidPage(
              # PANEL 2: COMPARE LABELING METHODS  ----  
              tabPanel("Compare Labeling Methods",
                       mainPanel(width = 12, # 12/12 is full panel,
-                                wellPanel(includeMarkdown("descriptionfiles/helptext_comparelabels.Rmd"))
+                                wellPanel(includeMarkdown("descriptionfiles/helptext_comparelabels.Rmd")),
+                                wellPanel(
+                                  fluidRow(
+                                    column(width = 6, 
+                                           selectInput("leftlabeltype", 
+                                                       label = NULL,
+                                                       choices = list(
+                                                         "SingleR (Default)" = "SingleR.calls",
+                                                         "Seurat Clusters" = "seurat_clusters",
+                                                         "scCATCH (Heart)" = "scheart",
+                                                         "scCATCH (Blood Vessels)" = "scvessels"
+                                                       ),
+                                                       selected = "SingleR (Default)"),
+                                           plotOutput("leftlabelplot",
+                                                      height = '500px')),
+                                    
+                                    column(width = 6,
+                                           selectInput("rightlabeltype", 
+                                                       label = NULL,
+                                                       choices = list(
+                                                         "SingleR (Default)" = "SingleR.calls",
+                                                         "Seurat Clusters" = "seurat_clusters",
+                                                         "scCATCH (Heart)" = "scheart",
+                                                         "scCATCH (Blood Vessels)" = "scvessels"
+                                                       ),
+                                                       selected = "Seurat Clusters"),
+                                           plotOutput("rightlabelplot",
+                                                      height = '500px')
+                                    )
+                                  )# fluidrow
+                                ) # close wellpanel
                       ), # mainPanel
                       
-                      mainPanel(
-                        fluidRow(
-                          column(width = 6, 
-                                 selectInput("leftlabeloutput", 
-                                             label = NULL,
-                                             choices = list(
-                                               "SingleR (Default)" = "SingleR",
-                                               "Manual (Unlabeled)" = "Unlabeled",
-                                               "scCATCH (Heart)" = "scheart",
-                                               "scCATCH (Blood Vessels)" = "scvessels"
-                                             ),
-                                             selected = "SingleR (Default)"),
-                                 plotOutput("leftlabelplot")),
-                          column(width = 6,
-                                 selectInput("leftlabelplot", 
-                                             label = NULL,
-                                             choices = list(
-                                               "SingleR (Default)" = "SingleR",
-                                               "Manual (Unlabeled)" = "Unlabeled",
-                                               "scCATCH (Heart)" = "scheart",
-                                               "scCATCH (Blood Vessels)" = "scvessels"
-                                             ),
-                                             selected = "SingleR (Default)"),
-                                 plotOutput("rightlabelplot")
-                          )
-                        )# fluidrow
-                      ) # close mainpanel
+                      
                       
              ), # tabPanel
              
@@ -198,7 +198,8 @@ ui <- fluidPage(
                                 fileInput(inputId = "upload",
                                           label = "Upload .rds or count matrix",
                                           width = "100%",
-                                          accept = c(".txt", ".rds")) 
+                                          accept = c(".txt", ".rds")),
+                                helpText("This feature is still under development.")
                       ), # close mainpanel
                       
                       
@@ -211,6 +212,7 @@ ui <- fluidPage(
                         includeMarkdown("descriptionfiles/aboutusdescription.Rmd"),
                         br(),
                         img(src = "MSTPlogo.png", width = 233, height = 83),
+                        br(),
                         downloadButton("downloadsessioninfo", "Download Session and Package Information")
                         
                         
@@ -256,7 +258,7 @@ server <- function(input, output) {
       validate(need(input$selectaplot=="Dot", message=FALSE))
       DotPlot(stanford, 
               features = (str_split(input$genes, ", "))[[1]])+ # a trick to sep long string input
-        ggtitle(paste(input$genes, "Expression Dot Plot")) +
+        ggtitle("Expression Dot Plot") +
         theme(plot.title = element_text(hjust = 1)) +
         theme(plot.title = element_text(hjust = 0.5)) 
       
@@ -268,7 +270,7 @@ server <- function(input, output) {
                   features = (str_split(input$genes, ", "))[[1]])+ # a trick to sep long string input
         theme(legend.position="bottom", legend.box = "vertical") + # group.by is important, use this to call metadata separation
         theme(plot.title = element_text(hjust = 1)) +
-        ggtitle(paste(input$genes, "Expression Feature Plot")) +
+        ggtitle("Expression Feature Plot") +
         theme(plot.title = element_text(hjust =  0.5)) 
       
     }) 
@@ -280,7 +282,7 @@ server <- function(input, output) {
                 group.by = "SingleR.calls",
                 features = (str_split(input$genes, ", "))[[1]],)+ # a trick to sep long string input
         theme(legend.position="bottom", legend.box = "vertical") + # group.by is important, use this to call metadata separation
-        ggtitle(paste(input$genes, "Expression Ridge Plot")) +
+        ggtitle("Expression Ridge Plot") +
         theme(plot.title = element_text(hjust =  0.5)) +
         guides(color = guide_legend(nrow = 5))
       
@@ -318,20 +320,53 @@ server <- function(input, output) {
   
   
   #### PANEL #2 FUNCTIONS ####
+  output$leftlabelplot <-
+    renderPlot(
+      DimPlot(
+        stanford,
+        reduction = "umap",
+        label = TRUE,
+        label.size = 3,
+        repel = T,
+        # repel labels
+        pt.size = 1,
+        cols = manual_color_list,
+        group.by = input$leftlabeltype ) + # group.by is important, use this to call metadata separation
+        theme(legend.position="bottom", 
+              legend.box = "vertical") +
+        ggtitle("UMAP by Cell Type") +
+        theme(plot.title = element_text(hjust =  0.5)) +
+        guides(color = guide_legend(nrow = 5))
+    )# render plot
+  
+  output$rightlabelplot <- 
+    renderPlot(
+      DimPlot(
+        stanford,
+        reduction = "umap",
+        label = TRUE,
+        label.size = 3,
+        repel = T,
+        # repel labels
+        pt.size = 1,
+        cols = manual_color_list,
+        group.by = input$rightlabeltype ) + # group.by is important, use this to call metadata separation
+        theme(legend.position="bottom", 
+              legend.box = "vertical") +
+        ggtitle("UMAP by Cell Type") +
+        theme(plot.title = element_text(hjust =  0.5)) +
+        guides(color = guide_legend(nrow = 5))
+    )# render plot
   
   #### PANEL #3 FUNCTIONS ####
   
   #### PANEL #4 FUNCTIONS #### 
   
   output$downloadsessioninfo <- downloadHandler(
-    filename = function() {
-      paste(date(), "_RSession_info.csv", sep = "")
-    },
+    filename = paste(date(), "sesssioninfo.txt"),
     content = function(file) {
-      writeLines(sessionInfo(), 
-                 file)
-    } 
-  )# close downloadhandler
+      write_lines(sessionInfo(), file)
+    }  )# close downloadhandler
   
   
   
