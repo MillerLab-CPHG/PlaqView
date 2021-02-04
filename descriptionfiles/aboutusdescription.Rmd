@@ -3,11 +3,15 @@
 
 *Plaqview 0.1* is currently in beta as of Feb 1, 2021.
 
-### Data Source
-The data used in this interactive session were first published by Wirka et al. [(Nature Medicine, 2019)](https://pubmed.ncbi.nlm.nih.gov/31359001/). The data were later extensively analyzed and made available here by Ma et al. (2021).
+### About the Datasets
+The primary data used in this interactive session were first published by Wirka *et al.* [(Nature Medicine, 2019)](https://pubmed.ncbi.nlm.nih.gov/31359001/) and made available here by Ma *et al.* (2021). In this dataset, diseased segments of the right coronary artery were subjected to scRNA-seq from four patients who underwent heart transplantation. 
+
+For details on sample information, click [here to download supplemental data table](https://static-content.springer.com/esm/art%3A10.1038%2Fs41591-019-0512-5/MediaObjects/41591_2019_512_MOESM1_ESM.xlsx)
+
+**More datasets are coming soon!**
 
 ### Reproducibility and Code Availability 
-*PlaqView* is designed to be open-source and publicly available and serve as a template for other scRNA-seq analysis pipelines. The code scripts are available on our [GitHub Page](https://github.com/MillerLab-CPHG/PlaqView). This application calls for .rds datafiles that are too large to host on Github, but you can find them [here](https://virginia.box.com/shared/static/oyo1bicpvlxen940zmciqapvg0y3n6gb.rds). To Run this application successfully, place the .rds object file in a folder/subdiretory called 'data.'
+*PlaqView* is designed to be open-source and publicly available and serve as a template for other scRNA-seq analysis pipelines. The code scripts are available on our [GitHub Page](https://github.com/MillerLab-CPHG/PlaqView). This application calls for .rds datafiles that are too large to host on Github, but you can find them [here](https://virginia.box.com/shared/static/oyo1bicpvlxen940zmciqapvg0y3n6gb.rds). To Run this application successfully, place the .rds object file in the folder/subdiretory called 'data.'
 
 ### Packages Used
 Seurat, Monocle3, Tidyverse, EnrichR, Shiny.

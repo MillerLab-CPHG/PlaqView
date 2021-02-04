@@ -175,7 +175,6 @@ ui <- fluidPage(
                                            selectInput("rightlabeltype", 
                                                        label = NULL,
                                                        choices = list(
-                                                         "SingleR (Default)" = "SingleR.calls",
                                                          "Seurat Clusters" = "seurat_clusters",
                                                          "scCATCH (Heart)" = "scheart",
                                                          "scCATCH (Blood Vessels)" = "scvessels"
@@ -183,6 +182,13 @@ ui <- fluidPage(
                                                        selected = "Seurat Clusters"),
                                            plotOutput("rightlabelplot",
                                                       height = '500px')
+                                    ),# column
+                                    
+                                    br(), 
+                                    
+                                    column(width = 12,
+                                           downloadButton("downloaddiffex", "Download Complete Differential Gene Expression Data",
+                                                          helpText("Download all differential gene expression by cluster as .csv for manual annotation"))
                                     )
                                   )# fluidrow
                                 ) # close wellpanel
