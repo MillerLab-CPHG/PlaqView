@@ -186,11 +186,16 @@ ui <- fluidPage(
                                     
                                     br(), 
                                     
-                                    column(width = 12,
-                                           downloadButton("downloaddiffex", "Download Complete Differential Gene Expression Data",
-                                                          helpText("Download all differential gene expression by cluster as .csv for manual annotation"))
-                                    )
-                                  )# fluidrow
+                                    column(width = 6, h4("Differential Expression by Cell Type (SingleR)"),
+                                           downloadButton("diffbysingleR", "Download"),
+                                           helpText("This will download a .csv of every cluster identified in singleR")
+                                    ), # column
+                                    
+                                    column(width = 6, h4("Differential Expression by Seurat (Unlabeled)"),
+                                           downloadButton("diffbyseurat", "Download"),
+                                           helpText("This will download a .csv of every cluster by cluster number only, intended for manually identifying cell type")
+                                    ) # column
+                                  ) # fluidrow
                                 ) # close wellpanel
                       ), # mainPanel
                       
@@ -218,6 +223,7 @@ ui <- fluidPage(
                         includeMarkdown("descriptionfiles/aboutusdescription.Rmd"),
                         br(),
                         img(src = "MSTPlogo.png", width = 233, height = 83),
+                        br(),
                         br(),
                         downloadButton("downloadsessioninfo", "Download Session and Package Information")
                         
