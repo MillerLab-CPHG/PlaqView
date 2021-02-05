@@ -138,7 +138,9 @@ ui <- fluidPage(
                                                        choices = enrichRdb, 
                                                        selected = "GO_Biological_Process_2018")
                                     ),
-                                    column(width = 12, tableOutput("enrichtable"),
+                                    column(width = 12, 
+                                           tableOutput("enrichtable"),
+                                           helpText("You must restart query if you change database"),
                                            downloadButton("downloadenrichRdata", "Download Pathway Enrichment Data")
                                            
                                     ),
