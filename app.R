@@ -204,21 +204,21 @@ ui <- fluidPage(
                       
                       
              ), # tabPanel
-             
-             # PANEL 3: EXPLORE YOUR OWN DATA ----  
+             # PANEL 3: COMPARE TRAJECTORY METHODS ----  
+             # PANEL 4: EXPLORE YOUR OWN DATA ----  
              tabPanel("Explore Your Own Dataset",
                       mainPanel(width = 12, # 12/12 is full panel,
                                 fileInput(inputId = "upload",
                                           label = "Upload .rds or count matrix",
                                           width = "100%",
                                           accept = c(".txt", ".rds")),
-                                helpText("This feature is still under development.")
+                                helpText("This feature is under development! Check back soon for updates.")
                       ), # close mainpanel
                       
                       
              ), # close tabPanel
              
-             # PANEL 4: ABOUT PANEL ----
+             # PANEL 5: ABOUT PANEL ----
              tabPanel("About & Help",
                       mainPanel(
                         # descriptions
