@@ -12,7 +12,7 @@ library(enrichR) # install.packages("enrichR")
 
 #### LOADING DATA ####
 # below line is commented for shinyapp.io deployment temp
-stanford <- readRDS(file = "data/final_stanford_labeled.rds")
+stanford <- readRDS(file = "data/final_stanford_extendedlabels_02082021.rds")
 # stanford <- readRDS(file = url("https://virginia.box.com/shared/static/oyo1bicpvlxen940zmciqapvg0y3n6gb.rds"))
 
 # enrichR functions
@@ -79,17 +79,31 @@ ui <- fluidPage(
                                         "genes",
                                         width = '100%',
                                         h3("Query Gene Expression", h5("please follow HUGO conventions")),
-                                        placeholder = "try: NOX4, CYBB",
-                                        value = "NOX4, CYBB"
+                                       # value = "NOX4, CYBB",
+                                        placeholder = "try: NOX4, CYBB"
                                       ),
                                       
                                       # choose the type of output graph 
-                                      selectInput("selectaplot", label = h4("Plot Type"), 
+                                      helpText("Preferred Plot Type"),
+                                      
+                                      selectInput("selectaplot", label = NULL, 
                                                   choices = list(
-                                                    "Dot Plot (one or more genes)" = "Dot",
-                                                    "Feature Plot (single gene)" = "Feature",
-                                                    "Ridge Plot (single gene)" = "Ridge"), 
-                                                  selected = "Dot Plot"),                                        
+                                                    "Dot Plot (up to 9 genes)" = "Dot",
+                                                    "Feature Plot (up to 4 genes)" = "Feature",
+                                                    "Ridge Plot (single gene)" = "Ridge"),
+                                                  width = '75%',
+                                                  selected = "Dot Plot"),
+                                      
+                                      helpText("Preferred Cell Labeling Method"),
+                                      selectInput("selectlabelmethodforgenequery", label = NULL, 
+                                                  choices = list(
+                                                    "Wirka et al. (Nature Med. 2019)" = "manually_annotated_labels",
+                                                    "SingleR (Individual Cell ID)" = "SingleR.calls",
+                                                    "Seurat Clusters (Numbered)" = "seurat_clusters",
+                                                    "scCATCH (Heart)" = "scCATCH_Heart",
+                                                    "scCATCH (Blood Vessels)" = "scCATCH_BV"),
+                                                  width = '75%',
+                                                  selected = "Wirka et al. (Nature Med. 2019)"),
                                       # 'go' button
                                       actionButton(
                                         inputId = "runcode",
@@ -164,12 +178,12 @@ ui <- fluidPage(
                                            selectInput("leftlabeltype", 
                                                        label = NULL,
                                                        choices = list(
-                                                         "SingleR (Default)" = "SingleR.calls",
-                                                         "Seurat Clusters" = "seurat_clusters",
-                                                         "scCATCH (Heart)" = "scheart",
-                                                         "scCATCH (Blood Vessels)" = "scvessels"
-                                                       ),
-                                                       selected = "SingleR (Default)"),
+                                                         "Wirka et al. (Nature Med. 2019)" = "manually_annotated_labels",
+                                                         "SingleR (Individual Cell ID)" = "SingleR.calls",
+                                                         "Seurat Clusters (Numbered)" = "seurat_clusters",
+                                                         "scCATCH (Heart)" = "scCATCH_Heart",
+                                                         "scCATCH (Blood Vessels)" = "scCATCH_BV"),
+                                                       selected = "Wirka et al. (Nature Med. 2019)"),
                                            plotOutput("leftlabelplot",
                                                       height = '500px')),
                                     
@@ -177,11 +191,12 @@ ui <- fluidPage(
                                            selectInput("rightlabeltype", 
                                                        label = NULL,
                                                        choices = list(
-                                                         "Seurat Clusters" = "seurat_clusters",
-                                                         "scCATCH (Heart)" = "scheart",
-                                                         "scCATCH (Blood Vessels)" = "scvessels"
-                                                       ),
-                                                       selected = "Seurat Clusters"),
+                                                         "Wirka et al. (Nature Med. 2019)" = "manually_annotated_labels",
+                                                         "SingleR (Individual Cell ID)" = "SingleR.calls",
+                                                         "Seurat Clusters (Numbered)" = "seurat_clusters",
+                                                         "scCATCH (Heart)" = "scCATCH_Heart",
+                                                         "scCATCH (Blood Vessels)" = "scCATCH_BV"),
+                                                       selected = "SingleR (Individual Cell ID)"),
                                            plotOutput("rightlabelplot",
                                                       height = '500px')
                                     ),# column
@@ -204,7 +219,58 @@ ui <- fluidPage(
                       
                       
              ), # tabPanel
-             # PANEL 3: COMPARE TRAJECTORY METHODS ----  
+             # # PANEL 3: COMPARE TRAJECTORY METHODS ----  
+             # tabPanel("Compare Trajectory Methods",
+             #          mainPanel(width = 12, # 12/12 is full panel,
+             #                    wellPanel(includeMarkdown("descriptionfiles/helptext_comparetrajectories.Rmd")),
+             #                    wellPanel(
+             #                      fluidRow(
+             #                        column(width = 6, 
+             #                               selectInput("leftlabeltype", 
+             #                                           label = NULL,
+             #                                           choices = list(
+             #                                             "SingleR (Default)" = "SingleR.calls",
+             #                                             "Seurat Clusters" = "seurat_clusters",
+             #                                             "scCATCH (Heart)" = "scheart",
+             #                                             "scCATCH (Blood Vessels)" = "scvessels"
+             #                                           ),
+             #                                           selected = "SingleR (Default)"),
+             #                               plotOutput("leftlabelplot",
+             #                                          height = '500px')),
+             #                        
+             #                        column(width = 6,
+             #                               selectInput("rightlabeltype", 
+             #                                           label = NULL,
+             #                                           choices = list(
+             #                                             "Seurat Clusters" = "seurat_clusters",
+             #                                             "scCATCH (Heart)" = "scheart",
+             #                                             "scCATCH (Blood Vessels)" = "scvessels"
+             #                                           ),
+             #                                           selected = "Seurat Clusters"),
+             #                               plotOutput("rightlabelplot",
+             #                                          height = '500px')
+             #                        ),# column
+             #                        
+             #                        br(), 
+             #                        
+             #                        column(width = 6, h4("Differential Expression by Cell Type (SingleR)"),
+             #                               downloadButton("diffbysingleR", "Download"),
+             #                               helpText("This will download a .csv of every cluster identified in singleR")
+             #                        ), # column
+             #                        
+             #                        column(width = 6, h4("Differential Expression by Seurat (Unlabeled)"),
+             #                               downloadButton("diffbyseurat", "Download"),
+             #                               helpText("This will download a .csv of every cluster by cluster number only, intended for manually identifying cell type")
+             #                        ) # column
+             #                      ) # fluidrow
+             #                    ) # close wellpanel
+             #          ), # mainPanel
+             #          
+             #          
+             #          
+             # ), # tabPanel
+             # 
+             # 
              # PANEL 4: EXPLORE YOUR OWN DATA ----  
              tabPanel("Explore Your Own Dataset",
                       mainPanel(width = 12, # 12/12 is full panel,
@@ -257,7 +323,7 @@ server <- function(input, output) {
           # repel labels
           pt.size = 1,
           cols = manual_color_list,
-          group.by = "SingleR.calls" ) + # group.by is important, use this to call metadata separation
+          group.by = input$selectlabelmethodforgenequery) + # group.by is important, use this to call metadata separation
           theme(legend.position="bottom", 
                 legend.box = "vertical") +
           ggtitle("UMAP by Cell Type") +
@@ -266,37 +332,39 @@ server <- function(input, output) {
       ) # closes renderPlot
   })# closes observe event
   
-  # Gene feature plot, interactive #
+  # Gene expression plots #
+  # dot
   observeEvent(input$runcode,{ # observe event puts a pause until pushed
     output$Dot <- renderPlot({
       validate(need(input$selectaplot=="Dot", message=FALSE))
       DotPlot(stanford, 
+              group.by = input$selectlabelmethodforgenequery,
               features = (str_split(input$genes, ", "))[[1]])+ # a trick to sep long string input
         ggtitle("Expression Dot Plot") +
         theme(plot.title = element_text(hjust = 1)) +
         theme(plot.title = element_text(hjust = 0.5)) 
       
     })
+    # feature
     parsed.genes <- str_split(input$genes, ", ")[[1]]
     output$Feature <- renderPlot({
       validate(need(input$selectaplot=="Feature", message=FALSE))
       FeaturePlot(stanford, 
+                  group.by = input$selectlabelmethodforgenequery,
                   features = (str_split(input$genes, ", "))[[1]])+ # a trick to sep long string input
         theme(legend.position="bottom", legend.box = "vertical") + # group.by is important, use this to call metadata separation
         theme(plot.title = element_text(hjust = 1)) +
-        ggtitle("Expression Feature Plot") +
         theme(plot.title = element_text(hjust =  0.5)) 
       
     }) 
-    
+    #ridge
     output$Ridge <- renderPlot({
       validate(need(input$selectaplot=="Ridge", message=FALSE))
       RidgePlot(stanford,
                 cols = manual_color_list,
-                group.by = "SingleR.calls",
+                group.by = input$selectlabelmethodforgenequery,
                 features = (str_split(input$genes, ", "))[[1]],)+ # a trick to sep long string input
         theme(legend.position="bottom", legend.box = "vertical") + # group.by is important, use this to call metadata separation
-        ggtitle("Expression Ridge Plot") +
         theme(plot.title = element_text(hjust =  0.5)) +
         guides(color = guide_legend(nrow = 5))
       

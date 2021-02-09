@@ -14,3 +14,4 @@ For a **single** gene, feature and ridge plots work well. For **multiple** genes
 
 *to save plot, right-click and 'save image as'", please cite Ma et al., (2021) and Wirka et al., (2019) in your publications*
 
+Acronyms: chondrocytes (CH) common myeloid progenitor (CMP), dendritic cells (DC), endothelial cells (EC), fibroblasts (FB), granulocyte/monocyte progenitors (GMP), Macrophages (Mø), Monocytes (Mono), Natural Killer (NK), stem cells (SC), smooth muscle cells (SMC).
