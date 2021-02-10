@@ -72,14 +72,14 @@ ui <- fluidPage(
                       mainPanel(width = 12, # 12/12 is full panel
                                 fluidRow(## panel for gene input
                                   column(
-                                    width = 4,
+                                    width = 5,
                                     wellPanel(                                      
                                       # must add up to 12 all columns
                                       textInput(
                                         "genes",
                                         width = '100%',
                                         h3("Query Gene Expression", h5("please follow HUGO conventions")),
-                                       # value = "NOX4, CYBB",
+                                        value = "NOX4, CYBB",
                                         placeholder = "try: NOX4, CYBB"
                                       ),
                                       
@@ -115,7 +115,7 @@ ui <- fluidPage(
                                   
                                   ## panel for description
                                   column(
-                                    width = 8,
+                                    width = 7,
                                     wellPanel(includeMarkdown("descriptionfiles/helptext_singlegenepage.Rmd"))
                                   )
                                 ),
@@ -148,14 +148,14 @@ ui <- fluidPage(
                                   br(),
                                   fluidRow( # bottom whole for GO output
                                     column(width = 12, 
-                                           selectInput("selectedenrichRdb", label = h5("Pathway Enrichment Database"), 
+                                           selectInput("selectedenrichRdb", label = h5("Top 25 Pathway Enrichment"), 
                                                        choices = enrichRdb, 
                                                        selected = "GO_Biological_Process_2018")
                                     ),
                                     column(width = 12, 
                                            tableOutput("enrichtable"),
                                            helpText("You must restart query if you change database"),
-                                           downloadButton("downloadenrichRdata", "Download Pathway Enrichment Data")
+                                           downloadButton("downloadenrichRdata", "Download Complete Pathway Enrichment Data")
                                            
                                     ),
                                   )# another fluidrow 
@@ -191,7 +191,6 @@ ui <- fluidPage(
                                            selectInput("rightlabeltype", 
                                                        label = NULL,
                                                        choices = list(
-                                                         "Wirka et al. (Nature Med. 2019)" = "manually_annotated_labels",
                                                          "SingleR (Individual Cell ID)" = "SingleR.calls",
                                                          "Seurat Clusters (Numbered)" = "seurat_clusters",
                                                          "scCATCH (Heart)" = "scCATCH_Heart",
@@ -203,13 +202,13 @@ ui <- fluidPage(
                                     
                                     br(), 
                                     
-                                    column(width = 6, h4("Differential Expression by Cell Type (SingleR)"),
-                                           downloadButton("diffbysingleR", "Download"),
+                                    column(width = 6, h4("Differential Expression by Seurat (Unlabeled)"),
+                                           downloadButton("diffbyseurat", "Download"),
                                            helpText("This will download a .csv of every cluster identified in singleR")
                                     ), # column
                                     
-                                    column(width = 6, h4("Differential Expression by Seurat (Unlabeled)"),
-                                           downloadButton("diffbyseurat", "Download"),
+                                    column(width = 6, h4("Differential Expression by Cell Type (SingleR)"),
+                                           downloadButton("diffbysingleR", "Download"),
                                            helpText("This will download a .csv of every cluster by cluster number only, intended for manually identifying cell type")
                                     ) # column
                                   ) # fluidrow
@@ -318,7 +317,7 @@ server <- function(input, output) {
           stanford,
           reduction = "umap",
           label = TRUE,
-          label.size = 3,
+          label.size = 4,
           repel = T,
           # repel labels
           pt.size = 1,
@@ -336,22 +335,25 @@ server <- function(input, output) {
   # dot
   observeEvent(input$runcode,{ # observe event puts a pause until pushed
     output$Dot <- renderPlot({
+      # parse string input 
+      user_genes <- str_split(input$genes, ", ")[[1]]
       validate(need(input$selectaplot=="Dot", message=FALSE))
       DotPlot(stanford, 
               group.by = input$selectlabelmethodforgenequery,
-              features = (str_split(input$genes, ", "))[[1]])+ # a trick to sep long string input
+              features = user_genes) + # a trick to sep long string input
         ggtitle("Expression Dot Plot") +
         theme(plot.title = element_text(hjust = 1)) +
         theme(plot.title = element_text(hjust = 0.5)) 
+      
       
     })
     # feature
     parsed.genes <- str_split(input$genes, ", ")[[1]]
     output$Feature <- renderPlot({
+      user_genes <- str_split(input$genes, ", ")[[1]]
       validate(need(input$selectaplot=="Feature", message=FALSE))
       FeaturePlot(stanford, 
-                  group.by = input$selectlabelmethodforgenequery,
-                  features = (str_split(input$genes, ", "))[[1]])+ # a trick to sep long string input
+                  features = user_genes[1:4]) + # a trick to sep long string input
         theme(legend.position="bottom", legend.box = "vertical") + # group.by is important, use this to call metadata separation
         theme(plot.title = element_text(hjust = 1)) +
         theme(plot.title = element_text(hjust =  0.5)) 
@@ -359,24 +361,27 @@ server <- function(input, output) {
     }) 
     #ridge
     output$Ridge <- renderPlot({
+      user_genes <- str_split(input$genes, ", ")[[1]]
       validate(need(input$selectaplot=="Ridge", message=FALSE))
       RidgePlot(stanford,
                 cols = manual_color_list,
                 group.by = input$selectlabelmethodforgenequery,
-                features = (str_split(input$genes, ", "))[[1]],)+ # a trick to sep long string input
-        theme(legend.position="bottom", legend.box = "vertical") + # group.by is important, use this to call metadata separation
+                features =  user_genes[1:1]
+                ) + # a trick to sep long string input
+        #theme(legend.position="bottom", legend.box = "vertical") + # group.by is important, use this to call metadata separation
         theme(plot.title = element_text(hjust =  0.5)) +
-        guides(color = guide_legend(nrow = 5))
+        guides(color = guide_legend(nrow = 3))
       
     })
     
     
-    # Gene ontology check #
+    # Gene ontology table #
     {
       parsed.genes <- str_split(input$genes, ", ")[[1]]
       enriched <- enrichr(genes = parsed.genes, 
                           database = enrichRdb) # this queries all of them
       cleanedenrichedtable <- select(enriched[[input$selectedenrichRdb]], -Old.Adjusted.P.value, -Old.P.value,)
+      cleanedenrichedtable <- top_n(cleanedenrichedtable, 25) # top 25 will be rendered
       output$enrichtable <- renderTable(cleanedenrichedtable,
                                         striped = T,
                                         spacing = "xs",
@@ -439,6 +444,17 @@ server <- function(input, output) {
         theme(plot.title = element_text(hjust =  0.5)) +
         guides(color = guide_legend(nrow = 5))
     )# render plot
+  
+  ## download diffex
+  output$diffbyseurat <- downloadHandler(
+    filename = "differential_markergenes_by_seurat_clusters.csv",
+    content = function(file) {
+      
+    }  )# close downloadhandler
+  output$diffbysingleR <- downloadHandler(
+    filename = "differential_markergenes_by_singleR_labels.csv",
+    content = function(file) {
+    }  )# close downloadhandler
   
   #### PANEL #3 FUNCTIONS ####
   
