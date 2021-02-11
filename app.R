@@ -219,52 +219,52 @@ ui <- fluidPage(
                       
                       
              ), # tabPanel
-             # PANEL 3: COMPARE TRAJECTORY METHODS ----
-             tabPanel("Compare Trajectory Methods",
-                      mainPanel(width = 12, # 12/12 is full panel,
-                                wellPanel(includeMarkdown("descriptionfiles/helptext_comparetrajectories.Rmd")),
-                                wellPanel(
-                                  fluidRow(
-                                    column(width = 6,
-                                           selectInput("lefttrajectory",
-                                                       label = NULL,
-                                                       choices = list(
-                                                         "Monocle3  (Trapnell Lab)" = "monocle3",
-                                                         "PAGA (Theis Lab)" = "paga",
-                                                         "Slingshot (Dudoit Lab)" = "slingshot",
-                                                         "SCORPIUS (Ginhoux Lab)" = "scorpius"
-                                                       ),
-                                                       selected = "Monocle3  (Trapnell Lab)"),
-                                           plotOutput("lefttrajectory",
-                                                      height = '500px')),
-
-                                    
-                                           column(width = 6,
-                                                  selectInput("righttrajectory",
-                                                              label = NULL,
-                                                              choices = list(
-                                                                "PAGA (Theis Lab)" = "paga",
-                                                                "Slingshot (Dudoit Lab)" = "slingshot",
-                                                                "SCORPIUS (Ginhoux Lab)" = "scorpius"
-                                                              ),
-                                                              selected ="PAGA (Theis Lab)"),
-                                                  plotOutput("righttrajectory",
-                                                             height = '500px')        
-                                           ) # column
-                                   
-
-          
-
-                        
-                                  ) # fluidrow
-                                ) # close wellpanel
-                      ), # mainPanel
-
-
-
-             ), # tabPanel
-
-
+             # # PANEL 3: COMPARE TRAJECTORY METHODS ----
+             # tabPanel("Compare Trajectory Methods",
+             #          mainPanel(width = 12, # 12/12 is full panel,
+             #                    wellPanel(includeMarkdown("descriptionfiles/helptext_comparetrajectories.Rmd")),
+             #                    wellPanel(
+             #                      fluidRow(
+             #                        column(width = 6,
+             #                               selectInput("lefttrajectory",
+             #                                           label = NULL,
+             #                                           choices = list(
+             #                                             "Monocle3  (Trapnell Lab)" = "monocle3",
+             #                                             "PAGA (Theis Lab)" = "paga",
+             #                                             "Slingshot (Dudoit Lab)" = "slingshot",
+             #                                             "SCORPIUS (Ginhoux Lab)" = "scorpius"
+             #                                           ),
+             #                                           selected = "Monocle3  (Trapnell Lab)"),
+             #                               plotOutput("lefttrajectory",
+             #                                          height = '500px')),
+             # 
+             #                        
+             #                               column(width = 6,
+             #                                      selectInput("righttrajectory",
+             #                                                  label = NULL,
+             #                                                  choices = list(
+             #                                                    "PAGA (Theis Lab)" = "paga",
+             #                                                    "Slingshot (Dudoit Lab)" = "slingshot",
+             #                                                    "SCORPIUS (Ginhoux Lab)" = "scorpius"
+             #                                                  ),
+             #                                                  selected ="PAGA (Theis Lab)"),
+             #                                      plotOutput("righttrajectory",
+             #                                                 height = '500px')        
+             #                               ) # column
+             #                       
+             # 
+             # 
+             # 
+             #            
+             #                      ) # fluidrow
+             #                    ) # close wellpanel
+             #          ), # mainPanel
+             # 
+             # 
+             # 
+             # ), # tabPanel
+             # 
+             # 
              # PANEL 4: EXPLORE YOUR OWN DATA ----  
              tabPanel("Explore Your Own Dataset",
                       mainPanel(width = 12, # 12/12 is full panel,
