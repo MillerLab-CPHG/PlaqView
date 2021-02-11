@@ -472,7 +472,6 @@ server <- function(input, output) {
      
     )# render plot
   
-
   
   #### PANEL #4 FUNCTIONS #### 
   
