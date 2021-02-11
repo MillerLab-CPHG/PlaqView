@@ -202,14 +202,13 @@ ui <- fluidPage(
                                     
                                     br(), 
                                     
-                                    column(width = 6, h4("Differential Expression by Seurat Clusters"),
-                                           downloadButton("diffbywirka", "Wirka et al."),
-                                           downloadButton("diffbyseurat", "Seurat (numbered cluster)"),
+                                    column(width = 6, h4("Differential Expression by Seurat (Unlabeled)"),
+                                           downloadButton("diffbyseurat", "Download"),
                                            helpText("This will download a .csv of every cluster identified in singleR")
                                     ), # column
                                     
                                     column(width = 6, h4("Differential Expression by Cell Type (SingleR)"),
-                                           downloadButton("diffbysingleR", "SingleR"),
+                                           downloadButton("diffbysingleR", "Download"),
                                            helpText("This will download a .csv of every cluster by cluster number only, intended for manually identifying cell type")
                                     ) # column
                                   ) # fluidrow
@@ -219,7 +218,7 @@ ui <- fluidPage(
                       
                       
              ), # tabPanel
-             # # PANEL 3: COMPARE TRAJECTORY METHODS ----
+             # # PANEL 3: COMPARE TRAJECTORY METHODS ----  
              # tabPanel("Compare Trajectory Methods",
              #          mainPanel(width = 12, # 12/12 is full panel,
              #                    wellPanel(includeMarkdown("descriptionfiles/helptext_comparetrajectories.Rmd")),
@@ -262,6 +261,49 @@ ui <- fluidPage(
              # 
              # 
              # 
+             #                        column(width = 6, 
+             #                               selectInput("leftlabeltype", 
+             #                                           label = NULL,
+             #                                           choices = list(
+             #                                             "SingleR (Default)" = "SingleR.calls",
+             #                                             "Seurat Clusters" = "seurat_clusters",
+             #                                             "scCATCH (Heart)" = "scheart",
+             #                                             "scCATCH (Blood Vessels)" = "scvessels"
+             #                                           ),
+             #                                           selected = "SingleR (Default)"),
+             #                               plotOutput("leftlabelplot",
+             #                                          height = '500px')),
+             #                        
+             #                        column(width = 6,
+             #                               selectInput("rightlabeltype", 
+             #                                           label = NULL,
+             #                                           choices = list(
+             #                                             "Seurat Clusters" = "seurat_clusters",
+             #                                             "scCATCH (Heart)" = "scheart",
+             #                                             "scCATCH (Blood Vessels)" = "scvessels"
+             #                                           ),
+             #                                           selected = "Seurat Clusters"),
+             #                               plotOutput("rightlabelplot",
+             #                                          height = '500px')
+             #                        ),# column
+             #                        
+             #                        br(), 
+             #                        
+             #                        column(width = 6, h4("Differential Expression by Cell Type (SingleR)"),
+             #                               downloadButton("diffbysingleR", "Download"),
+             #                               helpText("This will download a .csv of every cluster identified in singleR")
+             #                        ), # column
+             #                        
+             #                        column(width = 6, h4("Differential Expression by Seurat (Unlabeled)"),
+             #                               downloadButton("diffbyseurat", "Download"),
+             #                               helpText("This will download a .csv of every cluster by cluster number only, intended for manually identifying cell type")
+             #                        ) # column
+             #                      ) # fluidrow
+             #                    ) # close wellpanel
+             #          ), # mainPanel
+             #          
+             #          
+             #          
              # ), # tabPanel
              # 
              # 
@@ -440,39 +482,29 @@ server <- function(input, output) {
         guides(color = guide_legend(nrow = 5))
     )# render plot
   
-  ### download diffex tables###
+  ## download diffex
   output$diffbyseurat <- downloadHandler(
     filename = "differential_markergenes_by_seurat_clusters.csv",
     content = function(file) {
-      file.copy("data/diffexp_by_wirka_clusters.csv", file)
       
     }  )# close downloadhandler
   output$diffbysingleR <- downloadHandler(
     filename = "differential_markergenes_by_singleR_labels.csv",
     content = function(file) {
-      file.copy("data/diffexp_by_singleR.csv", file)
-      
     }  )# close downloadhandler
   
-  output$diffbywirka <- downloadHandler(
-    filename = "Wirka_et_al_2019_supplemental_material.xlsx",
-    content = function(file) {
-      file.copy("data/Wirka_et_al_2019_supplemental_material.xlsx", file)
-      
-    }  )# close downloadhandler
-  
-  #### PANEL #3 FUNCTIONS ####
-  output$lefttrajectory <-
-    renderPlot(
-     
-    )# render plot
-  
-  output$righttrajectory <- 
-    renderPlot(
-     
-    )# render plot
-  
-  
+  # #### PANEL #3 FUNCTIONS ####
+  # output$lefttrajectory <-
+  #   renderPlot(
+  #    
+  #   )# render plot
+  # 
+  # output$righttrajectory <- 
+  #   renderPlot(
+  #    
+  #   )# render plot
+  # 
+  # 
   #### PANEL #4 FUNCTIONS #### 
   
   output$downloadsessioninfo <- downloadHandler(
