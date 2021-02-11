@@ -202,8 +202,9 @@ ui <- fluidPage(
                                     
                                     br(), 
                                     
-                                    column(width = 6, h4("Differential Expression by Seurat (Unlabeled)"),
-                                           downloadButton("diffbyseurat", "Download"),
+                                    column(width = 6, h4("Differential Expression by Cluster"),
+                                           downloadButton("diffbyseurat", "Numbered Only (Unlabeled)"),
+                                           downloadButton("diffbywirka", "Wirka et al."),
                                            helpText("This will download a .csv of every cluster identified in singleR")
                                     ), # column
                                     
@@ -218,95 +219,52 @@ ui <- fluidPage(
                       
                       
              ), # tabPanel
-             # # PANEL 3: COMPARE TRAJECTORY METHODS ----  
-             # tabPanel("Compare Trajectory Methods",
-             #          mainPanel(width = 12, # 12/12 is full panel,
-             #                    wellPanel(includeMarkdown("descriptionfiles/helptext_comparetrajectories.Rmd")),
-             #                    wellPanel(
-             #                      fluidRow(
-             #                        column(width = 6,
-             #                               selectInput("lefttrajectory",
-             #                                           label = NULL,
-             #                                           choices = list(
-             #                                             "Monocle3  (Trapnell Lab)" = "monocle3",
-             #                                             "PAGA (Theis Lab)" = "paga",
-             #                                             "Slingshot (Dudoit Lab)" = "slingshot",
-             #                                             "SCORPIUS (Ginhoux Lab)" = "scorpius"
-             #                                           ),
-             #                                           selected = "Monocle3  (Trapnell Lab)"),
-             #                               plotOutput("lefttrajectory",
-             #                                          height = '500px')),
-             # 
-             #                        
-             #                               column(width = 6,
-             #                                      selectInput("righttrajectory",
-             #                                                  label = NULL,
-             #                                                  choices = list(
-             #                                                    "PAGA (Theis Lab)" = "paga",
-             #                                                    "Slingshot (Dudoit Lab)" = "slingshot",
-             #                                                    "SCORPIUS (Ginhoux Lab)" = "scorpius"
-             #                                                  ),
-             #                                                  selected ="PAGA (Theis Lab)"),
-             #                                      plotOutput("righttrajectory",
-             #                                                 height = '500px')        
-             #                               ) # column
-             #                       
-             # 
-             # 
-             # 
-             #            
-             #                      ) # fluidrow
-             #                    ) # close wellpanel
-             #          ), # mainPanel
-             # 
-             # 
-             # 
-             #                        column(width = 6, 
-             #                               selectInput("leftlabeltype", 
-             #                                           label = NULL,
-             #                                           choices = list(
-             #                                             "SingleR (Default)" = "SingleR.calls",
-             #                                             "Seurat Clusters" = "seurat_clusters",
-             #                                             "scCATCH (Heart)" = "scheart",
-             #                                             "scCATCH (Blood Vessels)" = "scvessels"
-             #                                           ),
-             #                                           selected = "SingleR (Default)"),
-             #                               plotOutput("leftlabelplot",
-             #                                          height = '500px')),
-             #                        
-             #                        column(width = 6,
-             #                               selectInput("rightlabeltype", 
-             #                                           label = NULL,
-             #                                           choices = list(
-             #                                             "Seurat Clusters" = "seurat_clusters",
-             #                                             "scCATCH (Heart)" = "scheart",
-             #                                             "scCATCH (Blood Vessels)" = "scvessels"
-             #                                           ),
-             #                                           selected = "Seurat Clusters"),
-             #                               plotOutput("rightlabelplot",
-             #                                          height = '500px')
-             #                        ),# column
-             #                        
-             #                        br(), 
-             #                        
-             #                        column(width = 6, h4("Differential Expression by Cell Type (SingleR)"),
-             #                               downloadButton("diffbysingleR", "Download"),
-             #                               helpText("This will download a .csv of every cluster identified in singleR")
-             #                        ), # column
-             #                        
-             #                        column(width = 6, h4("Differential Expression by Seurat (Unlabeled)"),
-             #                               downloadButton("diffbyseurat", "Download"),
-             #                               helpText("This will download a .csv of every cluster by cluster number only, intended for manually identifying cell type")
-             #                        ) # column
-             #                      ) # fluidrow
-             #                    ) # close wellpanel
-             #          ), # mainPanel
-             #          
-             #          
-             #          
-             # ), # tabPanel
-             # 
-             # 
+             # PANEL 3: COMPARE TRAJECTORY METHODS ----
+             tabPanel("Compare Trajectory Methods",
+                      mainPanel(width = 12, # 12/12 is full panel,
+                                wellPanel(includeMarkdown("descriptionfiles/helptext_comparetrajectories.Rmd")),
+                                wellPanel(
+                                  fluidRow(
+                                    column(width = 6,
+                                           selectInput("lefttrajectory",
+                                                       label = NULL,
+                                                       choices = list(
+                                                         "Monocle3  (Trapnell Lab)" = "monocle3",
+                                                         "PAGA (Theis Lab)" = "paga",
+                                                         "Slingshot (Dudoit Lab)" = "slingshot",
+                                                         "SCORPIUS (Ginhoux Lab)" = "scorpius"
+                                                       ),
+                                                       selected = "Monocle3  (Trapnell Lab)"),
+                                           plotOutput("lefttrajectory",
+                                                      height = '500px')),
+
+                                    
+                                           column(width = 6,
+                                                  selectInput("righttrajectory",
+                                                              label = NULL,
+                                                              choices = list(
+                                                                "PAGA (Theis Lab)" = "paga",
+                                                                "Slingshot (Dudoit Lab)" = "slingshot",
+                                                                "SCORPIUS (Ginhoux Lab)" = "scorpius"
+                                                              ),
+                                                              selected ="PAGA (Theis Lab)"),
+                                                  plotOutput("righttrajectory",
+                                                             height = '500px')        
+                                           ) # column
+                                   
+
+          
+
+                        
+                                  ) # fluidrow
+                                ) # close wellpanel
+                      ), # mainPanel
+
+
+
+             ), # tabPanel
+
+
              # PANEL 4: EXPLORE YOUR OWN DATA ----  
              tabPanel("Explore Your Own Dataset",
                       mainPanel(width = 12, # 12/12 is full panel,
@@ -488,6 +446,13 @@ server <- function(input, output) {
     content = function(file) {
       
     }  )# close downloadhandler
+  
+  output$diffbywirka <- downloadHandler(
+    filename = "Original_wirka_et_al_2019_NatureMed_supplemental.xlms",
+    content = function(file) {
+      
+    }  )# close downloadhandler
+  
   output$diffbysingleR <- downloadHandler(
     filename = "differential_markergenes_by_singleR_labels.csv",
     content = function(file) {
