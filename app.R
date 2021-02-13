@@ -6,7 +6,7 @@ library(Seurat)
 library(shinybusy) #install.packages("shinybusy")
 library(tidyverse)
 library(enrichR) # install.packages("enrichR")
-
+library(imager)
 #### extrasensory codes ####
 
 
@@ -148,7 +148,7 @@ ui <- fluidPage(
                                   br(),
                                   fluidRow( # bottom whole for GO output
                                     column(width = 12, 
-                                           selectInput("selectedenrichRdb", label = h5("Top 25 Pathway Enrichment"), 
+                                           selectInput("selectedenrichRdb", label = h5("Top Significantly Enriched Pathways"), 
                                                        choices = enrichRdb, 
                                                        selected = "GO_Biological_Process_2018")
                                     ),
@@ -169,7 +169,7 @@ ui <- fluidPage(
              
              
              # PANEL 2: COMPARE LABELING METHODS  ----  
-             tabPanel("Compare Labeling Methods",
+             tabPanel("Labeling Methods",
                       mainPanel(width = 12, # 12/12 is full panel,
                                 wellPanel(includeMarkdown("descriptionfiles/helptext_comparelabels.Rmd")),
                                 wellPanel(
@@ -205,12 +205,14 @@ ui <- fluidPage(
                                     column(width = 6, h4("Differential Expression by Cluster"),
                                            downloadButton("diffbyseurat", "Numbered Only (Unlabeled)"),
                                            downloadButton("diffbywirka", "Wirka et al."),
-                                           helpText("This will download a .csv of every cluster identified in singleR")
+                                           
+                                        
+                                           helpText("This will download a .csv of differentially expressed genes by cluster")
                                     ), # column
                                     
-                                    column(width = 6, h4("Differential Expression by Cell Type (SingleR)"),
-                                           downloadButton("diffbysingleR", "Download"),
-                                           helpText("This will download a .csv of every cluster by cluster number only, intended for manually identifying cell type")
+                                    column(width = 6, h4("Differential Expression by Cell Type"),
+                                           downloadButton("diffbysingleR", "SingleR"),
+                                           helpText("This will download a .csv of differentially expressed genes as identified by singleR")
                                     ) # column
                                   ) # fluidrow
                                 ) # close wellpanel
@@ -220,27 +222,25 @@ ui <- fluidPage(
                       
              ), # tabPanel
              # PANEL 3: COMPARE TRAJECTORY METHODS ----
-             tabPanel("Compare Trajectory Methods",
+             tabPanel("Trajectory Methods",
                       mainPanel(width = 12, # 12/12 is full panel,
                                 wellPanel(includeMarkdown("descriptionfiles/helptext_comparetrajectories.Rmd")),
                                 wellPanel(
                                   fluidRow(
                                     column(width = 6,
-                                           selectInput("lefttrajectory",
+                                           selectInput("lefttrajectorymethod",
                                                        label = NULL,
                                                        choices = list(
-                                                         "Monocle3  (Trapnell Lab)" = "monocle3",
-                                                         "PAGA (Theis Lab)" = "paga",
-                                                         "Slingshot (Dudoit Lab)" = "slingshot",
-                                                         "SCORPIUS (Ginhoux Lab)" = "scorpius"
+                                                         "Monocle3  (Trapnell Lab)" = "monocle3"
                                                        ),
                                                        selected = "Monocle3  (Trapnell Lab)"),
-                                           plotOutput("lefttrajectory",
-                                                      height = '500px')),
+                                           imageOutput("lefttrajectorygraph")
+                                           
+                                           ), # column
 
                                     
                                            column(width = 6,
-                                                  selectInput("righttrajectory",
+                                                  selectInput("righttrajectorymethod",
                                                               label = NULL,
                                                               choices = list(
                                                                 "PAGA (Theis Lab)" = "paga",
@@ -248,7 +248,7 @@ ui <- fluidPage(
                                                                 "SCORPIUS (Ginhoux Lab)" = "scorpius"
                                                               ),
                                                               selected ="PAGA (Theis Lab)"),
-                                                  plotOutput("righttrajectory",
+                                                  plotOutput("righttrajectorygraph",
                                                              height = '500px')        
                                            ) # column
                                    
@@ -312,7 +312,7 @@ server <- function(input, output) {
           stanford,
           reduction = "umap",
           label = TRUE,
-          label.size = 4,
+          label.size = 5,
           repel = T,
           # repel labels
           pt.size = 1,
@@ -377,7 +377,7 @@ server <- function(input, output) {
                           database = enrichRdb) # this queries all of them
       cleanedenrichedtable <- select(enriched[[input$selectedenrichRdb]], -Old.Adjusted.P.value, -Old.P.value,)
       cleanedenrichedtable <- top_n(cleanedenrichedtable, 25) # top 25 will be rendered
-      output$enrichtable <- renderTable(cleanedenrichedtable,
+      output$enrichtable <- renderTable(cleanedenrichedtable, 
                                         striped = T,
                                         spacing = "xs",
                                         align = 'l',
@@ -408,7 +408,7 @@ server <- function(input, output) {
         stanford,
         reduction = "umap",
         label = TRUE,
-        label.size = 3,
+        label.size = 5,
         repel = T,
         # repel labels
         pt.size = 1,
@@ -427,7 +427,7 @@ server <- function(input, output) {
         stanford,
         reduction = "umap",
         label = TRUE,
-        label.size = 3,
+        label.size = 5,
         repel = T,
         # repel labels
         pt.size = 1,
@@ -444,32 +444,45 @@ server <- function(input, output) {
   output$diffbyseurat <- downloadHandler(
     filename = "differential_markergenes_by_seurat_clusters.csv",
     content = function(file) {
+      file.copy("data/diffexp_by_unlabeled_clusters.csv", file)
       
     }  )# close downloadhandler
   
-  output$diffbywirka <- downloadHandler(
+  output$diffbywirka_supplement <- downloadHandler(
     filename = "Original_wirka_et_al_2019_NatureMed_supplemental.xlms",
     content = function(file) {
+      file.copy("data/Wirka_2019_supplemental_material_NatMed.xlsx", file)
       
     }  )# close downloadhandler
+  
+  
+  output$diffbywirka <- downloadHandler(
+    filename = "",
+    content = function(file) {
+      file.copy("data/diffexp_by_wirka_clusters.csv", file)
+      
+    }  )# close downloadhandler
+  
   
   output$diffbysingleR <- downloadHandler(
     filename = "differential_markergenes_by_singleR_labels.csv",
     content = function(file) {
+      file.copy("data/diffexp_by_singleR.csv", file)
+      
     }  )# close downloadhandler
   
-  # #### PANEL #3 FUNCTIONS ####
-  # output$lefttrajectory <-
-  #   renderPlot(
-  #    
-  #   )# render plot
-  # 
-  # output$righttrajectory <- 
-  #   renderPlot(
-  #    
-  #   )# render plot
-  # 
-  # 
+  #### PANEL #3 FUNCTIONS ####
+  output$lefttrajectorygraph <- renderPlot(
+    readRDS(file =  normalizePath(file.path('data/trajectories', # this will dynamically read the file containing the right name
+                                            paste(input$lefttrajectorymethod, '.rds', sep=''))))
+    
+  ) # renderplot 
+  
+  output$righttrajectorygraph <- renderPlot(
+    readRDS(file =  normalizePath(file.path('data/trajectories', # this will dynamically read the file containing the right name
+                                            paste(input$righttrajectorymethod, '.rds', sep='')))) + # this ggplot type needs a little editing
+      guides(color = guide_legend(nrow = 6)) 
+  ) # renderplot 
   #### PANEL #4 FUNCTIONS #### 
   
   output$downloadsessioninfo <- downloadHandler(
