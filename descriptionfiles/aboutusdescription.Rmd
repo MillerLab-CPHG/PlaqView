@@ -8,7 +8,7 @@ output: html_document
 ## About *PlaqView*
 *PlaqView* is a standalone, interactive, and reproducible Shiny- and R-based tool to explore single-cell RNA-sequencing data of human coronary artery samples. Our goal is to make these valuable data analytic tools publicly available to non-bioinformaticians. This is an open-sourced tool that is freely available and can be modified for other scRNA-seq data. 
 
-*Plaqview 0.1* is currently in beta as of Feb 1, 2021.
+*Plaqview* is currently in beta as of Feb 1 (v.0.1), 2021. Last Updated: Feb 13, 2021.
 
 ### About the Datasets
 The primary data used in this interactive session were first published by Wirka *et al.* [(Nature Medicine, 2019)](https://pubmed.ncbi.nlm.nih.gov/31359001/) and made available here by Ma *et al.* (2021). In this dataset, diseased segments of the right coronary artery were subjected to scRNA-seq from four patients who underwent heart transplantation. 
@@ -26,12 +26,12 @@ We are continuously improving PlaqView. We are working on modularizing and expan
 
 ### Packages Used
 *Seurat, Monocle3, Tidyverse, EnrichR, scCATCH, Shiny.*
-See session info for detailed version history.
+See session info for detailed version and package history.
 
 ### About Our Lab
 The Miller Lab is a part of the Center for Public Health Genomics of the University of Virginia, School of Medicine in Charlottesville, VA. Our lab focuses on finding novel risk factors and mechanisms of heart diseases using next-generation sequencing techniques. For questions about our lab, please contact us [here](https://millerlab.org). For questions about *PlaqView*, raise a ticket in our [GitHub Page](https://github.com/MillerLab-CPHG/PlaqView).
 
 ### Where to Find Help
-If you have issue running *PlaqView*, please raise a ticket at our [GitHub Page](https://github.com/MillerLab-CPHG/PlaqView). For urgent issues, please email the author directly at weima@virginia.edu.
+If you have issue running *PlaqView*, please raise a ticket at our [GitHub Page](https://github.com/MillerLab-CPHG/PlaqView). For urgent issues, please email the authors directly at weima@virginia.edu.
 
 

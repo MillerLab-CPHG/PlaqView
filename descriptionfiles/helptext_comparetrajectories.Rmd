@@ -4,13 +4,13 @@ author: "WeiMa"
 date: "1/2/2021"
 output: html_document
 ---
-### PlaqView: an interactive portal to explore single cell RNA-seq of human coronary artery.
+### **PlaqView**: an interactive portal to explore single cell RNA-seq of human coronary artery.
 
 Use this module to **compare different RNA trajectory methods.** 
 
-By default, *Plaqview* uses *Monocle3* (Trapnell Lab) for cell RNA trajectory inference. We found that *Monocle3* was the most flexible in handling complex datasets with multiple cell origins (as opposed to purified/cultured samples). 
+By default, *Plaqview* uses *Monocle3* [(Trapnell Lab)](https://cole-trapnell-lab.github.io/monocle3/) for cell RNA trajectory inference. We found that *Monocle3* was the most flexible in handling complex datasets with multiple cell origins (as opposed to purified/cultured samples). 
 
-Here, we can compare other popular trajectory methods in a subset of the Wirka et al. (2019) human coronary artery dataset. Because some of these methods, such as SCORPIUS and Slingshot, cannot handle cells in distinct clusters, we have pre-selected clusters here.
+Here, we can compare other popular trajectory methods in the Wirka et al. (2019) human coronary artery dataset. Available methods include *Slingshot* [(Dudoit Lab)](https://bmcgenomics.biomedcentral.com/articles/10.1186/s12864-018-4772-0), *PAGA* [(partition-based graph abstraction, Theis Lab)](https://genomebiology.biomedcentral.com/articles/10.1186/s13059-019-1663-x), and *SCORPIUS*, [(Saeys Lab)](https://www.biorxiv.org/content/10.1101/079509v2). 
 
 *to save plot, right-click and 'save image as'", please cite Ma et al., (2021) and Wirka et al., (2019) in your publications*
 

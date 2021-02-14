@@ -7,6 +7,7 @@ library(shinybusy) #install.packages("shinybusy")
 library(tidyverse)
 library(enrichR) # install.packages("enrichR")
 library(imager)
+
 #### extrasensory codes ####
 
 
@@ -65,8 +66,8 @@ ui <- fluidPage(
   
   
   # defining each 'tab' here
-  navbarPage("PlaqView", # title 
-             
+  navbarPage("PlaqView",
+  
              # PANEL 1: QUERY GENE   ----
              tabPanel("Quick Gene Lookup", 
                       mainPanel(width = 12, # 12/12 is full panel
@@ -231,10 +232,14 @@ ui <- fluidPage(
                                            selectInput("lefttrajectorymethod",
                                                        label = NULL,
                                                        choices = list(
-                                                         "Monocle3  (Trapnell Lab)" = "monocle3"
+                                                         "Monocle3  (Trapnell Lab)" = "monocle3",
+                                                         "PAGA (Theis Lab)" = "paga",
+                                                         "Slingshot (Dudoit Lab)" = "slingshot",
+                                                         "SCORPIUS (Saeys Lab)" = "scorpius"
                                                        ),
                                                        selected = "Monocle3  (Trapnell Lab)"),
-                                           imageOutput("lefttrajectorygraph")
+                                           plotOutput("lefttrajectorygraph",
+                                                      height = '500px')
                                            
                                            ), # column
 
@@ -245,7 +250,7 @@ ui <- fluidPage(
                                                               choices = list(
                                                                 "PAGA (Theis Lab)" = "paga",
                                                                 "Slingshot (Dudoit Lab)" = "slingshot",
-                                                                "SCORPIUS (Ginhoux Lab)" = "scorpius"
+                                                                "SCORPIUS (Saeys Lab)" = "scorpius"
                                                               ),
                                                               selected ="PAGA (Theis Lab)"),
                                                   plotOutput("righttrajectorygraph",
@@ -369,6 +374,33 @@ server <- function(input, output) {
       
     })
     
+    # cell population 
+    output$cellpopulation <- renderPlot({
+      # this chunk is to calculate population statistics 
+      cellcounts <- stanford@meta.data[[input$selectlabelmethodforgenequery]] # extract cell names
+      cellcounts <- as.factor(cellcounts) # convert to factors
+      
+      cellcounts.summary <- as.data.frame(summary(cellcounts)) # for levels laters
+      
+      cellcounts <- as.data.frame((cellcounts)) # summarize factors into table
+      cellcounts <- dplyr::rename(cellcounts, Celltype = '(cellcounts)' ) # just to rename the columns
+      
+      # this is to create levels so i can flip the graph to the way i want
+      cellcounts.summary <- rownames_to_column(cellcounts.summary)
+      cellcounts.summary <- reorder(cellcounts.summary$rowname, cellcounts.summary$`summary(cellcounts)`)
+      sortedlevel <- levels(cellcounts.summary)
+      
+      cellpop <- ggplot(data = cellcounts, aes(y = Celltype)) +
+        geom_bar(fill = manual_color_list) +
+        xlab("Counts") +
+        ylab("Cell Types") +
+        xlim(c(-150,1800)) +
+        theme_light() +
+        scale_y_discrete(limits=sortedlevel) +
+        stat_count(geom = "text", # this stat_count function gives percentages
+                   aes(label = paste(round((..count..)/sum(..count..)*100,2),"%; n =", round((..count..)))))
+      cellpop
+    })
     
     # Gene ontology table #
     {
@@ -480,9 +512,10 @@ server <- function(input, output) {
   
   output$righttrajectorygraph <- renderPlot(
     readRDS(file =  normalizePath(file.path('data/trajectories', # this will dynamically read the file containing the right name
-                                            paste(input$righttrajectorymethod, '.rds', sep='')))) + # this ggplot type needs a little editing
-      guides(color = guide_legend(nrow = 6)) 
+                                            paste(input$righttrajectorymethod, '.rds', sep='')))) 
   ) # renderplot 
+  
+  
   #### PANEL #4 FUNCTIONS #### 
   
   output$downloadsessioninfo <- downloadHandler(
