@@ -4,7 +4,7 @@ author: "WeiMa"
 date: "1/2/2021"
 output: html_document
 ---
-### **PlaqView**: an interactive portal to explore single cell RNA-seq of human coronary artery.
+### **PlaqView**: an interactive application to explore scRNA-seq of human coronary artery.
 
 **Please be patient, it might take a while to query.** 
 

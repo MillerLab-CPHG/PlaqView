@@ -7,7 +7,8 @@ library(shinybusy) #install.packages("shinybusy")
 library(tidyverse)
 library(enrichR) # install.packages("enrichR")
 library(imager)
-
+library(waiter)
+        
 #### extrasensory codes ####
 
 
@@ -61,8 +62,9 @@ ui <- fluidPage(
   
   # set theme
   theme = shinytheme("flatly"),
-  add_busy_bar(color = "#ff9142"), # THIS IS THE BUSY BAR
-  
+  add_busy_bar(color = "#ff9142", height = "10px"), # THIS IS THE BUSY BAR
+  use_waiter(), 
+  waiter_show_on_load(html = spin_5()),
   
   
   # defining each 'tab' here
@@ -80,8 +82,8 @@ ui <- fluidPage(
                                         "genes",
                                         width = '100%',
                                         h3("Query Gene Expression", h5("please follow HUGO conventions")),
-                                        value = "NOX4, CYBB",
-                                        placeholder = "try: NOX4, CYBB"
+                                        value = "TREM2, CYBB",
+                                        placeholder = "try: TREM2, CYBB"
                                       ),
                                       
                                       # choose the type of output graph 
@@ -269,8 +271,9 @@ ui <- fluidPage(
 
              ), # tabPanel
 
-
-             # PANEL 4: EXPLORE YOUR OWN DATA ----  
+             # PANEL 4: Druggable Genome ----  
+             
+             # PANEL 5: EXPLORE YOUR OWN DATA ----  
              tabPanel("Explore Your Own Dataset",
                       mainPanel(width = 12, # 12/12 is full panel,
                                 fileInput(inputId = "upload",
@@ -524,6 +527,8 @@ server <- function(input, output) {
       write_lines(sessionInfo(), file)
     }  )# close downloadhandler
   
+  #### waiter hide ####
+  waiter_hide()
   
   
 } # ends server function

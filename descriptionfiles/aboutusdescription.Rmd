@@ -8,7 +8,7 @@ output: html_document
 ## About *PlaqView*
 *PlaqView* is a standalone, interactive, and reproducible Shiny- and R-based tool to explore single-cell RNA-sequencing data of human coronary artery samples. Our goal is to make these valuable data analytic tools publicly available to non-bioinformaticians. This is an open-sourced tool that is freely available and can be modified for other scRNA-seq data. 
 
-*Plaqview* is currently in beta as of Feb 1 (v.0.1), 2021. Last Updated: Feb 13, 2021.
+*Plaqview* is currently in beta as of Feb 1 (v.0.1), 2021. Last Updated: Feb 15, 2021.
 
 ### About the Datasets
 The primary data used in this interactive session were first published by Wirka *et al.* [(Nature Medicine, 2019)](https://pubmed.ncbi.nlm.nih.gov/31359001/) and made available here by Ma *et al.* (2021). In this dataset, diseased segments of the right coronary artery were subjected to scRNA-seq from four patients who underwent heart transplantation. 

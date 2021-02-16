@@ -1,0 +1,12 @@
+name: PlaqView_developmentalbranch
+title: PlaqView_developmentalbranch
+username:
+account: millerlab
+server: shinyapps.io
+hostUrl: https://api.shinyapps.io/v1
+appId: 3639288
+bundleId: 4226027
+url: https://millerlab.shinyapps.io/PlaqView_developmentalbranch/
+when: 1613407750.82048
+asMultiple: FALSE
+asStatic: FALSE
