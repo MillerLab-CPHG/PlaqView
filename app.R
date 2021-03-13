@@ -8,7 +8,7 @@ library(tidyverse)
 library(enrichR) # install.packages("enrichR")
 library(imager)
 library(waiter)
-        
+
 #### extrasensory codes ####
 
 
@@ -69,7 +69,7 @@ ui <- fluidPage(
   
   # defining each 'tab' here
   navbarPage("PlaqView",
-  
+             
              # PANEL 1: QUERY GENE   ----
              tabPanel("Quick Gene Lookup", 
                       mainPanel(width = 12, # 12/12 is full panel
@@ -130,39 +130,40 @@ ui <- fluidPage(
                                 
                                 ## lower panel for graphic outputs
                                 wellPanel(width = 12,
-                                  fluidRow( # top splite rows
-                                    column(width = 6, align="center", plotOutput("umaps", 
-                                                                                 width = "auto",
-                                                                                 height = '500px')),
-                                    column(width = 6, align="center", 
-                                           conditionalPanel('input.selectaplot=="Ridge"', plotOutput("Ridge",
-                                                                                                     width = "auto",
-                                                                                                     height = '500px')),
-                                           conditionalPanel('input.selectaplot=="Dot"', plotOutput("Dot",
-                                                                                                   width = "auto",
-                                                                                                   height = '500px')), # conditonal panels renders only if conditions are met
-                                           conditionalPanel('input.selectaplot=="Feature"', plotOutput("Feature",
-                                                                                                       width = "auto",
-                                                                                                       height = '500px'))
-                                           
-                                    ) # column 
-                                    
-                                  ), # fluidrow
-                                  br(),
-                                  fluidRow( # bottom whole for GO output
-                                    column(width = 12, 
-                                           selectInput("selectedenrichRdb", label = h5("Top Significantly Enriched Pathways"), 
-                                                       choices = enrichRdb, 
-                                                       selected = "GO_Biological_Process_2018")
-                                    ),
-                                    column(width = 12, 
-                                           tableOutput("enrichtable"),
-                                           helpText("You must restart query if you change database"),
-                                           downloadButton("downloadenrichRdata", "Download Complete Pathway Enrichment Data")
-                                           
-                                    ),
-                                  )# another fluidrow 
-                                  
+                                          fluidRow( # top splite rows
+                                            column(width = 6, align="center", plotOutput("umaps", 
+                                                                                         width = "auto",
+                                                                                         height = '500px')),
+                                            column(width = 6, align="center", 
+                                                   conditionalPanel('input.selectaplot=="Ridge"', plotOutput("Ridge",
+                                                                                                             width = "auto",
+                                                                                                             height = '500px')),
+                                                   conditionalPanel('input.selectaplot=="Dot"', 
+                                                                    plotOutput("Dot", width = "auto", height = '500px'),
+                                                                    downloadButton("downloaddotplot", "Download Dot Plot", width = '100%')
+                                                   ), # conditonal panels renders only if conditions are met
+                                                   conditionalPanel('input.selectaplot=="Feature"', plotOutput("Feature",
+                                                                                                               width = "auto",
+                                                                                                               height = '500px'))
+                                                   
+                                            ) # column 
+                                            
+                                          ), # fluidrow
+                                          br(),
+                                          fluidRow( # bottom whole for GO output
+                                            column(width = 12, 
+                                                   selectInput("selectedenrichRdb", label = h5("Top Significantly Enriched Pathways"), 
+                                                               choices = enrichRdb, 
+                                                               selected = "GO_Biological_Process_2018")
+                                            ),
+                                            column(width = 12, 
+                                                   tableOutput("enrichtable"),
+                                                   helpText("You must restart query if you change database"),
+                                                   downloadButton("downloadenrichRdata", "Download Complete Pathway Enrichment Data")
+                                                   
+                                            ),
+                                          )# another fluidrow 
+                                          
                                 )# wellpanel
                                 
                                 
@@ -209,7 +210,7 @@ ui <- fluidPage(
                                            downloadButton("diffbyseurat", "Numbered Only (Unlabeled)"),
                                            downloadButton("diffbywirka", "Wirka et al."),
                                            
-                                        
+                                           
                                            helpText("This will download a .csv of differentially expressed genes by cluster")
                                     ), # column
                                     
@@ -243,34 +244,34 @@ ui <- fluidPage(
                                            plotOutput("lefttrajectorygraph",
                                                       height = '500px')
                                            
-                                           ), # column
-
+                                    ), # column
                                     
-                                           column(width = 6,
-                                                  selectInput("righttrajectorymethod",
-                                                              label = NULL,
-                                                              choices = list(
-                                                                "PAGA (Theis Lab)" = "paga",
-                                                                "Slingshot (Dudoit Lab)" = "slingshot",
-                                                                "SCORPIUS (Saeys Lab)" = "scorpius"
-                                                              ),
-                                                              selected ="PAGA (Theis Lab)"),
-                                                  plotOutput("righttrajectorygraph",
-                                                             height = '500px')        
-                                           ) # column
-                                   
-
-          
-
-                        
+                                    
+                                    column(width = 6,
+                                           selectInput("righttrajectorymethod",
+                                                       label = NULL,
+                                                       choices = list(
+                                                         "PAGA (Theis Lab)" = "paga",
+                                                         "Slingshot (Dudoit Lab)" = "slingshot",
+                                                         "SCORPIUS (Saeys Lab)" = "scorpius"
+                                                       ),
+                                                       selected ="PAGA (Theis Lab)"),
+                                           plotOutput("righttrajectorygraph",
+                                                      height = '500px')        
+                                    ) # column
+                                    
+                                    
+                                    
+                                    
+                                    
                                   ) # fluidrow
                                 ) # close wellpanel
                       ), # mainPanel
-
-
-
+                      
+                      
+                      
              ), # tabPanel
-
+             
              # PANEL 4: Druggable Genome ----  
              
              # PANEL 5: EXPLORE YOUR OWN DATA ----  
@@ -312,6 +313,7 @@ ui <- fluidPage(
 # Define server logic required to draw a histogram
 server <- function(input, output) {
   #### PANEL #1 FUNCTIONS ####
+  #### umap ####
   # UMAP plot, interactive #
   observeEvent(input$runcode,{ 
     output$umaps <- 
@@ -334,9 +336,10 @@ server <- function(input, output) {
       ) # closes renderPlot
   })# closes observe event
   
-  # Gene expression plots #
-  # dot
+  #### dot plot ####
   observeEvent(input$runcode,{ # observe event puts a pause until pushed
+   
+     # this is for the display
     output$Dot <- renderPlot({
       # parse string input 
       user_genes <- str_split(input$genes, ", ")[[1]]
@@ -346,10 +349,32 @@ server <- function(input, output) {
               features = user_genes) + # a trick to sep long string input
         ggtitle("Expression Dot Plot") +
         theme(plot.title = element_text(hjust = 1)) +
-        theme(plot.title = element_text(hjust = 0.5)) 
-      
-      
+        theme(plot.title = element_text(hjust = 0.5))
     })
+    
+    # this is for the download
+    output$downloaddotplot<- downloadHandler(
+      filename = function() {
+        paste("dotplot.pdf", sep = "")
+      },
+      content = function(file) {
+        pdf(file, paper = "default")
+        user_genes <- str_split(input$genes, ", ")[[1]]
+        validate(need(input$selectaplot=="Dot", message=FALSE))
+        temp <- DotPlot(stanford, 
+                        group.by = input$selectlabelmethodforgenequery,
+                        features = user_genes) + # a trick to sep long string input
+          ggtitle("Expression Dot Plot") +
+          theme(plot.title = element_text(hjust = 1)) +
+          theme(plot.title = element_text(hjust = 0.5)) 
+        
+        plot(temp) #this is all you need
+        
+        dev.off()
+      }
+      
+    )# close downloadhandler
+    
     # feature
     parsed.genes <- str_split(input$genes, ", ")[[1]]
     output$Feature <- renderPlot({
@@ -370,7 +395,7 @@ server <- function(input, output) {
                 cols = manual_color_list,
                 group.by = input$selectlabelmethodforgenequery,
                 features =  user_genes[1:1]
-                ) + # a trick to sep long string input
+      ) + # a trick to sep long string input
         #theme(legend.position="bottom", legend.box = "vertical") + # group.by is important, use this to call metadata separation
         theme(plot.title = element_text(hjust =  0.5)) +
         guides(color = guide_legend(nrow = 3))
