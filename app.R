@@ -9,8 +9,6 @@ library(enrichR) # install.packages("enrichR")
 library(imager)
 library(waiter)
 
-#### extrasensory codes ####
-
 
 #### LOADING DATA ####
 # below line is commented for shinyapp.io deployment temp
@@ -130,21 +128,32 @@ ui <- fluidPage(
                                 
                                 ## lower panel for graphic outputs
                                 wellPanel(width = 12,
-                                          fluidRow( # top splite rows
-                                            column(width = 6, align="center", plotOutput("umaps", 
-                                                                                         width = "auto",
-                                                                                         height = '500px')),
+                                          fluidRow( # top split rows
                                             column(width = 6, align="center", 
-                                                   conditionalPanel('input.selectaplot=="Ridge"', plotOutput("Ridge",
-                                                                                                             width = "auto",
-                                                                                                             height = '500px')),
+                                                   plotOutput("umaps", width = "auto", height = '500px'),
+                                                   br(),
+                                                   downloadButton("downloadumapplot", "Download UMAP", width = '100%')
+                                            ),
+                                            
+                                            column(width = 6, align="center", 
+                                                   conditionalPanel('input.selectaplot=="Ridge"', 
+                                                                    plotOutput("Ridge", width = "auto", height = '500px'),
+                                                                    br(),
+                                                                    downloadButton("downloadridgeplot", "Download Ridge Plot", width = '100%')
+                                                   ),
+                                                   
                                                    conditionalPanel('input.selectaplot=="Dot"', 
                                                                     plotOutput("Dot", width = "auto", height = '500px'),
+                                                                    br(),
                                                                     downloadButton("downloaddotplot", "Download Dot Plot", width = '100%')
-                                                   ), # conditonal panels renders only if conditions are met
-                                                   conditionalPanel('input.selectaplot=="Feature"', plotOutput("Feature",
-                                                                                                               width = "auto",
-                                                                                                               height = '500px'))
+                                                   ), # conditional panels renders only if conditions are met
+                                                   
+                                                   conditionalPanel('input.selectaplot=="Feature"', 
+                                                                    plotOutput("Feature", width = "auto", height = '500px'),
+                                                                    br(),
+                                                                    downloadButton("downloadfeatureplot", "Download Feature Plot", width = '100%')
+                                                                    
+                                                                    )
                                                    
                                             ) # column 
                                             
@@ -287,7 +296,7 @@ ui <- fluidPage(
                       
              ), # close tabPanel
              
-             # PANEL 5: ABOUT PANEL ----
+             # PANEL 6: ABOUT PANEL ----
              tabPanel("About & Help",
                       mainPanel(
                         # descriptions
@@ -304,6 +313,7 @@ ui <- fluidPage(
   )# close navbarpage
   
 )# close fluidpage
+
 
 
 
@@ -336,6 +346,38 @@ server <- function(input, output) {
       ) # closes renderPlot
   })# closes observe event
   
+  # this is for the download
+  output$downloadumapplot<- downloadHandler(
+    filename = function() {
+      paste("UMAP.pdf", sep = "")
+    },
+    content = function(file) {
+      pdf(file, paper = "default") # paper = defult is a4 size
+      user_genes <- str_split(input$genes, ", ")[[1]]
+      validate(need(input$selectaplot=="Dot", message=FALSE))
+      temp <- DimPlot(
+        stanford,
+        reduction = "umap",
+        label = TRUE,
+        label.size = 5,
+        repel = T,
+        # repel labels
+        pt.size = 1,
+        cols = manual_color_list,
+        group.by = input$selectlabelmethodforgenequery) + # group.by is important, use this to call metadata separation
+        theme(legend.position="bottom", 
+              legend.box = "vertical") +
+        ggtitle("UMAP by Cell Type") +
+        theme(plot.title = element_text(hjust =  0.5)) +
+        guides(color = guide_legend(nrow = 5))
+      
+      plot(temp) #this is all you need
+      
+      dev.off()
+    }
+    
+  )# close downloadhandler
+  
   #### dot plot ####
   observeEvent(input$runcode,{ # observe event puts a pause until pushed
    
@@ -358,7 +400,7 @@ server <- function(input, output) {
         paste("dotplot.pdf", sep = "")
       },
       content = function(file) {
-        pdf(file, paper = "default")
+        pdf(file, paper = "default") # paper = defult is a4 size
         user_genes <- str_split(input$genes, ", ")[[1]]
         validate(need(input$selectaplot=="Dot", message=FALSE))
         temp <- DotPlot(stanford, 
@@ -375,7 +417,7 @@ server <- function(input, output) {
       
     )# close downloadhandler
     
-    # feature
+    #### feature plot ####
     parsed.genes <- str_split(input$genes, ", ")[[1]]
     output$Feature <- renderPlot({
       user_genes <- str_split(input$genes, ", ")[[1]]
@@ -385,9 +427,31 @@ server <- function(input, output) {
         theme(legend.position="bottom", legend.box = "vertical") + # group.by is important, use this to call metadata separation
         theme(plot.title = element_text(hjust = 1)) +
         theme(plot.title = element_text(hjust =  0.5)) 
-      
     }) 
-    #ridge
+    
+    # this is for the download
+    output$downloadfeatureplot<- downloadHandler(
+      filename = function() {
+        paste("featureplot.pdf", sep = "")
+      },
+      content = function(file) {
+        pdf(file, paper = "default") # paper = defult is a4 size
+        user_genes <- str_split(input$genes, ", ")[[1]]
+        validate(need(input$selectaplot=="Feature", message=FALSE))
+        temp <- FeaturePlot(stanford, 
+                    features = user_genes[1:4]) + # a trick to sep long string input
+          theme(legend.position="bottom", legend.box = "vertical") + # group.by is important, use this to call metadata separation
+          theme(plot.title = element_text(hjust = 1)) +
+          theme(plot.title = element_text(hjust =  0.5)) 
+        
+        plot(temp) #this is all you need
+        
+        dev.off()
+      }
+      
+    )# close downloadhandler
+    
+    #### ridge plot ####
     output$Ridge <- renderPlot({
       user_genes <- str_split(input$genes, ", ")[[1]]
       validate(need(input$selectaplot=="Ridge", message=FALSE))
@@ -402,7 +466,32 @@ server <- function(input, output) {
       
     })
     
-    # cell population 
+    
+    output$downloadridgeplot<- downloadHandler(
+      filename = function() {
+        paste("ridgeplot.pdf", sep = "")
+      },
+      content = function(file) {
+        pdf(file, paper = "default") # paper = defult is a4 size
+        user_genes <- str_split(input$genes, ", ")[[1]]
+        validate(need(input$selectaplot=="Ridge", message=FALSE))
+        temp <- RidgePlot(stanford,
+                  cols = manual_color_list,
+                  group.by = input$selectlabelmethodforgenequery,
+                  features =  user_genes[1:1]
+        ) + # a trick to sep long string input
+          #theme(legend.position="bottom", legend.box = "vertical") + # group.by is important, use this to call metadata separation
+          theme(plot.title = element_text(hjust =  0.5)) +
+          guides(color = guide_legend(nrow = 3))
+        
+        plot(temp) #this is all you need
+        
+        dev.off()
+      }
+      
+    )# close downloadhandler
+
+    #### cell population ####
     output$cellpopulation <- renderPlot({
       # this chunk is to calculate population statistics 
       cellcounts <- stanford@meta.data[[input$selectlabelmethodforgenequery]] # extract cell names
