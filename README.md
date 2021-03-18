@@ -1,5 +1,5 @@
 ## About *PlaqView*
-*PlaqView* is a standalone, interactive, and reproducible Shiny and R-based tool to explore single-cell RNA-sequencing data of human coronary artery samples. Our goal is to make these valuable data analytic tools publicly available to non-bioinformaticians. This is an open-sourced tool that is freely available and can be modified for other scRNA-seq data. 
+*PlaqView* is a standalone, interactive, and reproducible Shiny and R-based tool to explore single-cell RNA-sequencing data of human coronary artery samples. Our goal is to make these valuable data analytic tools publicly available to non-bioinformaticians. This is an open-sourced tool that is freely available and can be modified for other scRNA-seq data. Our latest preprint is available [HERE](https://www.biorxiv.org/content/10.1101/2020.10.27.357715v2)
 
 PlaqView is LIVE! [Check it out here](https://millerlab.shinyapps.io/PlaqView)
 
