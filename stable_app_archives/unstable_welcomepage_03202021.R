@@ -9,11 +9,12 @@ library(enrichR) # install.packages("enrichR")
 library(imager)
 library(waiter)
 library(DT)
-library(readxl)
 
 
-#### PreReq Codes ####
+#### LOADING DATA ####
 # below line is commented for shinyapp.io deployment temp
+stanford <- readRDS(file = "data/final_stanford_extendedlabels_02082021.rds")
+# stanford <- readRDS(file = url("https://virginia.box.com/shared/static/oyo1bicpvlxen940zmciqapvg0y3n6gb.rds"))
 
 # enrichR functions
 # handcurate db names 
@@ -27,8 +28,10 @@ dbs <- c("KEGG_2019_Human",
          "Gene_Perturbations_from_GEO_up")
 enrichRdb <- sort(dbs)
 
+#### SHINY OPTIONS, COLORs ####
 # make the graphs match color of the UI
 shinyOptions(plot.autocolors = TRUE)
+
 
 # color definitions
 manual_color_list <-
@@ -72,22 +75,17 @@ ui <- fluidPage(
                                 fluidRow(
                                   column(width = 12,
                                          wellPanel(
-                                           includeMarkdown("descriptionfiles/Welcome.Rmd"),
-                                           img(src = "abstract.png", width = '100%'),
+                                           includeMarkdown("descriptionfiles/Welcome.Rmd")
                                          )),
-                              
+                                  column(width = 12,
+                                         wellPanel(
+                                           img(src = "abstract.png", width = '100%'),
+                                           
+                                         ))
                                 )),
                       mainPanel(width = 12,
                                 DT::dataTableOutput('availabledatasettable'),
                                 
-                                br(),
-                                actionButton(
-                                  inputId = "loaddatabutton",
-                                  label = "Load Dataset",
-                                  width = '100%'),
-                                verbatimTextOutput('selecteddatasetID'),
-                                  
-                                br(),
                                 
                                 actionButton(
                                   inputId = "jumpto1",
@@ -353,33 +351,17 @@ ui <- fluidPage(
 # Define server logic required to draw a histogram
 server <- function(input, output) {
   #### WELCOME PANEL ####
-  df <- read_excel("Available_datasets.xlsx")
-  df <- column_to_rownames(df, var = "DataID")
-  
-  output$availabledatasettable <-
-    DT::renderDataTable(df, server = F, # server is for speed/loading
-                        selection = list(mode = 'single', selected = c(1)))
-  
-    observeEvent(input$loaddatabutton, {
-      path <- file.path(paste("data/", rownames(df)[input$availabledatasettable_rows_selected], 
-                                     ".rds", sep=""))
-      stanford <- readRDS(file = path)
-      
-      output$selecteddatasetID <- renderText({
-        paste0("You have sucessfully loaded the ", rownames(df)[input$availabledatasettable_rows_selected], 
-               " dataset! Please click below to enter PlaqView.",
-               collapse = ", ")
-      }) 
-      
+  observeEvent(input$jumpto1, {
+    updateTabsetPanel(session = getDefaultReactiveDomain(), "inTabset",
+                      selected = "panel1")
+    
   })
   
-    observeEvent(input$jumpto1, {
-      updateTabsetPanel(session = getDefaultReactiveDomain(), "inTabset",
-                        selected = "panel1") # this is to switch to tab1
-      
-    })
-    
+  df <- read_excel("Available_datasets.xlsx")
+  output$availabledatasettable <-
+    DT::renderDataTable(df, server = FALSE, selection = 'single')
   
+    
   #### PANEL #1 FUNCTIONS ####
   #### umap ####
   # UMAP plot, interactive #

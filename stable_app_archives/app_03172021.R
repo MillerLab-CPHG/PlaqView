@@ -8,12 +8,12 @@ library(tidyverse)
 library(enrichR) # install.packages("enrichR")
 library(imager)
 library(waiter)
-library(DT)
-library(readxl)
 
 
-#### PreReq Codes ####
+#### LOADING DATA ####
 # below line is commented for shinyapp.io deployment temp
+stanford <- readRDS(file = "data/final_stanford_extendedlabels_02082021.rds")
+# stanford <- readRDS(file = url("https://virginia.box.com/shared/static/oyo1bicpvlxen940zmciqapvg0y3n6gb.rds"))
 
 # enrichR functions
 # handcurate db names 
@@ -27,8 +27,10 @@ dbs <- c("KEGG_2019_Human",
          "Gene_Perturbations_from_GEO_up")
 enrichRdb <- sort(dbs)
 
+#### SHINY OPTIONS, COLORs ####
 # make the graphs match color of the UI
 shinyOptions(plot.autocolors = TRUE)
+
 
 # color definitions
 manual_color_list <-
@@ -64,42 +66,10 @@ ui <- fluidPage(
   
   
   # defining each 'tab' here
-  navbarPage("PlaqView", id = "inTabset",
-             
-             #### WELCOME Panel ####
-             tabPanel("Welcome", 
-                      mainPanel(width = 12,
-                                fluidRow(
-                                  column(width = 12,
-                                         wellPanel(
-                                           includeMarkdown("descriptionfiles/Welcome.Rmd"),
-                                           img(src = "abstract.png", width = '100%'),
-                                         )),
-                              
-                                )),
-                      mainPanel(width = 12,
-                                DT::dataTableOutput('availabledatasettable'),
-                                
-                                br(),
-                                actionButton(
-                                  inputId = "loaddatabutton",
-                                  label = "Load Dataset",
-                                  width = '100%'),
-                                verbatimTextOutput('selecteddatasetID'),
-                                  
-                                br(),
-                                
-                                actionButton(
-                                  inputId = "jumpto1",
-                                  label = "Enter PlaqView",
-                                  width = '100%'
-                                )
-                                
-                                )
-                      ),
+  navbarPage("PlaqView",
              
              # PANEL 1: QUERY GENE   ----
-             tabPanel(title = "Quick Gene Lookup", value = "panel1",
+             tabPanel("Quick Gene Lookup", 
                       mainPanel(width = 12, # 12/12 is full panel
                                 fluidRow(## panel for gene input
                                   column(
@@ -196,7 +166,7 @@ ui <- fluidPage(
                                                                selected = "GO_Biological_Process_2018")
                                             ),
                                             column(width = 12, 
-                                                   DT::dataTableOutput("enrichtable"),
+                                                   tableOutput("enrichtable"),
                                                    helpText("You must restart query if you change database"),
                                                    downloadButton("downloadenrichRdata", "Download Complete Pathway Enrichment Data")
                                                    
@@ -352,34 +322,6 @@ ui <- fluidPage(
 #### SERVER ####
 # Define server logic required to draw a histogram
 server <- function(input, output) {
-  #### WELCOME PANEL ####
-  df <- read_excel("Available_datasets.xlsx")
-  df <- column_to_rownames(df, var = "DataID")
-  
-  output$availabledatasettable <-
-    DT::renderDataTable(df, server = F, # server is for speed/loading
-                        selection = list(mode = 'single', selected = c(1)))
-  
-    observeEvent(input$loaddatabutton, {
-      path <- file.path(paste("data/", rownames(df)[input$availabledatasettable_rows_selected], 
-                                     ".rds", sep=""))
-      stanford <- readRDS(file = path)
-      
-      output$selecteddatasetID <- renderText({
-        paste0("You have sucessfully loaded the ", rownames(df)[input$availabledatasettable_rows_selected], 
-               " dataset! Please click below to enter PlaqView.",
-               collapse = ", ")
-      }) 
-      
-  })
-  
-    observeEvent(input$jumpto1, {
-      updateTabsetPanel(session = getDefaultReactiveDomain(), "inTabset",
-                        selected = "panel1") # this is to switch to tab1
-      
-    })
-    
-  
   #### PANEL #1 FUNCTIONS ####
   #### umap ####
   # UMAP plot, interactive #
@@ -583,8 +525,14 @@ server <- function(input, output) {
       enriched <- enrichr(genes = parsed.genes, 
                           database = enrichRdb) # this queries all of them
       cleanedenrichedtable <- select(enriched[[input$selectedenrichRdb]], -Old.Adjusted.P.value, -Old.P.value,)
-      cleanedenrichedtable <- top_n(cleanedenrichedtable, 100) # top 100 will be rendered
-      output$enrichtable <- DT::renderDataTable(cleanedenrichedtable)
+      cleanedenrichedtable <- top_n(cleanedenrichedtable, 25) # top 25 will be rendered
+      output$enrichtable <- renderTable(cleanedenrichedtable, 
+                                        striped = T,
+                                        spacing = "xs",
+                                        align = 'l',
+                                        width = "98%",
+                                        colnames = T,
+                                        digits = 3)
       
       # Downloadable csv of selected dataset
       output$downloadenrichRdata <- downloadHandler(
