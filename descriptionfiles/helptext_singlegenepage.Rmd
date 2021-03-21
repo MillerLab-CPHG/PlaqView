@@ -13,6 +13,6 @@ Use this module to explore gene expression of any gene in different human corona
 
 For a **single** gene, feature and ridge plots work well. For **multiple** genes, use dot plots.
 
-*to save plot, right-click and 'save image as'", please cite Ma et al., (2021) and the dataset you used in your publications*
+*Please cite Ma et al., (2021) and the dataset you used in your publications*
 
 Acronyms: chondrocytes (CH) common myeloid progenitor (CMP), dendritic cells (DC), endothelial cells (EC), fibroblasts (FB), granulocyte/monocyte progenitors (GMP), Macrophages (Mø), Monocytes (Mono), Natural Killer (NK), stem cells (SC), smooth muscle cells (SMC).

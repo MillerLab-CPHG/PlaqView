@@ -5,8 +5,8 @@ account: millerlab
 server: shinyapps.io
 hostUrl: https://api.shinyapps.io/v1
 appId: 3639288
-bundleId: 4376767
+bundleId: 4377171
 url: https://millerlab.shinyapps.io/PlaqView_developmentalbranch/
-when: 1616350872.87744
+when: 1616359538.24414
 asMultiple: FALSE
 asStatic: FALSE

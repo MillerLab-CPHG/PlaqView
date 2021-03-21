@@ -10,7 +10,8 @@ library(imager)
 library(waiter)
 library(DT)
 library(readxl)
-
+library(shinyWidgets)
+library(shinyjs)
 
 #### PreReq Codes ####
 # below line is commented for shinyapp.io deployment temp
@@ -58,10 +59,10 @@ ui <- fluidPage(
   
   # set theme
   theme = shinytheme("flatly"),
-  add_busy_bar(color = "#ff9142", height = "10px"), # THIS IS THE BUSY BAR
+  add_busy_bar(color = "#ff9142", height = "100px"), # THIS IS THE BUSY BAR
   use_waiter(), 
-  waiter_show_on_load(html = spin_5()),
-  
+  waiter_show_on_load(html = spin_rotate()),
+  useShinyjs(),
   
   # defining each 'tab' here
   navbarPage("PlaqView", id = "inTabset",
@@ -79,22 +80,28 @@ ui <- fluidPage(
                                 )),
                       mainPanel(width = 12,
                                 DT::dataTableOutput('availabledatasettable'),
-                                
                                 br(),
-                                actionButton(
-                                  inputId = "loaddatabutton",
-                                  label = "Load Dataset",
-                                  width = '100%'),
-                                verbatimTextOutput('selecteddatasetID'),
-                                  
+                                fluidRow(
+                                  column(width = 6,
+                                         actionBttn(
+                                           inputId = "loaddatabutton",
+                                           label = "Step 1: Click Here to Load Dataset",
+                                           style = "unite",
+                                           color = "danger",
+                                           block = T)
+                                         ),
+                                    column(width = 6,
+                                           hidden(
+                                             actionBttn(
+                                             inputId = "jumpto1",
+                                             label = "Step 2: Start PlaqView",
+                                             color = "primary",
+                                             block = T)
+                                           )
+                                  )
+                                ),
                                 br(),
-                                
-                                actionButton(
-                                  inputId = "jumpto1",
-                                  label = "Enter PlaqView",
-                                  width = '100%'
-                                )
-                                
+                                br(),
                                 )
                       ),
              
@@ -313,19 +320,6 @@ ui <- fluidPage(
              
              # PANEL 4: Druggable Genome ----  
              
-             # PANEL 5: EXPLORE YOUR OWN DATA ----  
-             tabPanel("Explore Your Own Dataset",
-                      mainPanel(width = 12, # 12/12 is full panel,
-                                fileInput(inputId = "upload",
-                                          label = "Upload .rds or count matrix",
-                                          width = "100%",
-                                          accept = c(".txt", ".rds")),
-                                helpText("This feature is under development! Check back soon for updates.")
-                      ), # close mainpanel
-                      
-                      
-             ), # close tabPanel
-             
              # PANEL 6: ABOUT PANEL ----
              tabPanel("About & Help",
                       mainPanel(
@@ -353,6 +347,8 @@ ui <- fluidPage(
 # Define server logic required to draw a histogram
 server <- function(input, output) {
   #### WELCOME PANEL ####
+  
+  
   df <- read_excel("Available_datasets.xlsx")
   df <- column_to_rownames(df, var = "DataID")
   
@@ -366,10 +362,11 @@ server <- function(input, output) {
       stanford <- readRDS(file = path)
       
       output$selecteddatasetID <- renderText({
-        paste0("You have sucessfully loaded the ", rownames(df)[input$availabledatasettable_rows_selected], 
-               " dataset! Please click below to enter PlaqView.",
+        paste0("Sucessfully loaded the ", rownames(df)[input$availabledatasettable_rows_selected], 
+               " dataset!.",
                collapse = ", ")
       }) 
+      show("jumpto1")
       
   })
   

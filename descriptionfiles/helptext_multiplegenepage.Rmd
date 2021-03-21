@@ -11,5 +11,3 @@ output: html_document
 Use this module to explore **multiple** genes' expression pattern. 'Feature Plot' and 'Feature Plot' will generate a UMAP for each gene you enter; 'Dot Plot' will generate one large graph that encompasses all of the queried genes.
 
 If you encounter an error, make sure there is a space after each comma. e.g. NOX4, MYH11, CDH2.
-
-*to save plot, right-click and 'save image as'", please cite Ma et al., (2021) and Wirka et al., (2019) in your publications*
