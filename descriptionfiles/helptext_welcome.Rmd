@@ -13,4 +13,4 @@ We are working constantly to update *PlaqView* with the most up-to-date analysis
 
 We are actively working on two types of datasets: human and mouse. PlaqView enables users to explore a single dataset or explore integrated (cross-species) datasets. Our our latest preprint [here](https://www.biorxiv.org/content/10.1101/2020.10.27.357715v2).
 
-**To begin using PlaqView, choose a dataset below and click Enter PlaqView. (Please be patient while the data loads).**
+**To begin using PlaqView, choose a dataset below and click "Step1: Load Dataset", (please be patient while the data loads), then click "Step2: Enter PlaqView".**

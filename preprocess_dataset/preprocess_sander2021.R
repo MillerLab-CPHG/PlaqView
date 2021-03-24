@@ -8,109 +8,91 @@ library(tidyverse)
 library(monocle3)
 library(SeuratData)
 library(magrittr)
-library(colourpicker)
-library(rDGIdb)
 library(ggrepel)
 
-
-## seurat doesnt support GEO files, but can do it with a matrix
-# note that normally geoGEO is for the matrix, but for NGS they are 
-# placed in the supplementary files
-# also note to UNZIP the files (it can come as .gz)
-
-gset <- read.delim("GSE131778_DEcompressed_human_coronary_scRNAseq_wirka_et_al_GEO.txt",
-                   row.names=1)
-
-# construct the seurat object
-stanford <- CreateSeuratObject(
-  gset,
-  project = "GSE131778_source",
-  assay = "RNA",
-  min.cells = 0,
-  min.features = 0
-)
-
-# here you can load the file using the directory shown in the output in the previous line
+#### READ .RDS ####
+plaqviewobj <- readRDS(file = "data/Slender_2021.RDS")
+plaqviewobj <- UpdateSeuratObject(plaqviewobj)
 
 #### SEURAT: QC and reduction---- 
 
 # The [[ operator can add columns to object metadata. This is a great place to stash QC stats
-stanford[["percent.mt"]] <- PercentageFeatureSet(stanford, pattern = "^MT-")
+plaqviewobj[["percent.mt"]] <- PercentageFeatureSet(plaqviewobj, pattern = "^MT-")
 
 # Show QC metrics for the first 5 cells
-head(stanford@meta.data, 5)
+head(plaqviewobj@meta.data, 5)
 #Low-quality / dying cells often exhibit extensive mitochondrial contamination
 
 # Visualize QC metrics as a violin plot
-VlnPlot(stanford, features = c("nFeature_RNA", "nCount_RNA", "percent.mt"), ncol = 3)
+VlnPlot(plaqviewobj, features = c("nFeature_RNA", "nCount_RNA", "percent.mt"), ncol = 3)
 
 # FeatureScatter is typically used to visualize feature-feature relationships, but can be used
 # for anything calculated by the object, i.e. columns in object metadata, PC scores etc.
 
-plot1 <- FeatureScatter(stanford, feature1 = "nCount_RNA", feature2 = "percent.mt")
-plot2 <- FeatureScatter(stanford, feature1 = "nCount_RNA", feature2 = "nFeature_RNA")
+plot1 <- FeatureScatter(plaqviewobj, feature1 = "nCount_RNA", feature2 = "percent.mt")
+plot2 <- FeatureScatter(plaqviewobj, feature1 = "nCount_RNA", feature2 = "nFeature_RNA")
 plot1 + plot2
 
-stanford <- subset(stanford, subset = nFeature_RNA > 200 & nFeature_RNA < 2500 & percent.mt < 5)
-stanford <- NormalizeData(stanford, normalization.method = "LogNormalize", scale.factor = 10000)
-stanford <- FindVariableFeatures(stanford, selection.method = "vst", nfeatures = 2000)
+plaqviewobj <- subset(plaqviewobj, subset = nFeature_RNA > 200 & nFeature_RNA < 2500 & percent.mt < 5)
+plaqviewobj <- NormalizeData(plaqviewobj, normalization.method = "LogNormalize", scale.factor = 10000)
+plaqviewobj <- FindVariableFeatures(plaqviewobj, selection.method = "vst", nfeatures = 2000)
 
 # Identify the 10 most highly variable genes
-top20 <- head(VariableFeatures(stanford), 20)
+top20 <- head(VariableFeatures(plaqviewobj), 20)
 
 # plot variable features with and without labels
-plot1 <- VariableFeaturePlot(stanford)
+plot1 <- VariableFeaturePlot(plaqviewobj)
 plot1 
 LabelPoints(plot = plot1, points = top20, repel = TRUE)
 
-all.genes <- rownames(stanford)
+all.genes <- rownames(plaqviewobj)
 # scaling the data enables the subsequent PCAs
-stanford <- ScaleData(stanford, features = all.genes)
+plaqviewobj <- ScaleData(plaqviewobj, features = all.genes)
 
 # PCA; finding the number of PCA axis for DS analysis
 # the following are three separate ways to look at PCA axis
-stanford <- RunPCA(stanford, features = VariableFeatures(object = stanford))
-print(stanford[["pca"]], dims = 1:5, nfeatures = 5)
+plaqviewobj <- RunPCA(plaqviewobj, features = VariableFeatures(object = plaqviewobj))
+print(plaqviewobj[["pca"]], dims = 1:5, nfeatures = 5)
 
 # dim shows the PCA#, you can increase it to show more if needed
 # this is helpful to show which genes are involved in the respsective PCA
-VizDimLoadings(stanford, dims = 1:2, reduction = "pca")
+VizDimLoadings(plaqviewobj, dims = 1:2, reduction = "pca")
 
 
-DimPlot(stanford, reduction = "pca")
+DimPlot(plaqviewobj, reduction = "pca")
 
 # this can be helpful to determine which PCA to include DS
-DimHeatmap(stanford, dims = 1:15, cells = 500, balanced = TRUE)
+DimHeatmap(plaqviewobj, dims = 1:15, cells = 500, balanced = TRUE)
 
 # Jacksaw procedure to determine PCA relevance
 # NOTE: This process can take a long time for big datasets, comment out for expediency. More
 # approximate techniques such as those implemented in ElbowPlot() can be used to reduce
 # computation time
-stanford <- JackStraw(stanford, num.replicate = 100)
-stanford <- ScoreJackStraw(stanford, dims = 1:30)
-JackStrawPlot(stanford, dims = 1:15)
+plaqviewobj <- JackStraw(plaqviewobj, num.replicate = 100)
+plaqviewobj <- ScoreJackStraw(plaqviewobj, dims = 1:30)
+JackStrawPlot(plaqviewobj, dims = 1:15)
 
 # alternatively you can run ELbow plot
-ElbowPlot(stanford) # this shows you can use up to 20
+ElbowPlot(plaqviewobj) # this shows you can use up to 20
 
 # now for the clustering
-stanford <- FindNeighbors(stanford, dims = 1:10)
-stanford <- FindClusters(stanford, resolution = 0.5)
+plaqviewobj <- FindNeighbors(plaqviewobj, dims = 1:10)
+plaqviewobj <- FindClusters(plaqviewobj, resolution = 0.5)
 
 # this looks at the cluster ID for the first 5 cells
 # not very important
-head(Idents(stanford), 5)
+head(Idents(plaqviewobj), 5)
 
 # Run non-linear dimensional reduction (UMAP/tSNE)
 # reticulate::py_install(packages = 'umap-learn')
-stanford <- RunUMAP(stanford, dims = 1:30)
-stanford <- RunTSNE(stanford, dims = 1:30)
+plaqviewobj <- RunUMAP(plaqviewobj, dims = 1:30)
+plaqviewobj <- RunTSNE(plaqviewobj, dims = 1:30)
 
 # note that you can set `label = TRUE` or use the LabelClusters function to help label
 # individual clusters
-DimPlot(stanford, reduction = "umap", label = T)
+DimPlot(plaqviewobj, reduction = "umap", label = T)
 
-saveRDS(stanford, file = "stanford_presingleR.rds")
+saveRDS(plaqviewobj, file = "plaqviewobj_presingleR.rds")
 #### SINGLE-R LABELING (post Seurat automated cell cluster annotation alternative) ----
 # BiocManager::install("SingleR")
 # here we are using Human Primary Cell Atlas design for blood
@@ -122,44 +104,44 @@ hpca.se
 # singleR requires that it be in a 'singlecellexperiment' format
 # they are workout agnostic
 
-for_singleR_input <- GetAssayData(stanford)
-pred.stanford <- SingleR(test = for_singleR_input, 
+for_singleR_input <- GetAssayData(plaqviewobj)
+pred.plaqviewobj <- SingleR(test = for_singleR_input, 
                          ref = hpca.se, 
                          label = hpca.se$label.main) # reference cell types
-pred.stanford
+pred.plaqviewobj
 # summarize distribution
-table(pred.stanford$labels)
+table(pred.plaqviewobj$labels)
 
 # to show annotation confidence map
-plotScoreHeatmap(pred.stanford)
+plotScoreHeatmap(pred.plaqviewobj)
 
 # to show # that are pruned due to low score
-summary(is.na(pred.stanford$pruned.labels))
+summary(is.na(pred.plaqviewobj$pruned.labels))
 
 ### to place the singleR predictions into Seurat as a sep unit ###
 # seurat.obj[["SingleR.labels"]] <- singler.results$labels
-stanford[["SingleR.labels"]] <- pred.stanford$labels # this nest under metadata
+plaqviewobj[["SingleR.labels"]] <- pred.plaqviewobj$labels # this nest under metadata
 
 # Copy over the labels and pruned.labels (Note: any other column of the results could be used as well)
-stanford$SingleR.pruned.calls <- pred.stanford$pruned.labels
-stanford$SingleR.calls <- pred.stanford$labels
+plaqviewobj$SingleR.pruned.calls <- pred.plaqviewobj$pruned.labels
+plaqviewobj$SingleR.calls <- pred.plaqviewobj$labels
 
 #### RECODE SINGLE-R NAMES ----
-stanford@meta.data[["SingleR.calls"]] <- recode(stanford@meta.data[["SingleR.calls"]], Smooth_muscle_cells = "SMC")
-stanford@meta.data[["SingleR.calls"]] <- recode(stanford@meta.data[["SingleR.calls"]], Endothelial_cells = "EC")
-stanford@meta.data[["SingleR.calls"]] <- recode(stanford@meta.data[["SingleR.calls"]], NK_cell = "NK")
-stanford@meta.data[["SingleR.calls"]] <- recode(stanford@meta.data[["SingleR.calls"]], Chondrocytes = "CH")
-stanford@meta.data[["SingleR.calls"]] <- recode(stanford@meta.data[["SingleR.calls"]], Fibroblasts = "FB")
-stanford@meta.data[["SingleR.calls"]] <- recode(stanford@meta.data[["SingleR.calls"]], Monocyte = "Mono")
-stanford@meta.data[["SingleR.calls"]] <- recode(stanford@meta.data[["SingleR.calls"]], B_cell = "B_Cells")
-stanford@meta.data[["SingleR.calls"]] <- recode(stanford@meta.data[["SingleR.calls"]], Macrophage = "Mø")
-stanford@meta.data[["SingleR.calls"]] <- recode(stanford@meta.data[["SingleR.calls"]], Tissue_stem_cells = "SC")
-stanford@meta.data[["SingleR.calls"]] <- recode(stanford@meta.data[["SingleR.calls"]], T_cells = "T_Cells")
-stanford@meta.data[["SingleR.calls"]] <- recode(stanford@meta.data[["SingleR.calls"]], 'Pre-B_cell_CD34-' = "PreB_CD34-")
-stanford@meta.data[["SingleR.calls"]] <- recode(stanford@meta.data[["SingleR.calls"]], 'Pro-B_cell_CD34+' = "ProB_CD34+")
+plaqviewobj@meta.data[["SingleR.calls"]] <- recode(plaqviewobj@meta.data[["SingleR.calls"]], Smooth_muscle_cells = "SMC")
+plaqviewobj@meta.data[["SingleR.calls"]] <- recode(plaqviewobj@meta.data[["SingleR.calls"]], Endothelial_cells = "EC")
+plaqviewobj@meta.data[["SingleR.calls"]] <- recode(plaqviewobj@meta.data[["SingleR.calls"]], NK_cell = "NK")
+plaqviewobj@meta.data[["SingleR.calls"]] <- recode(plaqviewobj@meta.data[["SingleR.calls"]], Chondrocytes = "CH")
+plaqviewobj@meta.data[["SingleR.calls"]] <- recode(plaqviewobj@meta.data[["SingleR.calls"]], Fibroblasts = "FB")
+plaqviewobj@meta.data[["SingleR.calls"]] <- recode(plaqviewobj@meta.data[["SingleR.calls"]], Monocyte = "Mono")
+plaqviewobj@meta.data[["SingleR.calls"]] <- recode(plaqviewobj@meta.data[["SingleR.calls"]], B_cell = "B_Cells")
+plaqviewobj@meta.data[["SingleR.calls"]] <- recode(plaqviewobj@meta.data[["SingleR.calls"]], Macrophage = "Mø")
+plaqviewobj@meta.data[["SingleR.calls"]] <- recode(plaqviewobj@meta.data[["SingleR.calls"]], Tissue_stem_cells = "SC")
+plaqviewobj@meta.data[["SingleR.calls"]] <- recode(plaqviewobj@meta.data[["SingleR.calls"]], T_cells = "T_Cells")
+plaqviewobj@meta.data[["SingleR.calls"]] <- recode(plaqviewobj@meta.data[["SingleR.calls"]], 'Pre-B_cell_CD34-' = "PreB_CD34-")
+plaqviewobj@meta.data[["SingleR.calls"]] <- recode(plaqviewobj@meta.data[["SingleR.calls"]], 'Pro-B_cell_CD34+' = "ProB_CD34+")
 
 
-stanford@meta.data[["SingleR.calls"]]
+plaqviewobj@meta.data[["SingleR.calls"]]
 
 
 #### COLOR SCHEME (for repr oducible external plots) ----
@@ -200,7 +182,7 @@ manual_color_list <-
 
 pdf("Figure_images/umap_automatic_annotation.pdf", width=8, height=6)
 plot <- DimPlot(
-  stanford,
+  plaqviewobj,
   reduction = "umap",
   label = TRUE,
   label.size = 5,
@@ -215,7 +197,7 @@ dev.off()
 
 pdf("Figure_images/umap_wirka_annotation.pdf", width=8, height=6)
 plot <- DimPlot(
-  stanford,
+  plaqviewobj,
   reduction = "umap",
   label = TRUE,
   label.size = 5,
@@ -231,7 +213,7 @@ dev.off()
 # # then un-comment these codes
 # CellSelector(plot)
 #### POPULATION STATISTICS ####
-cellcounts <- (stanford@meta.data[["SingleR.calls"]]) # extract cell names
+cellcounts <- (plaqviewobj@meta.data[["SingleR.calls"]]) # extract cell names
 cellcounts <- as.factor(cellcounts) # convert to factors
 
 cellcounts.summary <- as.data.frame(summary(cellcounts)) # for levels laters
@@ -258,8 +240,8 @@ dev.off()
 
 
 #### SINGLE-R DIAGNOSTICS diagnostic plots ----
-plotScoreHeatmap(pred.stanford) #inspect the confidence of the predicted labels 
-plotScoreDistribution(pred.stanford, ncol = 3)
+plotScoreHeatmap(pred.plaqviewobj) #inspect the confidence of the predicted labels 
+plotScoreDistribution(pred.plaqviewobj, ncol = 3)
 
 
 #### MONOCLE3 TRAJECTORY INFERENCE ----
@@ -268,49 +250,49 @@ plotScoreDistribution(pred.stanford, ncol = 3)
 
 # convert to monocle cds object 
 # Extract data, phenotype data, and feature data from the SeuratObject
-expressiondata <- stanford@assays[["RNA"]]@data
+expressiondata <- plaqviewobj@assays[["RNA"]]@data
 
-cellmd <- stanford@meta.data
+cellmd <- plaqviewobj@meta.data
 
 genemd <- data.frame(gene_short_name = row.names(expressiondata), 
                      row.names = row.names(expressiondata))
 
 # Construct monocle cds
-stanford.cds <- new_cell_data_set(expression_data = expressiondata,
+plaqviewobj.cds <- new_cell_data_set(expression_data = expressiondata,
                               cell_metadata = cellmd,
                               gene_metadata = genemd)
-stanford.cds <- preprocess_cds(stanford.cds, num_dim = 30) # we used 30 in earlier seurat scripts
+plaqviewobj.cds <- preprocess_cds(plaqviewobj.cds, num_dim = 30) # we used 30 in earlier seurat scripts
 
 # 
 # run clustering again (didnt transfer from seurat)
-stanford.cds <- reduce_dimension(stanford.cds, reduction_method = "UMAP")
-stanford.cds <- cluster_cells(stanford.cds, reduction_method = "UMAP")
+plaqviewobj.cds <- reduce_dimension(plaqviewobj.cds, reduction_method = "UMAP")
+plaqviewobj.cds <- cluster_cells(plaqviewobj.cds, reduction_method = "UMAP")
 
 
 #### TRANSFER SEURAT EMBEDDINGS #####
 # Note that these may be calculated on the Integrated object, not the counts
 #   and thus will involve fewer genes
-temp.cds <- ProjectDim(stanford, reduction = "pca") # this will be removed
-reducedDim(stanford.cds, type = "PCA") <- temp.cds@reductions$pca@cell.embeddings
-stanford.cds@preprocess_aux$prop_var_expl <- temp.cds@reductions$pca@stdev
-plot_pc_variance_explained(stanford.cds)
+temp.cds <- ProjectDim(plaqviewobj, reduction = "pca") # this will be removed
+reducedDim(plaqviewobj.cds, type = "PCA") <- temp.cds@reductions$pca@cell.embeddings
+plaqviewobj.cds@preprocess_aux$prop_var_expl <- temp.cds@reductions$pca@stdev
+plot_pc_variance_explained(plaqviewobj.cds)
 
 # Transfer Seurat UMAP embeddings
-stanford.cds@int_colData@listData$reducedDims$UMAP <- temp.cds@reductions$umap@cell.embeddings
+plaqviewobj.cds@int_colData@listData$reducedDims$UMAP <- temp.cds@reductions$umap@cell.embeddings
 
 ## transfer singleR labels to moncle3 object
-colData(stanford.cds)$assigned_cell_type <- stanford@meta.data[["SingleR.calls"]] # call this by opening the object
+colData(plaqviewobj.cds)$assigned_cell_type <- plaqviewobj@meta.data[["SingleR.calls"]] # call this by opening the object
 
 #### MONOCLE3 CONT. ----
 # now learn the PATH (trajectory)
-stanford.cds <- learn_graph(stanford.cds)
+plaqviewobj.cds <- learn_graph(plaqviewobj.cds)
 
 # this calls up a shiny app, choose the ROOT NODE
-stanford.cds <- order_cells(stanford.cds, reduction_method = "UMAP")
+plaqviewobj.cds <- order_cells(plaqviewobj.cds, reduction_method = "UMAP")
 
 # finally, you can visualize the learned path
 pdf("Figure_images/monocle3_RNAvelocity_seuratpartition.pdf", width=6, height=6)
-plot_cells(stanford.cds,
+plot_cells(plaqviewobj.cds,
            color_cells_by = "assigned_cell_type",
            label_groups_by_cluster=F,
            show_trajectory_graph = T,
@@ -328,7 +310,7 @@ dev.off()
 
 # now you can show pseudotime
 pdf("Figure_images/monocle3_pseudotime_seuratpartition.pdf", width=7, height=6)
-plot_cells(stanford.cds,
+plot_cells(plaqviewobj.cds,
            color_cells_by = "pseudotime",
            show_trajectory_graph = F,
            trajectory_graph_segment_size = 1,
@@ -344,9 +326,9 @@ dev.off()
 
 
 #### Subset Trajectory & analysis of SMC----
-stanford.cds_subset <- choose_cells(stanford.cds) # calls up shiny app
+plaqviewobj.cds_subset <- choose_cells(plaqviewobj.cds) # calls up shiny app
 
-plot_cells(stanford.cds_subset,
+plot_cells(plaqviewobj.cds_subset,
            color_cells_by = "pseudotime",
            show_trajectory_graph = T,
            trajectory_graph_segment_size = 1,
@@ -367,21 +349,21 @@ plot_cells(stanford.cds_subset,
 # expression levels for the gene being tested.
 ## first lets do the whole dataset
 # a special gene module score heatmap (for the whole dataset)
-# pr_graph_test_res <- graph_test(stanford.cds, neighbor_graph="principal_graph", cores=2)
+# pr_graph_test_res <- graph_test(plaqviewobj.cds, neighbor_graph="principal_graph", cores=2)
 write.csv(pr_graph_test_res, file = "moransI_all_clusters.csv")
 pr_deg_ids <- row.names(subset(pr_graph_test_res, q_value < 0.00000001)) # you can adjust the p-value here
 head(pr_deg_ids)
-gene_module_df <- find_gene_modules(stanford.cds[pr_deg_ids,], resolution=1e-3)
-cell_group_df <- tibble::tibble(cell=row.names(colData(stanford.cds)), 
-                                cell_group=colData(stanford.cds)$assigned_cell_type)
-agg_mat <- aggregate_gene_expression(stanford.cds, gene_module_df, cell_group_df)
+gene_module_df <- find_gene_modules(plaqviewobj.cds[pr_deg_ids,], resolution=1e-3)
+cell_group_df <- tibble::tibble(cell=row.names(colData(plaqviewobj.cds)), 
+                                cell_group=colData(plaqviewobj.cds)$assigned_cell_type)
+agg_mat <- aggregate_gene_expression(plaqviewobj.cds, gene_module_df, cell_group_df)
 row.names(agg_mat) <- stringr::str_c("Module ", row.names(agg_mat))
 pheatmap::pheatmap(agg_mat,
                    scale="column", clustering_method="ward.D2")
 
 # which then can be visualized like so;
 # this can show you the different gene modules that can are responsible for changes over pseudotime
-plot_cells(stanford.cds,
+plot_cells(plaqviewobj.cds,
            genes=gene_module_df %>% filter(module %in% c(2,3,7)), # specify the module you want to examine
            label_cell_groups=T,
            show_trajectory_graph=F)
@@ -389,18 +371,18 @@ plot_cells(stanford.cds,
 subset(gene_module_df, module == 2)
 
 ## now lets do the subsets
-# pr_graph_test_res.sub <- graph_test(stanford.cds_subset, neighbor_graph="principal_graph", cores=2)
+# pr_graph_test_res.sub <- graph_test(plaqviewobj.cds_subset, neighbor_graph="principal_graph", cores=2)
 pr_deg_ids.sub <- row.names(subset(pr_graph_test_res.sub, q_value < 0.00000001))
 write.csv(pr_graph_test_res.sub, file = "moransI_subset_cluster.csv")
 head(pr_deg_ids.sub)
 
 # collect the trajectory-variable genes into modules
-gene_module_df.sub <- find_gene_modules(stanford.cds_subset[pr_deg_ids.sub,], resolution=1e-3)
+gene_module_df.sub <- find_gene_modules(plaqviewobj.cds_subset[pr_deg_ids.sub,], resolution=1e-3)
 # visualize these genes
 # here I am just pulling out genes that have high moran's i and might be helpful in the paper
 # SELECTED FOR PUBLICATIONS
 pdf("Figure_images/monocle3_genesoverpseudotime_seuratpartition_extended.pdf", width=7, height=6)
-plot_cells(stanford.cds_subset, 
+plot_cells(plaqviewobj.cds_subset, 
            genes=c("MYH11", 'IGFBP2',"PPP1R14A","CNN1", "TNFRSF11B",
                    "C7", "C3",
                    "SERPINF1",  "FBLN1", 
@@ -412,10 +394,10 @@ plot_cells(stanford.cds_subset,
 dev.off()
 
 # recluster at higher definition
-stanford.cds_subset = cluster_cells(stanford.cds_subset, resolution=1e-2)
+plaqviewobj.cds_subset = cluster_cells(plaqviewobj.cds_subset, resolution=1e-2)
 
 pdf("Figure_images/monocle3_RNAvelocitySUBSET_seuratpartition.pdf", width=6, height=6)
-plot_cells(stanford.cds_subset, 
+plot_cells(plaqviewobj.cds_subset, 
            color_cells_by="cluster",
            label_groups_by_cluster=F,
            show_trajectory_graph = T,
@@ -434,7 +416,7 @@ dev.off()
 # use this and compare to the annotated map
 # this you can use to more accurately differentiate the CELLS expression
 # this is how to use singleR imported cell identity
-diffexSMC_chondro_BYCELL <- FindMarkers(stanford, group.by = "SingleR.calls",
+diffexSMC_chondro_BYCELL <- FindMarkers(plaqviewobj, group.by = "SingleR.calls",
                                  ident.1 = "Smooth_muscle_cells",
                                  ident.2 = "Fibroblasts")
 
@@ -443,17 +425,17 @@ write.table(diffexSMC_chondro_BYCELL, file = "SMCvsChondro_BYCELL.csv", sep = ",
 
 # generate plots for genes of interests
 features <- c("GATA6", "CTAGE1", "PLCE1", "DUSP13", "SAMD8")
-RidgePlot(stanford, features = features, ncol = 2, group.by = "SingleR.calls", log = TRUE, y.max = 20)
-VlnPlot(stanford, features = features, ncol = 2, group.by = "SingleR.calls", log = TRUE)
-FeaturePlot(stanford, features = features)
-DotPlot(stanford, features = features, group.by = "SingleR.calls")
+RidgePlot(plaqviewobj, features = features, ncol = 2, group.by = "SingleR.calls", log = TRUE, y.max = 20)
+VlnPlot(plaqviewobj, features = features, ncol = 2, group.by = "SingleR.calls", log = TRUE)
+FeaturePlot(plaqviewobj, features = features)
+DotPlot(plaqviewobj, features = features, group.by = "SingleR.calls")
 
 
 
 #### MORE LOOK UP ----
 # first set active idents
-Idents(stanford) <- stanford@meta.data[["SingleR.calls"]]
-markers_SMC <- FindMarkers(stanford, ident.1 = "SMC") # since we didnt specific ident.2, this shows relative to all other cell types
+Idents(plaqviewobj) <- plaqviewobj@meta.data[["SingleR.calls"]]
+markers_SMC <- FindMarkers(plaqviewobj, ident.1 = "SMC") # since we didnt specific ident.2, this shows relative to all other cell types
 
 write.csv(markers_SMC, file = "SMC_specific_DEGs.csv")
 
@@ -462,13 +444,13 @@ features <- c("MYH11", "FN1",  "COL6A1", 'COL6A2', "PPP1R14A",
               "FBLN1","LUM", "TCF21", "C7", "C6", # BOTTOM HEAVY
               "SERPINF1" )
 
-RidgePlot(stanford, features = features, ncol = 1, group.by = "SingleR.calls", log = TRUE, y.max = 20)
-VlnPlot(stanford, features = features, ncol = 1, group.by = "SingleR.calls", log = TRUE)
-FeaturePlot(stanford, features = features)
-DotPlot(stanford, features = features, group.by = "SingleR.calls")
+RidgePlot(plaqviewobj, features = features, ncol = 1, group.by = "SingleR.calls", log = TRUE, y.max = 20)
+VlnPlot(plaqviewobj, features = features, ncol = 1, group.by = "SingleR.calls", log = TRUE)
+FeaturePlot(plaqviewobj, features = features)
+DotPlot(plaqviewobj, features = features, group.by = "SingleR.calls")
 
 pdf("Figure_images/monocle3_genesoverpseudotime_seuratpartition_extended_v2.pdf", width=7, height=6)
-plot_cells(stanford.cds_subset, 
+plot_cells(plaqviewobj.cds_subset, 
            genes=features, # this is faceting by the genes that are DE
            show_trajectory_graph=FALSE, 
            label_cell_groups=FALSE)
@@ -480,23 +462,23 @@ CAC_genes_for_Wei <- read_csv("~/Desktop/CAC_genes_for_Wei.csv",
                              col_names = FALSE)
 
 features <- CAC_genes_for_Wei$X1
-RidgePlot(stanford, features = features, ncol = 4, group.by = "SingleR.calls", log = TRUE, y.max = 20)
-VlnPlot(stanford, features = features, ncol = 1, group.by = "SingleR.calls", log = TRUE)
-FeaturePlot(stanford, features = features, ncol = 4)
-DotPlot(stanford, features = features, group.by = "SingleR.calls") +
+RidgePlot(plaqviewobj, features = features, ncol = 4, group.by = "SingleR.calls", log = TRUE, y.max = 20)
+VlnPlot(plaqviewobj, features = features, ncol = 1, group.by = "SingleR.calls", log = TRUE)
+FeaturePlot(plaqviewobj, features = features, ncol = 4)
+DotPlot(plaqviewobj, features = features, group.by = "SingleR.calls") +
   theme(axis.text.x = element_text(angle = 90))
 
-Idents(stanford) <- stanford@meta.data[["manually_annotated_labels"]]
-DotPlot(stanford, features = features) +
+Idents(plaqviewobj) <- plaqviewobj@meta.data[["manually_annotated_labels"]]
+DotPlot(plaqviewobj, features = features) +
   theme(axis.text.x = element_text(angle = 90))
 
 #### STACKED POPULATION PLOT ####
-Idents(stanford) <- stanford@meta.data[["SingleR.calls"]]
-pop1 <- as.data.frame(prop.table(table(Idents(stanford))))
+Idents(plaqviewobj) <- plaqviewobj@meta.data[["SingleR.calls"]]
+pop1 <- as.data.frame(prop.table(table(Idents(plaqviewobj))))
 pop1$Method <- "SingleR"
 
-Idents(stanford) <- stanford@meta.data[["manually_annotated_labels"]]
-pop2 <- as.data.frame(prop.table(table(Idents(stanford))))
+Idents(plaqviewobj) <- plaqviewobj@meta.data[["manually_annotated_labels"]]
+pop2 <- as.data.frame(prop.table(table(Idents(plaqviewobj))))
 pop2$Method <- "ManualCluster"
 
 plot1 <- ggplot(pop1, aes(y = Freq, x =Method,)) + 
@@ -550,13 +532,13 @@ ggsave(plot2, file = "verticle_cellpop_plot_manual.pdf",
 
 
 #### OUTPUT RDS FILES ####
-saveRDS(stanford, file = "final_stanford_labeled.rds")
-stanford <- readRDS(file = "final_stanford_labeled.rds")
+saveRDS(plaqviewobj, file = "final_plaqviewobj_labeled.rds")
+plaqviewobj <- readRDS(file = "final_plaqviewobj_labeled.rds")
 
- saveRDS(stanford.cds, file = "final_stanford_labeled_CDS.rds")
+ saveRDS(plaqviewobj.cds, file = "final_plaqviewobj_labeled_CDS.rds")
 
 #### FINAL OUTPUTS ####
 # this extended label rds has the wirka labels too
-stanford <- readRDS(file = "final_stanford_extendedlabels_02082021.rds")
-stanford.cds <- readRDS(file = "final_stanford_labeled_CDS.rds")
+plaqviewobj <- readRDS(file = "final_plaqviewobj_extendedlabels_02082021.rds")
+plaqviewobj.cds <- readRDS(file = "final_plaqviewobj_labeled_CDS.rds")
 

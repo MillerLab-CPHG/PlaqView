@@ -73,10 +73,10 @@ ui <- fluidPage(
                                 fluidRow(
                                   column(width = 12,
                                          wellPanel(
-                                           includeMarkdown("descriptionfiles/Welcome.Rmd"),
+                                           includeMarkdown("descriptionfiles/helptext_welcome.Rmd"),
                                            img(src = "abstract.png", width = '100%'),
                                          )),
-                              
+                                  
                                 )),
                       mainPanel(width = 12,
                                 DT::dataTableOutput('availabledatasettable'),
@@ -87,23 +87,23 @@ ui <- fluidPage(
                                            inputId = "loaddatabutton",
                                            label = "Step 1: Click Here to Load Dataset",
                                            style = "unite",
-                                           color = "danger",
+                                           color = "primary",
                                            block = T)
-                                         ),
-                                    column(width = 6,
-                                           hidden(
-                                             actionBttn(
+                                  ),
+                                  column(width = 6,
+                                         hidden(
+                                           actionBttn(
                                              inputId = "jumpto1",
                                              label = "Step 2: Start PlaqView",
-                                             color = "primary",
+                                             color = "success",
                                              block = T)
-                                           )
+                                         )
                                   )
                                 ),
                                 br(),
                                 br(),
-                                )
-                      ),
+                      )
+             ),
              
              # PANEL 1: QUERY GENE   ----
              tabPanel(title = "Quick Gene Lookup", value = "panel1",
@@ -190,7 +190,7 @@ ui <- fluidPage(
                                                                     br(),
                                                                     downloadButton("downloadfeatureplot", "Download Feature Plot", width = '100%')
                                                                     
-                                                                    )
+                                                   )
                                                    
                                             ) # column 
                                             
@@ -350,32 +350,35 @@ server <- function(input, output) {
   
   
   df <- read_excel("Available_datasets.xlsx")
-  df <- column_to_rownames(df, var = "DataID")
+  df$DOI <- paste("<a href=",  df$DOI,">", "Link", "</a>") # this converts to clickable format
+  # df <- column_to_rownames(df, var = "DataID")
   
   output$availabledatasettable <-
     DT::renderDataTable(df, server = F, # server is for speed/loading
-                        selection = list(mode = 'single', selected = c(1)))
+                        selection = list(mode = 'single', selected = c(1)),
+                        options=list(columnDefs = list(list(visible=FALSE, targets=c(8)))), # this hides the 8th column, which is datasetID
+                        escape = FALSE) # this escapes rendering html (link) literally and makes link clickable
   
-    observeEvent(input$loaddatabutton, {
-      path <- file.path(paste("data/", rownames(df)[input$availabledatasettable_rows_selected], 
-                                     ".rds", sep=""))
-      stanford <- readRDS(file = path)
-      
-      output$selecteddatasetID <- renderText({
-        paste0("Sucessfully loaded the ", rownames(df)[input$availabledatasettable_rows_selected], 
-               " dataset!.",
-               collapse = ", ")
-      }) 
-      show("jumpto1")
-      
+  observeEvent(input$loaddatabutton, {
+    path <- file.path(paste("data/", df$DataID[input$availabledatasettable_rows_selected], 
+                            ".rds", sep=""))
+    stanford <<- readRDS(file = path)
+    
+    output$selecteddatasetID <- renderText({
+      paste0("Sucessfully loaded the ", rownames(df)[input$availabledatasettable_rows_selected], 
+             " dataset!.",
+             collapse = ", ")
+    }) 
+    show("jumpto1")
+    
   })
   
-    observeEvent(input$jumpto1, {
-      updateTabsetPanel(session = getDefaultReactiveDomain(), "inTabset",
-                        selected = "panel1") # this is to switch to tab1
-      
-    })
+  observeEvent(input$jumpto1, {
+    updateTabsetPanel(session = getDefaultReactiveDomain(), "inTabset",
+                      selected = "panel1") # this is to switch to tab1
     
+  })
+  
   
   #### PANEL #1 FUNCTIONS ####
   #### umap ####
@@ -435,8 +438,8 @@ server <- function(input, output) {
   
   #### dot plot ####
   observeEvent(input$runcode,{ # observe event puts a pause until pushed
-   
-     # this is for the display
+    
+    # this is for the display
     output$Dot <- renderPlot({
       # parse string input 
       user_genes <- str_split(input$genes, ", ")[[1]]
@@ -494,7 +497,7 @@ server <- function(input, output) {
         user_genes <- str_split(input$genes, ", ")[[1]]
         validate(need(input$selectaplot=="Feature", message=FALSE))
         temp <- FeaturePlot(stanford, 
-                    features = user_genes[1:4]) + # a trick to sep long string input
+                            features = user_genes[1:4]) + # a trick to sep long string input
           theme(legend.position="bottom", legend.box = "vertical") + # group.by is important, use this to call metadata separation
           theme(plot.title = element_text(hjust = 1)) +
           theme(plot.title = element_text(hjust =  0.5)) 
@@ -531,9 +534,9 @@ server <- function(input, output) {
         user_genes <- str_split(input$genes, ", ")[[1]]
         validate(need(input$selectaplot=="Ridge", message=FALSE))
         temp <- RidgePlot(stanford,
-                  cols = manual_color_list,
-                  group.by = input$selectlabelmethodforgenequery,
-                  features =  user_genes[1:1]
+                          cols = manual_color_list,
+                          group.by = input$selectlabelmethodforgenequery,
+                          features =  user_genes[1:1]
         ) + # a trick to sep long string input
           #theme(legend.position="bottom", legend.box = "vertical") + # group.by is important, use this to call metadata separation
           theme(plot.title = element_text(hjust =  0.5)) +
@@ -545,7 +548,7 @@ server <- function(input, output) {
       }
       
     )# close downloadhandler
-
+    
     #### cell population ####
     output$cellpopulation <- renderPlot({
       # this chunk is to calculate population statistics 
