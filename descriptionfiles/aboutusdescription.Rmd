@@ -6,32 +6,35 @@ output: html_document
 ---
 
 ## About *PlaqView*
-*PlaqView* is a standalone, interactive, and reproducible Shiny- and R-based tool to explore single-cell RNA-sequencing data of human coronary artery samples. Our goal is to make these valuable data analytic tools publicly available to non-bioinformaticians. This is an open-sourced tool that is freely available and can be modified for other scRNA-seq data. 
+
+*PlaqView* is a standalone, interactive, and reproducible Shiny- and R-based tool to explore single-cell RNA-sequencing data of human coronary artery samples. Our goal is to make these valuable data analytic tools publicly available to non-bioinformaticians. This is an open-sourced tool that is freely available and can be modified for other scRNA-seq data.
 
 *Plaqview* is currently in beta as of Feb 1 (v.0.1), 2021. Last Updated: March 23, 2021.
 
 ### About the Datasets
-The primary data used in this interactive session were first published by Wirka *et al.* [(Nature Medicine, 2019)](https://pubmed.ncbi.nlm.nih.gov/31359001/) and made available here by Ma *et al.* (2021). In this dataset, diseased segments of the right coronary artery were subjected to scRNA-seq from four patients who underwent heart transplantation. 
+
+The primary data used in this interactive session were first published by Wirka *et al.* [(Nature Medicine, 2019)](https://pubmed.ncbi.nlm.nih.gov/31359001/) and made available here by Ma *et al.* (2021). In this dataset, diseased segments of the right coronary artery were subjected to scRNA-seq from four patients who underwent heart transplantation.
 
 For details on sample information, click [here to download supplemental data table](https://static-content.springer.com/esm/art%3A10.1038%2Fs41591-019-0512-5/MediaObjects/41591_2019_512_MOESM1_ESM.xlsx)
 
 **More datasets are coming soon!**
 
 ### Features Coming Soon
-We are continuously improving PlaqView. We are working on modularizing and expanding to allow additional features such as comparing trajectory methods and automatic data retrieval. If you have a suggestion for us, please let us know on our [GitHub Page](https://github.com/MillerLab-CPHG/PlaqView) or via email directly at weima@virginia.edu.
 
+We are continuously improving PlaqView. We are working on modularizing and expanding to allow additional features such as comparing trajectory methods and automatic data retrieval. If you have a suggestion for us, please let us know on our [GitHub Page](https://github.com/MillerLab-CPHG/PlaqView) or via email directly at [weima\@virginia.edu](mailto:weima@virginia.edu){.email}.
 
-### Reproducibility and Code Availability 
+### Reproducibility and Code Availability
+
 *PlaqView* is designed to be open-source and publicly available and serve as a template for other scRNA-seq analysis pipelines. The code scripts are available on our [GitHub Page](https://github.com/MillerLab-CPHG/PlaqView). This application calls for .rds datafiles that are too large to host on Github, but you can find them [here](https://virginia.box.com/shared/static/oyo1bicpvlxen940zmciqapvg0y3n6gb.rds). To Run this application successfully, place the .rds object file in the folder/subdiretory called 'data.'
 
 ### Packages Used
-*Seurat, Monocle3, Tidyverse, EnrichR, scCATCH, Shiny.*
-See session info for detailed version and package history.
+
+*Seurat, Monocle3, Tidyverse, EnrichR, scCATCH, Shiny.* See session info for detailed version and package history.
 
 ### About Our Lab
+
 The Miller Lab is a part of the Center for Public Health Genomics of the University of Virginia, School of Medicine in Charlottesville, VA. Our lab focuses on finding novel risk factors and mechanisms of heart diseases using next-generation sequencing techniques. For questions about our lab, please contact us [here](https://millerlab.org). For questions about *PlaqView*, raise a ticket in our [GitHub Page](https://github.com/MillerLab-CPHG/PlaqView).
 
 ### Where to Find Help
-If you have issue running *PlaqView*, please raise a ticket at our [GitHub Page](https://github.com/MillerLab-CPHG/PlaqView). For urgent issues, please email the authors directly at weima@virginia.edu.
 
-
+If you have issue running *PlaqView*, please raise a ticket at our [GitHub Page](https://github.com/MillerLab-CPHG/PlaqView). For urgent issues, please email the authors directly at [weima\@virginia.edu](mailto:weima@virginia.edu){.email}.

@@ -7,7 +7,7 @@ output: html_document
 
 # Welcome to *PlaqView* !
 
-### This interactive web application is designed for lay scientists to explore complex single-cell RNA datasets from human and mouse cardiac tissues.
+### This interactive web application is designed for lay scientists to explore complex single-cell RNA datasets from human and mouse cardiovascular tissues.
 
 We are working constantly to update *PlaqView* with the most up-to-date analysis tools and are actively incorporating new datasets.
 

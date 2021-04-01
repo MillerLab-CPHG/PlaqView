@@ -90,7 +90,7 @@ plaqviewobj <- RunTSNE(plaqviewobj, dims = 1:30)
 
 # note that you can set `label = TRUE` or use the LabelClusters function to help label
 # individual clusters
-DimPlot(plaqviewobj, reduction = "umap", label = T)
+DimPlot(plaqviewobj, reduction = "umap", label = T) 
 
 saveRDS(plaqviewobj, file = "plaqviewobj_presingleR.rds")
 #### SINGLE-R LABELING (post Seurat automated cell cluster annotation alternative) ----
@@ -141,108 +141,36 @@ plaqviewobj@meta.data[["SingleR.calls"]] <- recode(plaqviewobj@meta.data[["Singl
 plaqviewobj@meta.data[["SingleR.calls"]] <- recode(plaqviewobj@meta.data[["SingleR.calls"]], 'Pro-B_cell_CD34+' = "ProB_CD34+")
 
 
-plaqviewobj@meta.data[["SingleR.calls"]]
+table(plaqviewobj@meta.data[["SingleR.calls"]])
 
 
 #### COLOR SCHEME (for repr oducible external plots) ----
-# the following function creates 'color_list' that shows the default color scheme
-ggplotColours <- function(n = 6, h = c(0, 360) + 15){
-  if ((diff(h) %% 360) < 1) h[2] <- h[2] - 360/n
-  hcl(h = (seq(h[1], h[2], length = n)), c = 100, l = 65)
-}
-color_list <- ggplotColours(n=18)
-# or you can try to define your own palette then pass the argument 'cols =' in Dimplot
 # install.packages("colourpicker") # run this package via 'tools'addins' in rstudio-
 manual_color_list <-
-  c("rosybrown2",
-    "palevioletred1",
-    "lemonchiffon3",
-    "darkseagreen",
-    "cadetblue1",
-    
-    "skyblue3",
-    "cadetblue3",
-    "lemonchiffon4",
-    "darkseagreen2",
-    "rosybrown3",
-    "thistle2",
-    "darkseagreen1",
-    "palevioletred3",
-    
-    "lightsteelblue3",
-    "cadetblue2",
-    "salmon1",
-    
-    "palevioletred4",
-    "thistle3"
+  c('#8dd3c7','#ffffb3','#bebada','#fb8072','#80b1d3','#fdb462','#b3de69','#fccde5','#d9d9d9','#bc80bd','#ccebc5','#ffed6f',
+    '#a6cee3','#1f78b4','#b2df8a','#33a02c','#fb9a99','#e31a1c','#fdbf6f','#ff7f00','#cab2d6','#6a3d9a','#ffff99','#b15928',
+    '#d53e4f','#fc8d59','#fee08b','#e6f598','#99d594','#3288bd'
   )
 
 #### SEURAT DIM PLOTS #### 
 # now you can call the dimplot
 
-pdf("Figure_images/umap_automatic_annotation.pdf", width=8, height=6)
-plot <- DimPlot(
+#pdf("Figure_images/umap_automatic_annotation.pdf", width=8, height=6)
+
+DimPlot(plaqviewobj, reduction = "umap", label = T,
+        group.by = "Sex") 
+
+DimPlot(
   plaqviewobj,
   reduction = "umap",
-  label = TRUE,
   label.size = 5,
   repel = T, # repel labels
   pt.size = 1,
   cols = manual_color_list,
-  group.by = "SingleR.calls") +# group.by is important, use this to call metadata separation
+  group.by = "SingleR.labels") + # group.by is important, use this to call metadata separation
   ggtitle(NULL)
-plot
-dev.off()
 
-
-pdf("Figure_images/umap_wirka_annotation.pdf", width=8, height=6)
-plot <- DimPlot(
-  plaqviewobj,
-  reduction = "umap",
-  label = TRUE,
-  label.size = 5,
-  repel = T, # repel labels
-  pt.size = 1,
-  cols = manual_color_list,
-  group.by = "manually_annotated_labels") +# group.by is important, use this to call metadata separation
-  ggtitle(NULL)
-plot
-dev.off()
-
-# # if you want to subset some cells
-# # then un-comment these codes
-# CellSelector(plot)
-#### POPULATION STATISTICS ####
-cellcounts <- (plaqviewobj@meta.data[["SingleR.calls"]]) # extract cell names
-cellcounts <- as.factor(cellcounts) # convert to factors
-
-cellcounts.summary <- as.data.frame(summary(cellcounts)) # for levels laters
-
-cellcounts <- as.data.frame((cellcounts)) # summarize factors into table
-cellcounts <- dplyr::rename(cellcounts, Celltype = '(cellcounts)' ) # just to rename the columns
-
-# this is to create levels so i can flip the graph to the way i want
-cellcounts.summary <- rownames_to_column(cellcounts.summary)
-cellcounts.summary <- reorder(cellcounts.summary$rowname, cellcounts.summary$`summary(cellcounts)`)
-sortedlevel <- levels(cellcounts.summary)
-
-pdf("Figure_images/umap_populationpercentage.pdf", width=6, height=4)
-ggplot(data = cellcounts, aes(y = Celltype)) +
-  geom_bar(fill = manual_color_list) +
-  xlab("Counts") +
-  ylab("Cell Types") +
-  xlim(c(0,1650)) +
-  theme_light() +
-  scale_y_discrete(limits=sortedlevel) +
-  stat_count(geom = "text", # this stat_count function gives percentages
-           aes(label = paste(round((..count..)/sum(..count..)*100,2),"%")))
-dev.off()
-
-
-#### SINGLE-R DIAGNOSTICS diagnostic plots ----
-plotScoreHeatmap(pred.plaqviewobj) #inspect the confidence of the predicted labels 
-plotScoreDistribution(pred.plaqviewobj, ncol = 3)
-
+#dev.off()
 
 #### MONOCLE3 TRAJECTORY INFERENCE ----
 # in previous versions we tried the seurat wrapper it just didnt work
