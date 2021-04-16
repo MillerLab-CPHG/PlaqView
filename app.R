@@ -166,7 +166,7 @@ ui <- fluidPage(
                                 ## lower panel for graphic outputs
                                 wellPanel(width = 12,
                                           fluidRow( # top split rows
-                                            column(width = 6, align="center", 
+                                            column(width = 6, align = "center", 
                                                    plotOutput("umaps", width = "auto", height = '500px'),
                                                    br(),
                                                    downloadButton("downloadumapplot", "Download UMAP", width = '100%')
@@ -400,7 +400,8 @@ server <- function(input, output) {
                 legend.box = "vertical") +
           ggtitle("UMAP by Cell Type") +
           theme(plot.title = element_text(hjust =  0.5)) +
-          guides(color = guide_legend(nrow = 5))
+          guides(color = guide_legend(nrow = 5)
+                 )
       ) # closes renderPlot
   })# closes observe event
   

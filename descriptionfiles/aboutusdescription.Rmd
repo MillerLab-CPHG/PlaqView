@@ -21,7 +21,7 @@ For details on sample information, click [here to download supplemental data tab
 
 ### Features Coming Soon
 
-We are continuously improving PlaqView. We are working on modularizing and expanding to allow additional features such as comparing trajectory methods and automatic data retrieval. If you have a suggestion for us, please let us know on our [GitHub Page](https://github.com/MillerLab-CPHG/PlaqView) or via email directly at [weima\@virginia.edu](mailto:weima@virginia.edu){.email}.
+We are continuously improving PlaqView. We are working on modularizing and expanding to allow additional features such as comparing trajectory methods and automatic data retrieval. If you have a suggestion for us, please let us know on our [GitHub Page](https://github.com/MillerLab-CPHG/PlaqView) or via email directly at weima@virginia.edu.
 
 ### Reproducibility and Code Availability
 
@@ -37,4 +37,5 @@ The Miller Lab is a part of the Center for Public Health Genomics of the Univers
 
 ### Where to Find Help
 
-If you have issue running *PlaqView*, please raise a ticket at our [GitHub Page](https://github.com/MillerLab-CPHG/PlaqView). For urgent issues, please email the authors directly at [weima\@virginia.edu](mailto:weima@virginia.edu){.email}.
+If you have issue running *PlaqView*, please raise a ticket at our [GitHub Page](https://github.com/MillerLab-CPHG/PlaqView). For urgent issues, please email the authors directly at weima@virginia.edu.
+

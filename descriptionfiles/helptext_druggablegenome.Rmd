@@ -1,0 +1,9 @@
+---
+title: "druggablegenome.Rmd"
+author: "WeiMa"
+date: "03/20/2021"
+output: html_document
+---
+
+### Use This Tab to Explore Drug-Gene Interactions
+
