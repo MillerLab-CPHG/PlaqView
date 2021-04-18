@@ -12,6 +12,7 @@ library(DT)
 library(readxl)
 library(shinyWidgets)
 library(shinyjs)
+library(RColorBrewer)
 
 #### PreReq Codes ####
 # below line is commented for shinyapp.io deployment temp
@@ -32,7 +33,7 @@ enrichRdb <- sort(dbs)
 shinyOptions(plot.autocolors = TRUE)
 
 # color definitions
-manual_color_list <-
+original_color_list <-
   {c("rosybrown2",
      "cadetblue1",
      "lemonchiffon3",
@@ -53,6 +54,7 @@ manual_color_list <-
      "cadetblue2"
   )}
 
+manual_colr_list <- colorRampPalette(original_color_list, 30)
 #### UI ####
 # Define UI for application that draws a histogram
 ui <- fluidPage(

@@ -340,66 +340,6 @@ plot_cells(plaqviewobj.cds_subset,
            scale_to_range = T)
 dev.off()
 
-#### SPECIAL LOOK UP ----
-# use this and compare to the annotated map
-# this you can use to more accurately differentiate the CELLS expression
-# this is how to use singleR imported cell identity
-diffexSMC_chondro_BYCELL <- FindMarkers(plaqviewobj, group.by = "SingleR.calls",
-                                 ident.1 = "Smooth_muscle_cells",
-                                 ident.2 = "Fibroblasts")
-
-write.table(diffexSMC_chondro_BYCELL, file = "SMCvsChondro_BYCELL.csv", sep = ",", 
-            col.names = NA) # col.names = NA sets the first cell to be empty so its offset correctly
-
-# generate plots for genes of interests
-features <- c("GATA6", "CTAGE1", "PLCE1", "DUSP13", "SAMD8")
-RidgePlot(plaqviewobj, features = features, ncol = 2, group.by = "SingleR.calls", log = TRUE, y.max = 20)
-VlnPlot(plaqviewobj, features = features, ncol = 2, group.by = "SingleR.calls", log = TRUE)
-FeaturePlot(plaqviewobj, features = features)
-DotPlot(plaqviewobj, features = features, group.by = "SingleR.calls")
-
-
-
-#### MORE LOOK UP ----
-# first set active idents
-Idents(plaqviewobj) <- plaqviewobj@meta.data[["SingleR.calls"]]
-markers_SMC <- FindMarkers(plaqviewobj, ident.1 = "SMC") # since we didnt specific ident.2, this shows relative to all other cell types
-
-write.csv(markers_SMC, file = "SMC_specific_DEGs.csv")
-
-features <- c("MYH11", "FN1",  "COL6A1", 'COL6A2', "PPP1R14A",
-              "TNFRSF11B", #TOP HEAVY
-              "FBLN1","LUM", "TCF21", "C7", "C6", # BOTTOM HEAVY
-              "SERPINF1" )
-
-RidgePlot(plaqviewobj, features = features, ncol = 1, group.by = "SingleR.calls", log = TRUE, y.max = 20)
-VlnPlot(plaqviewobj, features = features, ncol = 1, group.by = "SingleR.calls", log = TRUE)
-FeaturePlot(plaqviewobj, features = features)
-DotPlot(plaqviewobj, features = features, group.by = "SingleR.calls")
-
-pdf("Figure_images/monocle3_genesoverpseudotime_seuratpartition_extended_v2.pdf", width=7, height=6)
-plot_cells(plaqviewobj.cds_subset, 
-           genes=features, # this is faceting by the genes that are DE
-           show_trajectory_graph=FALSE, 
-           label_cell_groups=FALSE)
-
-dev.off()
-
-# 03192021
-CAC_genes_for_Wei <- read_csv("~/Desktop/CAC_genes_for_Wei.csv", 
-                             col_names = FALSE)
-
-features <- CAC_genes_for_Wei$X1
-RidgePlot(plaqviewobj, features = features, ncol = 4, group.by = "SingleR.calls", log = TRUE, y.max = 20)
-VlnPlot(plaqviewobj, features = features, ncol = 1, group.by = "SingleR.calls", log = TRUE)
-FeaturePlot(plaqviewobj, features = features, ncol = 4)
-DotPlot(plaqviewobj, features = features, group.by = "SingleR.calls") +
-  theme(axis.text.x = element_text(angle = 90))
-
-Idents(plaqviewobj) <- plaqviewobj@meta.data[["manually_annotated_labels"]]
-DotPlot(plaqviewobj, features = features) +
-  theme(axis.text.x = element_text(angle = 90))
-
 #### STACKED POPULATION PLOT ####
 Idents(plaqviewobj) <- plaqviewobj@meta.data[["SingleR.calls"]]
 pop1 <- as.data.frame(prop.table(table(Idents(plaqviewobj))))
@@ -462,11 +402,6 @@ ggsave(plot2, file = "verticle_cellpop_plot_manual.pdf",
 #### OUTPUT RDS FILES ####
 saveRDS(plaqviewobj, file = "final_plaqviewobj_labeled.rds")
 plaqviewobj <- readRDS(file = "final_plaqviewobj_labeled.rds")
+saveRDS(plaqviewobj.cds, file = "final_plaqviewobj_labeled_CDS.rds")
 
- saveRDS(plaqviewobj.cds, file = "final_plaqviewobj_labeled_CDS.rds")
-
-#### FINAL OUTPUTS ####
-# this extended label rds has the wirka labels too
-plaqviewobj <- readRDS(file = "final_plaqviewobj_extendedlabels_02082021.rds")
-plaqviewobj.cds <- readRDS(file = "final_plaqviewobj_labeled_CDS.rds")
 
