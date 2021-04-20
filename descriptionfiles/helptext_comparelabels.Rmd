@@ -12,5 +12,5 @@ By default, *Plaqview* uses *SingleR* (Aran et al.), which uses reference-based 
 
 Note: *scCATCH* requires user-defined tissue type reference (e.g. Heart, Blood Vessels)
 
-*to save plot, right-click and 'save image as'", please cite Ma et al., (2021) and Wirka et al., (2019) in your publications*
+*Please cite Ma et al., (2021) and datasets used in your publications*
 

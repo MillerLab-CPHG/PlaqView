@@ -1,5 +1,5 @@
 #### LIBRARIES #### 
-# library(BiocManager)
+library(BiocManager)
 library(shiny)
 library(shinythemes)
 library(Seurat)
@@ -358,7 +358,7 @@ server <- function(input, output) {
   output$availabledatasettable <-
     DT::renderDataTable(df, server = F, # server is for speed/loading
                         selection = list(mode = 'single', selected = c(1)),
-                        options=list(columnDefs = list(list(visible=FALSE, targets=c(10)))), # this hides the 8th column, which is datasetID
+                        options=list(columnDefs = list(list(visible=FALSE, targets=c(8)))), # this hides the 8th column, which is datasetID
                         escape = FALSE) # this escapes rendering html (link) literally and makes link clickable
   
   observeEvent(input$loaddatabutton, {
