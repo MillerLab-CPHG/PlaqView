@@ -5,10 +5,9 @@ account: millerlab
 server: shinyapps.io
 hostUrl: https://api.shinyapps.io/v1
 appId: 3639288
-bundleId: 4495291
+bundleId: 4520746
 url: https://millerlab.shinyapps.io/PlaqView_developmentalbranch/
-when: 1618922641.67766
-lastSyncTime: 1618922641.67768
+when: 1619446213.41445
+lastSyncTime: 1619446213.41447
 asMultiple: FALSE
 asStatic: FALSE
-ignoredFiles: preprocess_dataset

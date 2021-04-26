@@ -10,6 +10,6 @@ Use this module to **compare different RNA trajectory methods.**
 
 By default, *Plaqview* uses *Monocle3* [(Trapnell Lab)](https://cole-trapnell-lab.github.io/monocle3/) for cell RNA trajectory inference. We found that *Monocle3* was the most flexible in handling complex datasets with multiple cell origins (as opposed to purified/cultured samples). 
 
-Here, we can compare other popular trajectory methods in the Wirka et al. (2019) human coronary artery dataset. Available methods include *Slingshot* [(Dudoit Lab)](https://bmcgenomics.biomedcentral.com/articles/10.1186/s12864-018-4772-0), *PAGA* [(partition-based graph abstraction, Theis Lab)](https://genomebiology.biomedcentral.com/articles/10.1186/s13059-019-1663-x), and *SCORPIUS*, [(Saeys Lab)](https://www.biorxiv.org/content/10.1101/079509v2). 
+Here, we can compare other popular trajectory methods your selected dataset. Available methods include *Slingshot* [(Dudoit Lab)](https://bmcgenomics.biomedcentral.com/articles/10.1186/s12864-018-4772-0), *PAGA* [(partition-based graph abstraction, Theis Lab)](https://genomebiology.biomedcentral.com/articles/10.1186/s13059-019-1663-x), and *SCORPIUS*, [(Saeys Lab)](https://www.biorxiv.org/content/10.1101/079509v2). 
 
 

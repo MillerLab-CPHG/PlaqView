@@ -235,7 +235,7 @@ ui <- fluidPage(
                                                          "Seurat Clusters (Numbered)" = "seurat_clusters",
                                                          "scCATCH (Heart)" = "scCATCH_Heart",
                                                          "scCATCH (Blood Vessels)" = "scCATCH_BV"),
-                                                       selected = "Wirka et al. (Nature Med. 2019)"),
+                                                       selected = "Author Supplied (Manual)"),
                                            plotOutput("leftlabelplot",
                                                       height = '500px')),
                                     
@@ -256,7 +256,7 @@ ui <- fluidPage(
                                     
                                     column(width = 6, h4("Differential Expression by Cluster"),
                                            downloadButton("diffbyseurat", "Numbered Only (Unlabeled)"),
-                                           downloadButton("diffbywirka", "Wirka et al."),
+                                           downloadButton("diffbyauthor", "Author Supplied (Manual)"),
                                            
                                            
                                            helpText("This will download a .csv of differentially expressed genes by cluster")
@@ -293,7 +293,6 @@ ui <- fluidPage(
                                                       height = '500px')
                                            
                                     ), # column
-                                    
                                     
                                     column(width = 6,
                                            selectInput("righttrajectorymethod",
@@ -349,8 +348,6 @@ ui <- fluidPage(
 # Define server logic required to draw a histogram
 server <- function(input, output) {
   #### WELCOME PANEL ####
-  
-  
   df <- read_excel("Available_datasets.xlsx")
   df$DOI <- paste("<a href=",  df$DOI,">", "Link", "</a>") # this converts to clickable format
   # df <- column_to_rownames(df, var = "DataID")
@@ -362,9 +359,10 @@ server <- function(input, output) {
                         escape = FALSE) # this escapes rendering html (link) literally and makes link clickable
   
   observeEvent(input$loaddatabutton, {
-    path <- file.path(paste("data/", df$DataID[input$availabledatasettable_rows_selected], 
+    path <- file.path(paste("data/", df$DataID[input$availabledatasettable_rows_selected], "/",
+                            df$DataID[input$availabledatasettable_rows_selected],
                             ".rds", sep=""))
-    stanford <<- readRDS(file = path)
+    plaqviewobj <<- readRDS(file = path)
     
     output$selecteddatasetID <- renderText({
       paste0("Sucessfully loaded the ", rownames(df)[input$availabledatasettable_rows_selected], 
@@ -389,7 +387,7 @@ server <- function(input, output) {
     output$umaps <- 
       renderPlot(
         DimPlot(
-          stanford,
+          plaqviewobj,
           reduction = "umap",
           label = TRUE,
           label.size = 5,
@@ -417,7 +415,7 @@ server <- function(input, output) {
       user_genes <- str_split(input$genes, ", ")[[1]]
       validate(need(input$selectaplot=="Dot", message=FALSE))
       temp <- DimPlot(
-        stanford,
+        plaqviewobj,
         reduction = "umap",
         label = TRUE,
         label.size = 5,
@@ -447,7 +445,7 @@ server <- function(input, output) {
       # parse string input 
       user_genes <- str_split(input$genes, ", ")[[1]]
       validate(need(input$selectaplot=="Dot", message=FALSE))
-      DotPlot(stanford, 
+      DotPlot(plaqviewobj, 
               group.by = input$selectlabelmethodforgenequery,
               features = user_genes) + # a trick to sep long string input
         ggtitle("Expression Dot Plot") +
@@ -464,7 +462,7 @@ server <- function(input, output) {
         pdf(file, paper = "default") # paper = defult is a4 size
         user_genes <- str_split(input$genes, ", ")[[1]]
         validate(need(input$selectaplot=="Dot", message=FALSE))
-        temp <- DotPlot(stanford, 
+        temp <- DotPlot(plaqviewobj, 
                         group.by = input$selectlabelmethodforgenequery,
                         features = user_genes) + # a trick to sep long string input
           ggtitle("Expression Dot Plot") +
@@ -483,7 +481,7 @@ server <- function(input, output) {
     output$Feature <- renderPlot({
       user_genes <- str_split(input$genes, ", ")[[1]]
       validate(need(input$selectaplot=="Feature", message=FALSE))
-      FeaturePlot(stanford, 
+      FeaturePlot(plaqviewobj, 
                   features = user_genes[1:4]) + # a trick to sep long string input
         theme(legend.position="bottom", legend.box = "vertical") + # group.by is important, use this to call metadata separation
         theme(plot.title = element_text(hjust = 1)) +
@@ -499,7 +497,7 @@ server <- function(input, output) {
         pdf(file, paper = "default") # paper = defult is a4 size
         user_genes <- str_split(input$genes, ", ")[[1]]
         validate(need(input$selectaplot=="Feature", message=FALSE))
-        temp <- FeaturePlot(stanford, 
+        temp <- FeaturePlot(plaqviewobj, 
                             features = user_genes[1:4]) + # a trick to sep long string input
           theme(legend.position="bottom", legend.box = "vertical") + # group.by is important, use this to call metadata separation
           theme(plot.title = element_text(hjust = 1)) +
@@ -516,7 +514,7 @@ server <- function(input, output) {
     output$Ridge <- renderPlot({
       user_genes <- str_split(input$genes, ", ")[[1]]
       validate(need(input$selectaplot=="Ridge", message=FALSE))
-      RidgePlot(stanford,
+      RidgePlot(plaqviewobj,
                 cols = manual_color_list,
                 group.by = input$selectlabelmethodforgenequery,
                 features =  user_genes[1:1]
@@ -536,7 +534,7 @@ server <- function(input, output) {
         pdf(file, paper = "default") # paper = defult is a4 size
         user_genes <- str_split(input$genes, ", ")[[1]]
         validate(need(input$selectaplot=="Ridge", message=FALSE))
-        temp <- RidgePlot(stanford,
+        temp <- RidgePlot(plaqviewobj,
                           cols = manual_color_list,
                           group.by = input$selectlabelmethodforgenequery,
                           features =  user_genes[1:1]
@@ -555,7 +553,7 @@ server <- function(input, output) {
     #### cell population ####
     output$cellpopulation <- renderPlot({
       # this chunk is to calculate population statistics 
-      cellcounts <- stanford@meta.data[[input$selectlabelmethodforgenequery]] # extract cell names
+      cellcounts <- plaqviewobj@meta.data[[input$selectlabelmethodforgenequery]] # extract cell names
       cellcounts <- as.factor(cellcounts) # convert to factors
       
       cellcounts.summary <- as.data.frame(summary(cellcounts)) # for levels laters
@@ -609,7 +607,7 @@ server <- function(input, output) {
   output$leftlabelplot <-
     renderPlot(
       DimPlot(
-        stanford,
+        plaqviewobj,
         reduction = "umap",
         label = TRUE,
         label.size = 5,
@@ -628,7 +626,7 @@ server <- function(input, output) {
   output$rightlabelplot <- 
     renderPlot(
       DimPlot(
-        stanford,
+        plaqviewobj,
         reduction = "umap",
         label = TRUE,
         label.size = 5,
@@ -648,42 +646,38 @@ server <- function(input, output) {
   output$diffbyseurat <- downloadHandler(
     filename = "differential_markergenes_by_seurat_clusters.csv",
     content = function(file) {
-      file.copy("data/diffexp_by_unlabeled_clusters.csv", file)
+      file.copy(paste("data/", df$DataID[input$availabledatasettable_rows_selected], "/",
+                "diff_by_seurat.csv", sep = ""), file)
       
     }  )# close downloadhandler
   
-  output$diffbywirka_supplement <- downloadHandler(
-    filename = "Original_wirka_et_al_2019_NatureMed_supplemental.xlms",
+  output$diffbyauthor <- downloadHandler(
+    filename = "differential_markergenes_by_author_annotated_clusters.csv",
     content = function(file) {
-      file.copy("data/Wirka_2019_supplemental_material_NatMed.xlsx", file)
+      
+      file.copy(paste("data/", df$DataID[input$availabledatasettable_rows_selected], "/",
+                      "diff_by_author.csv", sep = ""), file)
       
     }  )# close downloadhandler
-  
-  
-  output$diffbywirka <- downloadHandler(
-    filename = "",
-    content = function(file) {
-      file.copy("data/diffexp_by_wirka_clusters.csv", file)
-      
-    }  )# close downloadhandler
-  
   
   output$diffbysingleR <- downloadHandler(
     filename = "differential_markergenes_by_singleR_labels.csv",
     content = function(file) {
-      file.copy("data/diffexp_by_singleR.csv", file)
-      
+      file.copy(paste("data/", df$DataID[input$availabledatasettable_rows_selected], "/",
+                      "diff_by_singleR.csv", sep = ""), file)      
     }  )# close downloadhandler
   
   #### PANEL #3 FUNCTIONS ####
   output$lefttrajectorygraph <- renderPlot(
-    readRDS(file =  normalizePath(file.path('data/trajectories', # this will dynamically read the file containing the right name
+    readRDS(file =  normalizePath(file.path('data/', # this will dynamically read the file containing the right name
+                                            df$DataID[input$availabledatasettable_rows_selected], "/",
                                             paste(input$lefttrajectorymethod, '.rds', sep=''))))
     
   ) # renderplot 
   
   output$righttrajectorygraph <- renderPlot(
-    readRDS(file =  normalizePath(file.path('data/trajectories', # this will dynamically read the file containing the right name
+    readRDS(file =  normalizePath(file.path('data/', # this will dynamically read the file containing the right name
+                                            df$DataID[input$availabledatasettable_rows_selected], "/",
                                             paste(input$righttrajectorymethod, '.rds', sep='')))) 
   ) # renderplot 
   
