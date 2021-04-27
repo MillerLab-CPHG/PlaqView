@@ -14,5 +14,6 @@ The data used in this interactive session were first published by Wirka et al. (
 UVA MSTP
 PlaqOmics (Leducq Foundation)
 
-![](www/MSTPlogo.png| width=300)
-![](www/Leducq.png) ![](www/PlaqOmics.png)
+<img src="www/MSTPlogo.png" alt="MSTP" width="200"/>
+<img src="drawing.jpg" alt="drawing" width="200"/>
+<img src="drawing.jpg" alt="drawing" width="200"/>
