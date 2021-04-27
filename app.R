@@ -13,6 +13,7 @@ library(readxl)
 library(shinyWidgets)
 library(shinyjs)
 library(RColorBrewer)
+library(rDGIdb)
 
 #### PreReq Codes ####
 # below line is commented for shinyapp.io deployment temp
@@ -319,7 +320,54 @@ ui <- fluidPage(
                       
              ), # tabPanel
              
-             # PANEL 4: Druggable Genome ----  
+             # PANEL 4: DRUGGABLE GENOME ----  
+             tabPanel("Drug-Gene Interactions",
+                      mainPanel(width = 12,
+                        fluidRow(width = 12,
+                          column(width = 6,
+                                 includeMarkdown("descriptionfiles/helptext_druggablegenome.Rmd"),
+                                 wellPanel(
+                                   textInput(
+                                   inputId = "druggeneinput",
+                                   label = "Gene to Drug",
+                                   value = "EGFR"
+                                 ),
+                                 selectInput("drugcelllabelmethod", 
+                                             label = NULL,
+                                             choices = list(
+                                               "SingleR (Individual Cell ID)" = "SingleR.calls",
+                                               "Author Supplied (Manual)" = "manually_annotated_labels",
+                                               "Seurat Clusters (Numbered)" = "seurat_clusters",
+                                               "scCATCH (Heart)" = "scCATCH_Heart",
+                                               "scCATCH (Blood Vessels)" = "scCATCH_BV"),
+                                             selected = "SingleR (Individual Cell ID)"),
+                                 ),
+                                
+                                 awesomeCheckboxGroup(
+                                   inputId = "dgidbdatabase",
+                                   label = "Choose a Database", 
+                                   inline = TRUE, 
+                                   status = "danger",
+                                   selected = "FDA",
+                                   choices = sourceDatabases()
+                                 ),
+                                 
+                                 actionButton(inputId = "rundgidb",
+                                              label = "Start Query",
+                                              width = '100%')
+                          ), 
+                          column(width = 6, 
+                                 wellPanel(plotOutput("featurefordrugs",
+                                                       height = '500px')  )),
+                          column(width = 12,
+                                 DT::dataTableOutput("dgidboutput", width = "100%"),
+                                 helpText("You must restart query if you change database. PubMed ID and citations of interactions are available in full download file."),
+                                 downloadButton("downloaddgidbdata", "Download Complete Gene-Drug Interaction Data")
+                          )
+                        )
+                      )
+               
+             ),
              
              # PANEL 6: ABOUT PANEL ----
              tabPanel("About & Help",
@@ -355,7 +403,7 @@ server <- function(input, output) {
   output$availabledatasettable <-
     DT::renderDataTable(df, server = F, # server is for speed/loading
                         selection = list(mode = 'single', selected = c(1)),
-                        options=list(columnDefs = list(list(visible=FALSE, targets=c(10)))), # this hides the 8th column, which is datasetID
+                        options=list(columnDefs = list(list(visible=FALSE, targets=c(11)))), # this hides the 8th column, which is datasetID
                         escape = FALSE) # this escapes rendering html (link) literally and makes link clickable
   
   observeEvent(input$loaddatabutton, {
@@ -682,7 +730,34 @@ server <- function(input, output) {
   ) # renderplot 
   
   
-  #### PANEL #4 FUNCTIONS #### 
+  #### PANEL #4 FUNCTIONS ####
+  observeEvent(input$rundgidb, {
+    druggenes <- str_split(input$druggeneinput, ", ")[[1]]
+    Idents(plaqviewobj) <- input$drugcelllabelmethod
+    output$featurefordrugs <- renderPlot({
+      user_genes <- str_split(input$genes, ", ")[[1]]
+      FeaturePlot(plaqviewobj, 
+                  features = druggenes[1:1], label = T, repel = T
+                  ) + # a trick to sep long string input
+        theme(legend.position="bottom", legend.box = "vertical") + # group.by is important, use this to call metadata separation
+        theme(plot.title = element_text(hjust = 1)) +
+        theme(plot.title = element_text(hjust =  0.5)) 
+    }) # render plot
+    
+    result <- queryDGIdb(input$druggeneinput,
+                         sourceDatabases = input$dgidbdatabase)
+    isolatedtable <- result@data[["interactions"]][[1]]
+    isolatedtable <-  isolatedtable %>% # reorder columns
+      select(drugName, interactionTypes, score, 
+             #pmids, 
+             #sources, 
+             drugConceptId
+             )
+    
+    output$dgidboutput <- DT::renderDataTable(isolatedtable, )
+  })# observer event
+  
+  #### PANEL #6 FUNCTIONS #### 
   
   output$downloadsessioninfo <- downloadHandler(
     filename = paste(date(), "sesssioninfo.txt"),

@@ -9,4 +9,10 @@ The data used in this interactive session were first published by Wirka et al. (
 ### Reproducibility and Code Availability 
 *PlaqView* is designed to be open-source and publicly available and serve as a template for other scRNA-seq analysis pipelines. The code scripts are available on our [GitHub Page](https://github.com/MillerLab-CPHG/PlaqView). This application calls for .rds datafiles that are too large to host on Github, but you can find them [here](https://virginia.box.com/shared/static/oyo1bicpvlxen940zmciqapvg0y3n6gb.rds). To Run this application successfully, place the .rds object file in a folder/subdiretory called 'data.'
 
+
+### Funding and Support
+UVA MSTP
+PlaqOmics (Leducq Foundation)
+
 ![](www/MSTPlogo.png)
+![](www/Leducq.png) ![](www/PlaqOmics.png)

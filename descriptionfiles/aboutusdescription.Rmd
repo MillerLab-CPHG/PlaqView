@@ -9,23 +9,22 @@ output: html_document
 
 *PlaqView* is a standalone, interactive, and reproducible Shiny- and R-based tool to explore single-cell RNA-sequencing data of human coronary artery samples. Our goal is to make these valuable data analytic tools publicly available to non-bioinformaticians. This is an open-sourced tool that is freely available and can be modified for other scRNA-seq data.
 
-*Plaqview* is currently in beta as of Feb 1 (v.0.1), 2021. Last Updated: March 23, 2021.
+*Plaqview* is currently in public beta as of April 26 (v.1.0), 2021. Last Updated: April 26, 2021.
 
 ### About the Datasets
 
-The primary data used in this interactive session were first published by Wirka *et al.* [(Nature Medicine, 2019)](https://pubmed.ncbi.nlm.nih.gov/31359001/) and made available here by Ma *et al.* (2021). In this dataset, diseased segments of the right coronary artery were subjected to scRNA-seq from four patients who underwent heart transplantation.
+The primary data used in this interactive session were first published by Wirka *et al.* [(Nature Medicine, 2019)](https://pubmed.ncbi.nlm.nih.gov/31359001/) and made available here by Ma *et al.* (2021). In this dataset, diseased segments of the right coronary artery were subjected to scRNA-seq from four patients who underwent heart transplantation. See welcome page for other data DOI's. Detailed methods and preprocessing steps are found in our pre-print, available [here!](https://www.biorxiv.org/content/10.1101/2020.10.27.357715v2)
 
 For details on sample information, click [here to download supplemental data table](https://static-content.springer.com/esm/art%3A10.1038%2Fs41591-019-0512-5/MediaObjects/41591_2019_512_MOESM1_ESM.xlsx)
 
 **More datasets are coming soon!**
 
 ### Features Coming Soon
-
-We are continuously improving PlaqView. We are working on modularizing and expanding to allow additional features such as comparing trajectory methods and automatic data retrieval. If you have a suggestion for us, please let us know on our [GitHub Page](https://github.com/MillerLab-CPHG/PlaqView) or via email directly at weima@virginia.edu.
+eQTL, multi-variate analysis with patient metadata. Check back soon!
 
 ### Reproducibility and Code Availability
 
-*PlaqView* is designed to be open-source and publicly available and serve as a template for other scRNA-seq analysis pipelines. The code scripts are available on our [GitHub Page](https://github.com/MillerLab-CPHG/PlaqView). This application calls for .rds datafiles that are too large to host on Github, but you can find them [here](https://virginia.box.com/shared/static/oyo1bicpvlxen940zmciqapvg0y3n6gb.rds). To Run this application successfully, place the .rds object file in the folder/subdiretory called 'data.'
+*PlaqView* is designed to be open-source and publicly available and serve as a template for other scRNA-seq analysis pipelines. The code scripts are available on our [GitHub Page](https://github.com/MillerLab-CPHG/PlaqView). This application calls for .rds datafiles that are too large to host on Github, but you can find them at the source codes on GitHub or by emailing us, we will get back to you in 24hrs. To Run this application successfully, place all the .rds object file in the folder/subdiretory called 'data.'
 
 ### Packages Used
 
@@ -39,3 +38,7 @@ The Miller Lab is a part of the Center for Public Health Genomics of the Univers
 
 If you have issue running *PlaqView*, please raise a ticket at our [GitHub Page](https://github.com/MillerLab-CPHG/PlaqView). For urgent issues, please email the authors directly at weima@virginia.edu.
 
+
+### Disclaimer
+
+The use of *PlaqView* is for research only. Please refer to the datasets' respective DOI for citation info. This application is not intended for use in clinical decision making or diagnostics. The work here is done under the funding of the University of Virginia MSTP grant, PlaqOmics grant, and others.
