@@ -11,9 +11,7 @@ The data used in this interactive session were first published by Wirka et al. (
 
 
 ### Funding and Support
-UVA MSTP
-PlaqOmics (Leducq Foundation)
+[UVA MSTP](https://mstp.med.virginia.edu/)
+[PlaqOmics (Leducq Foundation)](https://jeanette-erdmann.jimdo.com/)
 
-<img src="www/MSTPlogo.png" alt="MSTP" width="200"/>
-<img src="drawing.jpg" alt="drawing" width="200"/>
-<img src="drawing.jpg" alt="drawing" width="200"/>
+<img src="www/MSTPlogo.png" alt="MSTP" width="200"/> <img src="www/PlaqOmics.png" alt="PlaqOmics" width="200"/> <img src="www/Leducq.png" alt="leducq" width="200"/>
