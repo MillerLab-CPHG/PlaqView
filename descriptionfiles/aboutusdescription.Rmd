@@ -15,12 +15,12 @@ output: html_document
 
 The primary data used in this interactive session were first published by Wirka *et al.* [(Nature Medicine, 2019)](https://pubmed.ncbi.nlm.nih.gov/31359001/) and made available here by Ma *et al.* (2021). In this dataset, diseased segments of the right coronary artery were subjected to scRNA-seq from four patients who underwent heart transplantation. See welcome page for other data DOI's. Detailed methods and preprocessing steps are found in our pre-print, available [here!](https://www.biorxiv.org/content/10.1101/2020.10.27.357715v2)
 
-For details on sample information, click [here to download supplemental data table](https://static-content.springer.com/esm/art%3A10.1038%2Fs41591-019-0512-5/MediaObjects/41591_2019_512_MOESM1_ESM.xlsx)
+Details of each dataset is available in their respective publication. Please use the 'DOI' link to access the latest published articles. Please cite the original authors and our application if you use our data and application in your publications.
 
 **More datasets are coming soon!**
 
 ### Features Coming Soon
-eQTL, multi-variate analysis with patient metadata. Check back soon!
+eQTL/GWAS, multi-variate analysis and visualization with patient metadata. Check back soon!
 
 ### Reproducibility and Code Availability
 

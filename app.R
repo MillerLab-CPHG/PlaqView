@@ -71,7 +71,7 @@ ui <- fluidPage(
   navbarPage("PlaqView", id = "inTabset",
              
              #### WELCOME Panel ####
-             tabPanel("Welcome", 
+             tabPanel("Select Dataset", 
                       mainPanel(width = 12,
                                 fluidRow(
                                   column(width = 12,
@@ -356,13 +356,16 @@ ui <- fluidPage(
                                               label = "Start Query",
                                               width = '100%')
                           ), 
+                          br(),
                           column(width = 6, 
                                  wellPanel(plotOutput("featurefordrugs",
                                                        height = '500px')  )),
+                          br(),
                           column(width = 12,
                                  DT::dataTableOutput("dgidboutput", width = "100%"),
                                  helpText("You must restart query if you change database. PubMed ID and citations of interactions are available in full download file."),
-                                 downloadButton("downloaddgidbdata", "Download Complete Gene-Drug Interaction Data")
+                                 br(),
+                                 downloadButton("downloaddgidboutput", label = "Download Full Gene-Drug Interaction Table")
                           )
                         )
                       )
@@ -376,6 +379,9 @@ ui <- fluidPage(
                         includeMarkdown("descriptionfiles/aboutusdescription.Rmd"),
                         br(),
                         img(src = "MSTPlogo.png", width = 233, height = 83),
+                        img(src = "PlaqOmics.png", width = 233, height = 83),
+                        img(src = "Leducq.png", width = 233, height = 83),
+                        
                         br(),
                         br(),
                         downloadButton("downloadsessioninfo", "Download Session and Package Information")
@@ -498,7 +504,8 @@ server <- function(input, output) {
               features = user_genes) + # a trick to sep long string input
         ggtitle("Expression Dot Plot") +
         theme(plot.title = element_text(hjust = 1)) +
-        theme(plot.title = element_text(hjust = 0.5))
+        theme(plot.title = element_text(hjust = 0.5)) +
+        theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1))
     })
     
     # this is for the download
@@ -746,15 +753,33 @@ server <- function(input, output) {
     
     result <- queryDGIdb(input$druggeneinput,
                          sourceDatabases = input$dgidbdatabase)
-    isolatedtable <- result@data[["interactions"]][[1]]
-    isolatedtable <-  isolatedtable %>% # reorder columns
-      select(drugName, interactionTypes, score, 
+    fulltable <- result@data[["interactions"]][[1]]
+    
+    isolatedtable <-  fulltable %>% # reorder columns
+      select("Drug_Name" = drugName, 
+             "Interaction_Types" = interactionTypes, # rename columns might as well :)
+             "Int_Score" = score , 
              #pmids, 
              #sources, 
-             drugConceptId
+             "Drug_ConceptID" = drugConceptId
              )
     
+    # these need to be run to 'flatten' the list-type columns
+    fulltable <- fulltable %>% mutate(interactionTypes = map_chr(interactionTypes, toString))
+    fulltable <- fulltable %>% mutate(sources = map_chr(sources, toString))
+    fulltable <- fulltable %>% mutate(pmids = map_chr(pmids, toString))
+    
     output$dgidboutput <- DT::renderDataTable(isolatedtable, )
+    output$downloaddgidboutput <- downloadHandler(
+      filename = function() {
+        paste(input$druggeneinput, "_complete_drug-gene_int.csv", sep = "")
+      },
+      content = function(file) {
+        write.csv(fulltable, file, row.names = FALSE, col.names = T)
+      } 
+    )# close downloadhandler
+    
+# 
   })# observer event
   
   #### PANEL #6 FUNCTIONS #### 

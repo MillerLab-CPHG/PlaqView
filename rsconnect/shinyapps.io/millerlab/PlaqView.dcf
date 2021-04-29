@@ -5,9 +5,9 @@ account: millerlab
 server: shinyapps.io
 hostUrl: https://api.shinyapps.io/v1
 appId: 3596979
-bundleId: 4521697
+bundleId: 4536474
 url: https://millerlab.shinyapps.io/PlaqView/
-when: 1619460062.70825
-lastSyncTime: 1619460062.70827
+when: 1619721112.28026
+lastSyncTime: 1619721112.28027
 asMultiple: FALSE
 asStatic: FALSE
