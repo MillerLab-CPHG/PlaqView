@@ -60,13 +60,13 @@ manual_color_list <- color_function(40) # change this if clusters >40
 # Define UI for application that draws a histogram
 ui <- fluidPage(
   
-  # set theme
+  # AESTHETICS####
   theme = shinytheme("flatly"),
   add_busy_bar(color = "#ff9142", height = "100px"), # THIS IS THE BUSY BAR
   use_waiter(), 
   waiter_show_on_load(html = spin_rotate()),
   useShinyjs(),
-  
+
   # defining each 'tab' here
   navbarPage("PlaqView", id = "inTabset",
              
@@ -140,6 +140,7 @@ ui <- fluidPage(
                                                   choices = list(
                                                     "Author Supplied" = "manually_annotated_labels",
                                                     "SingleR (Individual Cell ID)" = "SingleR.calls",
+                                                    "Seurat + Tabula sapiens Ref" = "predicted.id_tabulus.sapien",
                                                     "Seurat Clusters (Numbered)" = "seurat_clusters",
                                                     "scCATCH (Heart)" = "scCATCH_Heart",
                                                     "scCATCH (Blood Vessels)" = "scCATCH_BV"),
@@ -233,6 +234,8 @@ ui <- fluidPage(
                                                        choices = list(
                                                          "Author Supplied (Manual)" = "manually_annotated_labels",
                                                          "SingleR (Individual Cell ID)" = "SingleR.calls",
+                                                         "Seurat + Tabula sapiens Ref" = "predicted.id_tabulus.sapien",
+                                                         
                                                          "Seurat Clusters (Numbered)" = "seurat_clusters",
                                                          "scCATCH (Heart)" = "scCATCH_Heart",
                                                          "scCATCH (Blood Vessels)" = "scCATCH_BV"),
@@ -246,6 +249,8 @@ ui <- fluidPage(
                                                        choices = list(
                                                          "SingleR (Individual Cell ID)" = "SingleR.calls",
                                                          "Seurat Clusters (Numbered)" = "seurat_clusters",
+                                                         "Seurat + Tabula sapiens Ref" = "predicted.id_tabulus.sapien",
+                                                         
                                                          "scCATCH (Heart)" = "scCATCH_Heart",
                                                          "scCATCH (Blood Vessels)" = "scCATCH_BV"),
                                                        selected = "SingleR (Individual Cell ID)"),
@@ -337,18 +342,19 @@ ui <- fluidPage(
                                              choices = list(
                                                "SingleR (Individual Cell ID)" = "SingleR.calls",
                                                "Author Supplied (Manual)" = "manually_annotated_labels",
+                                               "Seurat + Tabula sapiens Ref" = "predicted.id_tabulus.sapien",
+                                               
                                                "Seurat Clusters (Numbered)" = "seurat_clusters",
                                                "scCATCH (Heart)" = "scCATCH_Heart",
                                                "scCATCH (Blood Vessels)" = "scCATCH_BV"),
                                              selected = "SingleR (Individual Cell ID)"),
                                  ),
                                 
-                                 awesomeCheckboxGroup(
+                                 checkboxGroupInput(
                                    inputId = "dgidbdatabase",
                                    label = "Choose a Database", 
                                    inline = TRUE, 
-                                   status = "danger",
-                                   selected = "FDA",
+                                   selected = c("FDA", "DrugBank"),
                                    choices = sourceDatabases()
                                  ),
                                  
@@ -388,6 +394,7 @@ ui <- fluidPage(
                         
                         
                       )) # close tab panel
+
              
   )# close navbarpage
   
@@ -397,7 +404,7 @@ ui <- fluidPage(
 
 
 
-
+            
 #### SERVER ####
 # Define server logic required to draw a histogram
 server <- function(input, output) {
@@ -755,19 +762,34 @@ server <- function(input, output) {
                          sourceDatabases = input$dgidbdatabase)
     fulltable <- result@data[["interactions"]][[1]]
     
-    isolatedtable <-  fulltable %>% # reorder columns
-      select("Drug_Name" = drugName, 
-             "Interaction_Types" = interactionTypes, # rename columns might as well :)
-             "Int_Score" = score , 
-             #pmids, 
-             #sources, 
-             "Drug_ConceptID" = drugConceptId
-             )
+    # so if table becomes a list (empty), run the following
+    # this is a table to show no drugs available
+    if (class(fulltable) == "list" ) {
+      nodrug <- matrix(c("No Drugs Found"),ncol=4,byrow=TRUE)
+      colnames(nodrug) <- c("drugName","interactionTypes","score","drugConceptId")
+      nodrug <- as_data_frame(nodrug)
+      
+      isolatedtable <- nodrug
+      fulltable <- nodrug
+      
+      }
     
-    # these need to be run to 'flatten' the list-type columns
-    fulltable <- fulltable %>% mutate(interactionTypes = map_chr(interactionTypes, toString))
-    fulltable <- fulltable %>% mutate(sources = map_chr(sources, toString))
-    fulltable <- fulltable %>% mutate(pmids = map_chr(pmids, toString))
+    if (class(fulltable) == "data.frame" ) {
+      isolatedtable <-  fulltable %>% # reorder columns
+        select("Drug_Name" = drugName, 
+               "Interaction_Types" = interactionTypes, # rename columns might as well :)
+               "Int_Score" = score , 
+               #pmids, 
+               #sources, 
+               "Drug_ConceptID" = drugConceptId
+        )
+      
+      # these need to be run to 'flatten' the list-type columns
+      fulltable <- fulltable %>% mutate(interactionTypes = map_chr(interactionTypes, toString))
+      fulltable <- fulltable %>% mutate(sources = map_chr(sources, toString))
+      fulltable <- fulltable %>% mutate(pmids = map_chr(pmids, toString))
+    }
+    
     
     output$dgidboutput <- DT::renderDataTable(isolatedtable, )
     output$downloaddgidboutput <- downloadHandler(
@@ -790,7 +812,7 @@ server <- function(input, output) {
       write_lines(sessionInfo(), file)
     }  )# close downloadhandler
   
-  #### waiter hide ####
+  #### Waiter ####
   waiter_hide()
   
   

@@ -11,6 +11,6 @@ output: html_document
 
 We are working constantly to update *PlaqView* with the most up-to-date analysis tools and are actively incorporating new datasets.
 
-We are actively working on two types of datasets: human and mouse. PlaqView enables users to explore a single dataset or explore integrated (cross-species) datasets. Our our latest preprint [here](https://www.biorxiv.org/content/10.1101/2020.10.27.357715v2).
+We are actively working on two types of datasets: human and mouse. Currently, only human datasets are available. Mouse dataset will be available in late May with our next release. Our our latest preprint [here](https://www.biorxiv.org/content/10.1101/2020.10.27.357715v2).
 
 **To begin using PlaqView, choose a dataset below and click "Step1: Load Dataset", (please be patient while the data loads), then click "Step2: Enter PlaqView".**

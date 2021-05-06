@@ -9,6 +9,8 @@ output: html_document
 
 If you have a gene of interest, you can enter that gene to find known drugs or compounds that interact with it. A feature map of the gene of interest is also provided in your selected dataset. The drug interaction data is derived from [DGIDB.org](https://dgidb.org/) and made available through the [rDGIDB](https://www.bioconductor.org/packages/release/bioc/html/rDGIdb.html) package. In the future, CRISPR perturbation data will also be available. 
 
-For details about each variables, click [here](https://www.dgidb.org/score).
+For details about each variables, click [here](https://www.dgidb.org/score). 
+For details about interaction types, click [here](https://dgidb.org/interaction_types).
+For information about each databases and versions, click [here](https://dgidb.org/data_clients).
 
 *This is not for use in diagnosis or treatment in the clinical setting, only for scientific research.*
