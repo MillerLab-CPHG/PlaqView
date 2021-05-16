@@ -815,8 +815,8 @@ server <- function(input, output) {
     )# close downloadhandler
     
     # complete druggable genome
-    finan.genome <- read_delim("Druggable_genome_finan.txt", 
-                               "\t", escape_double = FALSE, trim_ws = TRUE)
+    # finan.genome <- read_delim("/data/Druggable_genome_finan.txt", 
+    #                            "\t", escape_double = FALSE, trim_ws = TRUE)
   })# observer event
   
   #### PANEL #6 FUNCTIONS #### 
