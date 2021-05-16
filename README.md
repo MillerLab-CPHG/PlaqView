@@ -4,10 +4,12 @@
 PlaqView is LIVE! [Check it out here](https://millerlab.shinyapps.io/PlaqView)
 
 ### Data Source
-The data used in this interactive session were first published by Wirka et al. (Nature Medicine, 2019). The data were later extensively analyzed and made available here by Ma et al. (2021). Overtime, we have included additional datasets, please see the online application or the 'available_dataset' file for the latest available datasets!
+The data used in this interactive session were first published by Wirka et al. (Nature Medicine, 2019). The data were later extensively analyzed and made available here by Ma et al. (2021). Overtime, we have included additional datasets, please see the [application webpage](https://millerlab.shinyapps.io/PlaqView) or the 'available_dataset' file for the latest available datasets!
 
 #### Submitting Your Data
 Currently, PlaqView supports scRNA-seq type data. We are working on expanding to ATAC-seq and spatial transcriptomics. We welcome submission of all kinds of single-cell data related to cardiovascular genetics.
+
+To learn about how data is processed or to **submit your own data**, [Click Here](https://github.com/MillerLab-CPHG/PlaqView_DataProcessing).
 
 For scRNA-seq data, we require the following:
 1) *Seurat* object containing your count matrix and cell labels used in your publication. (Cell labels are often stored in the 'Metadata' tab in the *Seurat* obj.).
@@ -22,8 +24,8 @@ To transfer your data, we will work with you if your institution require a data 
 *PlaqView* is designed to be open-source and publicly available and serve as a template for other scRNA-seq analysis pipelines. The code scripts are available on our [GitHub Page](https://github.com/MillerLab-CPHG/PlaqView). This application calls for .rds datafiles that are too large to host on Github, but you may request the latest files at weima@virginia.edu or via a GitHub request. We will respond to your requests within 24hrs. To Run this application successfully, place the .rds object files in a folder/subdiretory called 'data.'
 
 
-### Funding and Support
+### Funding and Collaborations
 [UVA MSTP](https://mstp.med.virginia.edu/)
 [PlaqOmics (Leducq Foundation)](https://jeanette-erdmann.jimdo.com/)
 
-<img src="www/MSTPlogo.png" alt="MSTP" width="200"/> <img src="www/PlaqOmics.png" alt="PlaqOmics" width="200"/> <img src="www/Leducq.png" alt="leducq" width="200"/>
+<img src="www/MSTPlogo.png" alt="MSTP" width="200"/> <img src="www/PlaqOmics.png" alt="PlaqOmics" width="200"/> <img src="www/Leducq.png" alt="leducq" width="200"/><img src="www/utrecht.png" alt="leducq" width="200"/>

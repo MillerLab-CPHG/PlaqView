@@ -270,7 +270,9 @@ ui <- fluidPage(
                                     
                                     column(width = 6, h4("Differential Expression by Cell Type"),
                                            downloadButton("diffbysingleR", "SingleR"),
-                                           helpText("This will download a .csv of differentially expressed genes as identified by singleR")
+                                           downloadButton("diffbyTS", "Seurat + Tabula sapiens"),
+                                           
+                                           helpText("This will download a .csv of differentially expressed genes as identified by individual cells")
                                     ) # column
                                   ) # fluidrow
                                 ) # close wellpanel
@@ -384,7 +386,11 @@ ui <- fluidPage(
                         # descriptions
                         includeMarkdown("descriptionfiles/aboutusdescription.Rmd"),
                         br(),
+                        img(src = "millerlablogo.png", height = 83),
                         img(src = "MSTPlogo.png", width = 233, height = 83),
+                        img(src = "umc.png", height = 83),
+                        br(),
+          
                         img(src = "PlaqOmics.png", width = 233, height = 83),
                         img(src = "Leducq.png", width = 233, height = 83),
                         
@@ -727,6 +733,13 @@ server <- function(input, output) {
     content = function(file) {
       file.copy(paste("data/", df$DataID[input$availabledatasettable_rows_selected], "/",
                       "diff_by_singleR.csv", sep = ""), file)      
+    }  )# close downloadhandler
+  
+  output$diffbyTS <- downloadHandler(
+    filename = "differential_markergenes_by_tabulus_sapien_reference.csv",
+    content = function(file) {
+      file.copy(paste("data/", df$DataID[input$availabledatasettable_rows_selected], "/",
+                      "diff_by_predicted.id_tabulus.sapien.csv", sep = ""), file)      
     }  )# close downloadhandler
   
   #### PANEL #3 FUNCTIONS ####

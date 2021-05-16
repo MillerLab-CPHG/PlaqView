@@ -32,7 +32,7 @@ eQTL/GWAS, multi-variate analysis and visualization with patient metadata. Check
 
 ### About Our Lab
 
-The Miller Lab is a part of the Center for Public Health Genomics of the University of Virginia, School of Medicine in Charlottesville, VA. Our lab focuses on finding novel risk factors and mechanisms of heart diseases using next-generation sequencing techniques. For questions about our lab, please contact us [here](https://millerlab.org). For questions about *PlaqView*, raise a ticket in our [GitHub Page](https://github.com/MillerLab-CPHG/PlaqView).
+The Miller Lab is a part of the Center for Public Health Genomics of the University of Virginia, School of Medicine in Charlottesville, VA. Our lab focuses on finding novel risk factors and mechanisms of heart diseases using next-generation sequencing techniques. For questions about our lab, please contact us [here](https://millerlab.org). For questions about *PlaqView*, raise a ticket in our [GitHub Page](https://github.com/MillerLab-CPHG/PlaqView). 
 
 ### Where to Find Help
 
