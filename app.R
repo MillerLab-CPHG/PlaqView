@@ -252,7 +252,7 @@ ui <- fluidPage(
                                                          "Seurat + Tabula sapiens Ref" = "predicted.id_tabulus.sapien",
                                                          
                                                          "scCATCH (Heart)" = "scCATCH_Heart",
-                                                         "scCATCH (Blood Vessels)" = "scCATCH_BV"),
+                                                          "scCATCH (Blood Vessels)" = "scCATCH_BV"),
                                                        selected = "SingleR (Individual Cell ID)"),
                                            plotOutput("rightlabelplot",
                                                       height = '500px')
@@ -801,7 +801,9 @@ server <- function(input, output) {
       } 
     )# close downloadhandler
     
-# 
+    # complete druggable genome
+    finan.genome <- read_delim("Druggable_genome_finan.txt", 
+                               "\t", escape_double = FALSE, trim_ws = TRUE)
   })# observer event
   
   #### PANEL #6 FUNCTIONS #### 
