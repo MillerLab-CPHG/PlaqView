@@ -1,6 +1,8 @@
 #### LIBRARIES #### 
 # library(BiocManager)
 library(shiny)
+library(shiny.fluent)
+library(shiny.react)
 library(shinythemes)
 library(Seurat)
 library(shinybusy) #install.packages("shinybusy")
@@ -56,22 +58,30 @@ original_color_list <-
 color_function <- colorRampPalette(original_color_list)
 manual_color_list <- color_function(40) # change this if clusters >40
 
+#aestethics for disabled tab panels
+css <- "
+.nav li a.disabled {
+background-color: #aaa !important;
+color: #333 !important;
+cursor: not-allowed !important;
+border-color: #aaa !important;
+}"
+
 #### UI ####
 # Define UI for application that draws a histogram
 ui <- fluidPage(
-  
+  shinyjs::inlineCSS(css), 
   # AESTHETICS####
   theme = shinytheme("flatly"),
   add_busy_bar(color = "#ff9142", height = "100px"), # THIS IS THE BUSY BAR
   use_waiter(), 
   waiter_show_on_load(html = spin_rotate()),
   useShinyjs(),
-
+  
   # defining each 'tab' here
   navbarPage("PlaqView", id = "inTabset",
-             
              #### WELCOME Panel ####
-             tabPanel("Select Dataset", 
+             tabPanel(textOutput(outputId = "welcome"), #allows for changing of the title later 
                       mainPanel(width = 12,
                                 fluidRow(
                                   column(width = 12,
@@ -85,7 +95,7 @@ ui <- fluidPage(
                                 DT::dataTableOutput('availabledatasettable'),
                                 br(),
                                 fluidRow(
-                                  column(width = 6,
+                                  column(width = 12,
                                          actionBttn(
                                            inputId = "loaddatabutton",
                                            label = "Step 1: Click Here to Load Dataset",
@@ -93,7 +103,7 @@ ui <- fluidPage(
                                            color = "primary",
                                            block = T)
                                   ),
-                                  column(width = 6,
+                                  column(width = 12,
                                          hidden(
                                            actionBttn(
                                              inputId = "jumpto1",
@@ -105,8 +115,7 @@ ui <- fluidPage(
                                 ),
                                 br(),
                                 br(),
-                      )
-             ),
+                      )),
              
              # PANEL 1: QUERY GENE   ----
              tabPanel(title = "Quick Gene Lookup", value = "panel1",
@@ -223,7 +232,7 @@ ui <- fluidPage(
              
              
              # PANEL 2: COMPARE LABELING METHODS  ----  
-             tabPanel("Labeling Methods",
+             tabPanel("Labeling Methods",value = "panel2",
                       mainPanel(width = 12, # 12/12 is full panel,
                                 wellPanel(includeMarkdown("descriptionfiles/helptext_comparelabels.Rmd")),
                                 wellPanel(
@@ -252,7 +261,7 @@ ui <- fluidPage(
                                                          "Seurat + Tabula sapiens Ref" = "predicted.id_tabulus.sapien",
                                                          
                                                          "scCATCH (Heart)" = "scCATCH_Heart",
-                                                          "scCATCH (Blood Vessels)" = "scCATCH_BV"),
+                                                         "scCATCH (Blood Vessels)" = "scCATCH_BV"),
                                                        selected = "SingleR (Individual Cell ID)"),
                                            plotOutput("rightlabelplot",
                                                       height = '500px')
@@ -282,7 +291,7 @@ ui <- fluidPage(
                       
              ), # tabPanel
              # PANEL 3: COMPARE TRAJECTORY METHODS ----
-             tabPanel("Trajectory Methods",
+             tabPanel("Trajectory Methods", value = "panel3",
                       mainPanel(width = 12, # 12/12 is full panel,
                                 wellPanel(includeMarkdown("descriptionfiles/helptext_comparetrajectories.Rmd")),
                                 wellPanel(
@@ -328,57 +337,69 @@ ui <- fluidPage(
              ), # tabPanel
              
              # PANEL 4: DRUGGABLE GENOME ----  
-             tabPanel("Drug-Gene Interactions",
+             tabPanel("Drug-Gene Interactions", value = "panel4",
                       mainPanel(width = 12,
-                        fluidRow(width = 12,
-                          column(width = 6,
-                                 includeMarkdown("descriptionfiles/helptext_druggablegenome.Rmd"),
-                                 wellPanel(
-                                   textInput(
-                                   inputId = "druggeneinput",
-                                   label = "Gene to Drug",
-                                   value = "EGFR"
-                                 ),
-                                 selectInput("drugcelllabelmethod", 
-                                             label = NULL,
-                                             choices = list(
-                                               "SingleR (Individual Cell ID)" = "SingleR.calls",
-                                               "Author Supplied (Manual)" = "manually_annotated_labels",
-                                               "Seurat + Tabula sapiens Ref" = "predicted.id_tabulus.sapien",
-                                               
-                                               "Seurat Clusters (Numbered)" = "seurat_clusters",
-                                               "scCATCH (Heart)" = "scCATCH_Heart",
-                                               "scCATCH (Blood Vessels)" = "scCATCH_BV"),
-                                             selected = "SingleR (Individual Cell ID)"),
-                                 ),
-                                
-                                 checkboxGroupInput(
-                                   inputId = "dgidbdatabase",
-                                   label = "Choose a Database", 
-                                   inline = TRUE, 
-                                   selected = c("FDA", "DrugBank"),
-                                   choices = sourceDatabases()
-                                 ),
-                                 
-                                 actionButton(inputId = "rundgidb",
-                                              label = "Start Query",
-                                              width = '100%')
-                          ), 
-                          br(),
-                          column(width = 6, 
-                                 wellPanel(plotOutput("featurefordrugs",
-                                                       height = '500px')  )),
-                          br(),
-                          column(width = 12,
-                                 DT::dataTableOutput("dgidboutput", width = "100%"),
-                                 helpText("You must restart query if you change database. PubMed ID and citations of interactions are available in full download file."),
-                                 br(),
-                                 downloadButton("downloaddgidboutput", label = "Download Full Gene-Drug Interaction Table")
-                          )
-                        )
-                      )
-               
+                                fluidRow(width = 12,
+                                         column(width = 6,
+                                                includeMarkdown("descriptionfiles/helptext_druggablegenome.Rmd"),
+                                                wellPanel(
+                                                  textInput(
+                                                    inputId = "druggeneinput",
+                                                    label = "Gene to Drug",
+                                                    value = "EGFR"
+                                                  ),
+                                                  selectInput("drugcelllabelmethod", 
+                                                              label = NULL,
+                                                              choices = list(
+                                                                "SingleR (Individual Cell ID)" = "SingleR.calls",
+                                                                "Author Supplied (Manual)" = "manually_annotated_labels",
+                                                                "Seurat + Tabula sapiens Ref" = "predicted.id_tabulus.sapien",
+                                                                
+                                                                "Seurat Clusters (Numbered)" = "seurat_clusters",
+                                                                "scCATCH (Heart)" = "scCATCH_Heart",
+                                                                "scCATCH (Blood Vessels)" = "scCATCH_BV"),
+                                                              selected = "SingleR (Individual Cell ID)"),
+                                                ),
+                                                checkboxGroupInput(
+                                                  inputId = "dgidbdatabase",
+                                                  label = "Choose a Database", 
+                                                  inline = TRUE, 
+                                                  selected = c(),
+                                                  choices = sourceDatabases()
+                                                ),
+                                                Stack(
+                                                  actionButton("selectAll",
+                                                               label = "Select All",
+                                                               style = "color: #fff#; background-color: #337ab7;
+                                                               border-color: #2e6da4"),
+                                                  actionButton("rundgidb",
+                                                               label = "Start Query",
+                                                               style = "color: #fff#; background-color: #00cc00;
+                                                               border-color: #2e6da4"),
+                                                  verticalAlign = TRUE,
+                                                  tokens = list(childrenGap = 10),
+                                                ),
+                                                br(),
+                                                br(),
+                                         ),
+                                         
+                                         
+                                         
+                                         br(),
+                                         column(width = 6, 
+                                                wellPanel(plotOutput("featurefordrugs",
+                                                                     height = '500px')  )),
+                                         br(),
+                                         column(width = 12,
+                                                DT::dataTableOutput("dgidboutput", width = "100%"),
+                                                helpText("You must restart query if you change database. PubMed ID and citations of interactions are available in full download file."),
+                                                br(),
+                                                downloadButton("downloaddgidboutput", label = "Download Full Gene-Drug Interaction Table")
+                                         ),
+                                ),
+                      ),
              ),
+             
              
              # PANEL 6: ABOUT PANEL ----
              tabPanel("About & Help",
@@ -390,7 +411,7 @@ ui <- fluidPage(
                         img(src = "MSTPlogo.png", width = 233, height = 83),
                         img(src = "umc.png", height = 83),
                         br(),
-          
+                        
                         img(src = "PlaqOmics.png", width = 233, height = 83),
                         img(src = "Leducq.png", width = 233, height = 83),
                         
@@ -400,20 +421,23 @@ ui <- fluidPage(
                         
                         
                       )) # close tab panel
-
+             
              
   )# close navbarpage
   
 )# close fluidpage
 
-
-
-
-
-            
 #### SERVER ####
 # Define server logic required to draw a histogram
-server <- function(input, output) {
+server <- function(input, output,clientData, session) {
+  output$welcome = renderText("Select Dataset") #initial title of the welcome panel
+  
+  #disable panels until data is loaded
+  shinyjs::disable(selector = '.navbar-nav a[data-value="panel1"')
+  shinyjs::disable(selector = '.navbar-nav a[data-value="panel2"')
+  shinyjs::disable(selector = '.navbar-nav a[data-value="panel3"')
+  shinyjs::disable(selector = '.navbar-nav a[data-value="panel4"')
+  
   #### WELCOME PANEL ####
   df <- read_excel("Available_datasets.xlsx")
   df$DOI <- paste("<a href=",  df$DOI,">", "Link", "</a>") # this converts to clickable format
@@ -436,6 +460,9 @@ server <- function(input, output) {
              " dataset!.",
              collapse = ", ")
     }) 
+    
+    #showcase new button
+    hide("loaddatabutton")
     show("jumpto1")
     
   })
@@ -443,6 +470,20 @@ server <- function(input, output) {
   observeEvent(input$jumpto1, {
     updateTabsetPanel(session = getDefaultReactiveDomain(), "inTabset",
                       selected = "panel1") # this is to switch to tab1
+    
+    #enable all panels once data is loaded in
+    shinyjs::enable(selector = '.navbar-nav a[data-value="panel1"')
+    shinyjs::enable(selector = '.navbar-nav a[data-value="panel2"')
+    shinyjs::enable(selector = '.navbar-nav a[data-value="panel3"')
+    shinyjs::enable(selector = '.navbar-nav a[data-value="panel4"')
+    
+    output$welcome = renderText("Change Dataset")
+    
+    
+    hide("jumpto1")
+    updateActionButton(session, inputId = "loaddatabutton", label = "Load New Dataset")
+    updateActionButton(session, inputId = "jumpto1", label = "Enter PlaqView")
+    show("loaddatabutton")
     
   })
   
@@ -468,7 +509,7 @@ server <- function(input, output) {
           ggtitle("UMAP by Cell Type") +
           theme(plot.title = element_text(hjust =  0.5)) +
           guides(color = guide_legend(nrow = 5)
-                 )
+          )
       ) # closes renderPlot
   })# closes observe event
   
@@ -715,7 +756,7 @@ server <- function(input, output) {
     filename = "differential_markergenes_by_seurat_clusters.csv",
     content = function(file) {
       file.copy(paste("data/", df$DataID[input$availabledatasettable_rows_selected], "/",
-                "diff_by_seurat.csv", sep = ""), file)
+                      "diff_by_seurat.csv", sep = ""), file)
       
     }  )# close downloadhandler
   
@@ -758,6 +799,28 @@ server <- function(input, output) {
   
   
   #### PANEL #4 FUNCTIONS ####
+  
+  #Changes "selectAll" while user is selecting/deselecting databases
+  obs <- observe(if (!is.null(input$dgidbdatabase)) {
+    updateActionButton(session,"selectAll", label = "Clear")
+  }
+  else if (is.null(input$dgidbdatabase)) {
+    updateActionButton(session, "selectAll", label = "Select All")
+  }
+  )
+  
+  #updates the selection (all or clear) of database based on "selectAll" button
+  observeEvent(input$selectAll, {
+    if (is.null(input$dgidbdatabase)) {
+      updateCheckboxGroupInput(session,"dgidbdatabase", selected = c(sourceDatabases()))
+      updateActionButton(session, "selectAll", label = "Clear")
+    }
+    else {
+      updateCheckboxGroupInput(session,"dgidbdatabase",selected = c(""))
+      updateActionButton(session, "selectAll", label = "Select All")
+    }
+  })
+  
   observeEvent(input$rundgidb, {
     druggenes <- str_split(input$druggeneinput, ", ")[[1]]
     Idents(plaqviewobj) <- input$drugcelllabelmethod
@@ -765,7 +828,7 @@ server <- function(input, output) {
       user_genes <- str_split(input$genes, ", ")[[1]]
       FeaturePlot(plaqviewobj, 
                   features = druggenes[1:1], label = T, repel = T
-                  ) + # a trick to sep long string input
+      ) + # a trick to sep long string input
         theme(legend.position="bottom", legend.box = "vertical") + # group.by is important, use this to call metadata separation
         theme(plot.title = element_text(hjust = 1)) +
         theme(plot.title = element_text(hjust =  0.5)) 
@@ -785,7 +848,7 @@ server <- function(input, output) {
       isolatedtable <- nodrug
       fulltable <- nodrug
       
-      }
+    }
     
     if (class(fulltable) == "data.frame" ) {
       isolatedtable <-  fulltable %>% # reorder columns
@@ -818,6 +881,7 @@ server <- function(input, output) {
     # finan.genome <- read_delim("/data/Druggable_genome_finan.txt", 
     #                            "\t", escape_double = FALSE, trim_ws = TRUE)
   })# observer event
+  
   
   #### PANEL #6 FUNCTIONS #### 
   
