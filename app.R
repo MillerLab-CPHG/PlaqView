@@ -4,7 +4,6 @@ library(shiny)
 library(shinythemes)
 library(Seurat)
 library(shinybusy) #install.packages("shinybusy")
-library(tidyverse)
 library(enrichR) # install.packages("enrichR")
 library(imager)
 library(waiter)
@@ -14,6 +13,8 @@ library(shinyWidgets)
 library(shinyjs)
 library(RColorBrewer)
 library(rDGIdb)
+library(CellChat)
+library(tidyverse)
 
 #### PreReq Codes ####
 # below line is commented for shinyapp.io deployment temp
@@ -109,7 +110,7 @@ ui <- fluidPage(
              ),
              
              # PANEL 1: QUERY GENE   ----
-             tabPanel(title = "Quick Gene Lookup", value = "panel1",
+             tabPanel(title = "Gene Lookup", value = "panel1",
                       mainPanel(width = 12, # 12/12 is full panel
                                 fluidRow(## panel for gene input
                                   column(
@@ -223,7 +224,7 @@ ui <- fluidPage(
              
              
              # PANEL 2: COMPARE LABELING METHODS  ----  
-             tabPanel("Labeling Methods",
+             tabPanel("Cell Labeling",
                       mainPanel(width = 12, # 12/12 is full panel,
                                 wellPanel(includeMarkdown("descriptionfiles/helptext_comparelabels.Rmd")),
                                 wellPanel(
@@ -282,7 +283,7 @@ ui <- fluidPage(
                       
              ), # tabPanel
              # PANEL 3: COMPARE TRAJECTORY METHODS ----
-             tabPanel("Trajectory Methods",
+             tabPanel("Trajectory",
                       mainPanel(width = 12, # 12/12 is full panel,
                                 wellPanel(includeMarkdown("descriptionfiles/helptext_comparetrajectories.Rmd")),
                                 wellPanel(
@@ -328,7 +329,7 @@ ui <- fluidPage(
              ), # tabPanel
              
              # PANEL 4: DRUGGABLE GENOME ----  
-             tabPanel("Drug-Gene Interactions",
+             tabPanel("Druggable Genome",
                       mainPanel(width = 12,
                         fluidRow(width = 12,
                           column(width = 6,
@@ -380,6 +381,16 @@ ui <- fluidPage(
                
              ),
              
+             # PANEL 5: CELL/CELL COMM ####
+             tabPanel("Cell Communications",
+                      mainPanel(width = 12,
+                                fluidRow(
+                                  column(width = 6, # hyperparameters
+                                         ),
+                                  column(width = 6, # cell pop selector
+                                         )
+                                ))
+             ),
              # PANEL 6: ABOUT PANEL ----
              tabPanel("About & Help",
                       mainPanel(
