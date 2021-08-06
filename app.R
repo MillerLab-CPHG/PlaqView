@@ -121,10 +121,11 @@ ui <- fluidPage(
                                         "genes",
                                         width = '100%',
                                         h3("Query Gene Expression", h5("please follow HUGO conventions")),
+                        
                                         value = "TREM2, CYBB",
                                         placeholder = "try: TREM2, CYBB"
                                       ),
-                                      
+            
                                       # choose the type of output graph 
                                       helpText("Preferred Plot Type"),
                                       
@@ -170,6 +171,7 @@ ui <- fluidPage(
                                 
                                 ## lower panel for graphic outputs
                                 wellPanel(width = 12,
+                                          textOutput("selecteddatasetID"),  
                                           fluidRow( # top split rows
                                             column(width = 6, align = "center", 
                                                    plotOutput("umaps", width = "auto", height = '500px'),
@@ -230,6 +232,7 @@ ui <- fluidPage(
                                 wellPanel(
                                   fluidRow(
                                     column(width = 6, 
+              
                                            selectInput("leftlabeltype", 
                                                        label = NULL,
                                                        choices = list(
@@ -328,7 +331,27 @@ ui <- fluidPage(
                       
              ), # tabPanel
              
-             # PANEL 4: DRUGGABLE GENOME ----  
+             # PANEL 4: CCC ####
+             tabPanel(title = "Cell-Cell Int.", value = "panel4",
+                      mainPanel(width = 12,
+                                fluidRow(
+                                  column(width = 6,
+                                         wellPanel(
+                                           h3("Infer Cell-to-Cell Communications"),
+                                           actionBttn(
+                                             inputId = "calculateCCC",
+                                             label = "Step 1: Calculate Interactions",
+                                             style = "unite",
+                                             color = "primary",
+                                             block = T),
+                                           
+                                         )),
+                                  column(width = 6,
+                                         wellPanel(
+                                           includeMarkdown("descriptionfiles/helptext_CCC.Rmd")
+                                         ))
+                                ))),
+             # PANEL 5: DRUGGABLE GENOME ----  
              tabPanel("Druggable Genome",
                       mainPanel(width = 12,
                         fluidRow(width = 12,
@@ -381,16 +404,6 @@ ui <- fluidPage(
                
              ),
              
-             # PANEL 5: CELL/CELL COMM ####
-             tabPanel("Cell Communications",
-                      mainPanel(width = 12,
-                                fluidRow(
-                                  column(width = 6, # hyperparameters
-                                         ),
-                                  column(width = 6, # cell pop selector
-                                         )
-                                ))
-             ),
              # PANEL 6: ABOUT PANEL ----
              tabPanel("About & Help",
                       mainPanel(
@@ -443,9 +456,7 @@ server <- function(input, output) {
     plaqviewobj <<- readRDS(file = path)
     
     output$selecteddatasetID <- renderText({
-      paste0("Sucessfully loaded the ", rownames(df)[input$availabledatasettable_rows_selected], 
-             " dataset!.",
-             collapse = ", ")
+      paste0("Current dataset: ", df$DataID[input$availabledatasettable_rows_selected])
     }) 
     show("jumpto1")
     
@@ -459,7 +470,7 @@ server <- function(input, output) {
   
   
   #### PANEL #1 FUNCTIONS ####
-  #### umap ####
+  #### umap ###
   # UMAP plot, interactive #
   observeEvent(input$runcode,{ 
     output$umaps <- 
@@ -515,7 +526,7 @@ server <- function(input, output) {
     
   )# close downloadhandler
   
-  #### dot plot ####
+  #### dot plot ###
   observeEvent(input$runcode,{ # observe event puts a pause until pushed
     
     # this is for the display
@@ -682,7 +693,7 @@ server <- function(input, output) {
   
   
   
-  #### PANEL #2 FUNCTIONS ####
+  #### PANEL #2 LABELS FUNCTIONS ####
   output$leftlabelplot <-
     renderPlot(
       DimPlot(
@@ -753,7 +764,7 @@ server <- function(input, output) {
                       "diff_by_predicted.id_tabulus.sapien.csv", sep = ""), file)      
     }  )# close downloadhandler
   
-  #### PANEL #3 FUNCTIONS ####
+  #### PANEL #3 TRAJ FUNCTIONS ####
   output$lefttrajectorygraph <- renderPlot(
     readRDS(file =  normalizePath(file.path('data/', # this will dynamically read the file containing the right name
                                             df$DataID[input$availabledatasettable_rows_selected], "/",
@@ -768,7 +779,38 @@ server <- function(input, output) {
   ) # renderplot 
   
   
-  #### PANEL #4 FUNCTIONS ####
+  #### PANEL #4 CCC FUNCTIONS ####
+  # transform seurat obj to cellchat obj#
+  observeEvent(input$calculateCCC,
+               { 
+  cellchat <- createCellChat(object = plaqviewobj, 
+                             group.by = "manually_annotated_labels")
+  
+  ## set the database##
+  CellChatDB <- CellChatDB.human # use CellChatDB.mouse if running on mouse data
+  # showDatabaseCategory(CellChatDB)
+  
+  ## subset the expression data of signaling genes for saving computation cost
+  cellchat@DB <- CellChatDB
+  cellchat <- subsetData(cellchat) # This step is necessary even if using the whole database
+  
+  cellchat <- identifyOverExpressedGenes(cellchat)
+  cellchat <- identifyOverExpressedInteractions(cellchat)
+  # cellchat <- projectData(cellchat, PPI.human) # this step is optional
+  
+  ## compute probablistic interaction
+  cellchat <- computeCommunProb(cellchat)
+  # Filter out the cell-cell communication if there are only few number of cells in certain cell groups
+  cellchat <- filterCommunication(cellchat, min.cells = 10)
+  
+  ## compute signaling pathway activations
+  cellchat <- computeCommunProbPathway(cellchat)
+  
+  ## aggregate comm networks
+  cellchat <- aggregateNet(cellchat)
+               })# closes observe event
+
+  #### PANEL #5 DRUG FUNCTIONS ####
   observeEvent(input$rundgidb, {
     druggenes <- str_split(input$druggeneinput, ", ")[[1]]
     Idents(plaqviewobj) <- input$drugcelllabelmethod
@@ -830,7 +872,7 @@ server <- function(input, output) {
     #                            "\t", escape_double = FALSE, trim_ws = TRUE)
   })# observer event
   
-  #### PANEL #6 FUNCTIONS #### 
+  #### PANEL #6 ABOUT FUNCTIONS #### 
   
   output$downloadsessioninfo <- downloadHandler(
     filename = paste(date(), "sesssioninfo.txt"),

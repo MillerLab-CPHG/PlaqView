@@ -1,0 +1,14 @@
+---
+title: "helptext_CCC.Rmd"
+author: "WeiMa"
+date: "8/6/2021"
+output: html_document
+---
+
+### Infer Cellular Communications
+
+**Please be patient, calculations may take up to two minutes.**
+
+**Flashing orange bar indicates calculation is still in progress!**
+
+Use this module to explore upregulated communications pathways within the tissue. This is made possible by 'CellChat' ([Jin et al, 2021](https://www.nature.com/articles/s41467-021-21246-9)). CellChat uses the most up-to-date and manually curated database of ligand-receptor interactions. For details on the methods employed by CellChat, please refer to their original publication.
