@@ -3,7 +3,7 @@ name: Docker Build CI for PlaqView
 on:
   push:
     branches:
-    - 'master'
+    - 'main'
 
 jobs:
   Build:
