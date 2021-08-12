@@ -7,8 +7,10 @@ output: html_document
 
 ### Infer Cellular Communications
 
-**Please be patient, calculations may take up to two minutes.**
+**Please be patient, calculations may take up to five minutes.**
 
 **Flashing orange bar indicates calculation is still in progress!**
 
-Use this module to explore upregulated communications pathways within the tissue. This is made possible by 'CellChat' ([Jin et al, 2021](https://www.nature.com/articles/s41467-021-21246-9)). CellChat uses the most up-to-date and manually curated database of ligand-receptor interactions. For details on the methods employed by CellChat, please refer to their original publication.
+Use this module to explore upregulated communications pathways within the tissue. This is made possible by 'CellChat' ([Jin et al, 2021](https://www.nature.com/articles/s41467-021-21246-9)). CellChat uses the most up-to-date, manually curated database of ligand-receptor interactions in combinations with state-of-the-art machine learning algorithms. For details on the methods employed by CellChat, please refer to their original publication.
+
+**IMPORTANT:** Cell-to-cell communication inference results are highly subjected to how users label the cells (cell identity causes significant downstream differences). While there are no one method is perfect, PlaqView enables users to explore and compare the results of using different popular labeling methods such as singleR, Seurat, etc.

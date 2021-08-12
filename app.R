@@ -13,8 +13,8 @@ library(shinyWidgets)
 library(shinyjs)
 library(RColorBrewer)
 library(rDGIdb)
-library(CellChat)
 library(tidyverse)
+library(CellChat)
 
 #### PreReq Codes ####
 # below line is commented for shinyapp.io deployment temp
@@ -67,7 +67,7 @@ ui <- fluidPage(
   use_waiter(), 
   waiter_show_on_load(html = spin_rotate()),
   useShinyjs(),
-
+  
   # defining each 'tab' here
   navbarPage("PlaqView", id = "inTabset",
              
@@ -121,11 +121,11 @@ ui <- fluidPage(
                                         "genes",
                                         width = '100%',
                                         h3("Query Gene Expression", h5("please follow HUGO conventions")),
-                        
+                                        
                                         value = "TREM2, CYBB",
                                         placeholder = "try: TREM2, CYBB"
                                       ),
-            
+                                      
                                       # choose the type of output graph 
                                       helpText("Preferred Plot Type"),
                                       
@@ -232,7 +232,7 @@ ui <- fluidPage(
                                 wellPanel(
                                   fluidRow(
                                     column(width = 6, 
-              
+                                           
                                            selectInput("leftlabeltype", 
                                                        label = NULL,
                                                        choices = list(
@@ -256,7 +256,7 @@ ui <- fluidPage(
                                                          "Seurat + Tabula sapiens Ref" = "predicted.id_tabulus.sapien",
                                                          
                                                          "scCATCH (Heart)" = "scCATCH_Heart",
-                                                          "scCATCH (Blood Vessels)" = "scCATCH_BV"),
+                                                         "scCATCH (Blood Vessels)" = "scCATCH_BV"),
                                                        selected = "SingleR (Individual Cell ID)"),
                                            plotOutput("rightlabelplot",
                                                       height = '500px')
@@ -332,76 +332,104 @@ ui <- fluidPage(
              ), # tabPanel
              
              # PANEL 4: CCC ####
-             tabPanel(title = "Cell-Cell Int.", value = "panel4",
+             tabPanel(title = "Cell-Cell Comm", value = "panel4",
                       mainPanel(width = 12,
                                 fluidRow(
                                   column(width = 6,
                                          wellPanel(
                                            h3("Infer Cell-to-Cell Communications"),
+                                           h5("Choose a Cell Labeling Method"),
+                                           selectInput("selectlabelmethodforCCC", label = NULL, 
+                                                       choices = list(
+                                                         "Author Supplied" = "manually_annotated_labels",
+                                                         "SingleR (Individual Cell ID)" = "SingleR.calls",
+                                                         "Seurat + Tabula sapiens Ref" = "predicted.id_tabulus.sapien",
+                                                         "Seurat Clusters (Numbered)" = "seurat_clusters",
+                                                         "scCATCH (Heart)" = "scCATCH_Heart",
+                                                         "scCATCH (Blood Vessels)" = "scCATCH_BV"),
+                                                       width = '75%',
+                                                       selected = "Seurat + Tabula sapiens Ref"),
+                                           textOutput("selecteddatasetID2"),  
+                                           
                                            actionBttn(
                                              inputId = "calculateCCC",
                                              label = "Step 1: Calculate Interactions",
-                                             style = "unite",
-                                             color = "primary",
+                                             style = "pill",
+                                             color = "warning",
                                              block = T),
                                            
+                                           # show this after calculation is done
+                                           hidden(
+                                             actionBttn(
+                                               inputId = "selectCCCoutput",
+                                               label = "Step 2: Display Calculation",
+                                               color = "success",
+                                               block = T)
+                                           )
                                          )),
                                   column(width = 6,
                                          wellPanel(
                                            includeMarkdown("descriptionfiles/helptext_CCC.Rmd")
                                          ))
-                                ))),
+                                ), # fluid row
+                                fluidRow(
+                                  column(width = 12,
+                                         
+                                         
+                                  )# close column
+                                )# fluid row
+                      )),
              # PANEL 5: DRUGGABLE GENOME ----  
              tabPanel("Druggable Genome",
                       mainPanel(width = 12,
-                        fluidRow(width = 12,
-                          column(width = 6,
-                                 includeMarkdown("descriptionfiles/helptext_druggablegenome.Rmd"),
-                                 wellPanel(
-                                   textInput(
-                                   inputId = "druggeneinput",
-                                   label = "Gene to Drug",
-                                   value = "EGFR"
-                                 ),
-                                 selectInput("drugcelllabelmethod", 
-                                             label = NULL,
-                                             choices = list(
-                                               "SingleR (Individual Cell ID)" = "SingleR.calls",
-                                               "Author Supplied (Manual)" = "manually_annotated_labels",
-                                               "Seurat + Tabula sapiens Ref" = "predicted.id_tabulus.sapien",
-                                               
-                                               "Seurat Clusters (Numbered)" = "seurat_clusters",
-                                               "scCATCH (Heart)" = "scCATCH_Heart",
-                                               "scCATCH (Blood Vessels)" = "scCATCH_BV"),
-                                             selected = "SingleR (Individual Cell ID)"),
-                                 ),
-                                
-                                 checkboxGroupInput(
-                                   inputId = "dgidbdatabase",
-                                   label = "Choose a Database", 
-                                   inline = TRUE, 
-                                   selected = c("FDA", "DrugBank"),
-                                   choices = sourceDatabases()
-                                 ),
-                                 
-                                 actionButton(inputId = "rundgidb",
-                                              label = "Start Query",
-                                              width = '100%')
-                          ), 
-                          br(),
-                          column(width = 6, 
-                                 wellPanel(plotOutput("featurefordrugs",
-                                                       height = '500px')  )),
-                          br(),
-                          column(width = 12,
-                                 DT::dataTableOutput("dgidboutput", width = "100%"),
-                                 helpText("You must restart query if you change database. PubMed ID and citations of interactions are available in full download file."),
-                                 br(),
-                                 downloadButton("downloaddgidboutput", label = "Download Full Gene-Drug Interaction Table")
-                          )
-                        )
+                                fluidRow(width = 12,
+                                         column(width = 6,
+                                                includeMarkdown("descriptionfiles/helptext_druggablegenome.Rmd"),
+                                                wellPanel(
+                                                  textInput(
+                                                    inputId = "druggeneinput",
+                                                    label = "Gene to Drug",
+                                                    value = "EGFR"
+                                                  ),
+                                                  selectInput("drugcelllabelmethod", 
+                                                              label = NULL,
+                                                              choices = list(
+                                                                "SingleR (Individual Cell ID)" = "SingleR.calls",
+                                                                "Author Supplied (Manual)" = "manually_annotated_labels",
+                                                                "Seurat + Tabula sapiens Ref" = "predicted.id_tabulus.sapien",
+                                                                
+                                                                "Seurat Clusters (Numbered)" = "seurat_clusters",
+                                                                "scCATCH (Heart)" = "scCATCH_Heart",
+                                                                "scCATCH (Blood Vessels)" = "scCATCH_BV"),
+                                                              selected = "SingleR (Individual Cell ID)"),
+                                                ),
+                                                
+                                                checkboxGroupInput(
+                                                  inputId = "dgidbdatabase",
+                                                  label = "Choose a Database", 
+                                                  inline = TRUE, 
+                                                  selected = c("FDA", "DrugBank"),
+                                                  choices = sourceDatabases()
+                                                ),
+                                                
+                                                actionButton(inputId = "rundgidb",
+                                                             label = "Start Query",
+                                                             width = '100%')
+                                         ), 
+                                         br(),
+                                         column(width = 6, 
+                                                wellPanel(plotOutput("featurefordrugs",
+                                                                     height = '500px')  )),
+                                         br(),
+                                         column(width = 12,
+                                                DT::dataTableOutput("dgidboutput", width = "100%"),
+                                                helpText("You must restart query if you change database. PubMed ID and citations of interactions are available in full download file."),
+                                                br(),
+                                                downloadButton("downloaddgidboutput", label = "Download Full Gene-Drug Interaction Table")
+                                         )
+                                )
                       )
-               
+                      
              ),
              
              # PANEL 6: ABOUT PANEL ----
@@ -414,7 +442,7 @@ ui <- fluidPage(
                         img(src = "MSTPlogo.png", width = 233, height = 83),
                         img(src = "umc.png", height = 83),
                         br(),
-          
+                        
                         img(src = "PlaqOmics.png", width = 233, height = 83),
                         img(src = "Leducq.png", width = 233, height = 83),
                         
@@ -424,7 +452,7 @@ ui <- fluidPage(
                         
                         
                       )) # close tab panel
-
+             
              
   )# close navbarpage
   
@@ -434,7 +462,7 @@ ui <- fluidPage(
 
 
 
-            
+
 #### SERVER ####
 # Define server logic required to draw a histogram
 server <- function(input, output) {
@@ -455,9 +483,17 @@ server <- function(input, output) {
                             ".rds", sep=""))
     plaqviewobj <<- readRDS(file = path)
     
+    ## these are just for displaying current data name in other tabs##
     output$selecteddatasetID <- renderText({
       paste0("Current dataset: ", df$DataID[input$availabledatasettable_rows_selected])
     }) 
+    output$selecteddatasetID2 <- renderText({
+      paste0("Current dataset: ", df$DataID[input$availabledatasettable_rows_selected])
+    }) 
+    output$selecteddatasetID3 <- renderText({
+      paste0("Current dataset: ", df$DataID[input$availabledatasettable_rows_selected])
+    }) 
+   
     show("jumpto1")
     
   })
@@ -490,7 +526,7 @@ server <- function(input, output) {
           ggtitle("UMAP by Cell Type") +
           theme(plot.title = element_text(hjust =  0.5)) +
           guides(color = guide_legend(nrow = 5)
-                 )
+          )
       ) # closes renderPlot
   })# closes observe event
   
@@ -737,7 +773,7 @@ server <- function(input, output) {
     filename = "differential_markergenes_by_seurat_clusters.csv",
     content = function(file) {
       file.copy(paste("data/", df$DataID[input$availabledatasettable_rows_selected], "/",
-                "diff_by_seurat.csv", sep = ""), file)
+                      "diff_by_seurat.csv", sep = ""), file)
       
     }  )# close downloadhandler
   
@@ -783,33 +819,34 @@ server <- function(input, output) {
   # transform seurat obj to cellchat obj#
   observeEvent(input$calculateCCC,
                { 
-  cellchat <- createCellChat(object = plaqviewobj, 
-                             group.by = "manually_annotated_labels")
-  
-  ## set the database##
-  CellChatDB <- CellChatDB.human # use CellChatDB.mouse if running on mouse data
-  # showDatabaseCategory(CellChatDB)
-  
-  ## subset the expression data of signaling genes for saving computation cost
-  cellchat@DB <- CellChatDB
-  cellchat <- subsetData(cellchat) # This step is necessary even if using the whole database
-  
-  cellchat <- identifyOverExpressedGenes(cellchat)
-  cellchat <- identifyOverExpressedInteractions(cellchat)
-  # cellchat <- projectData(cellchat, PPI.human) # this step is optional
-  
-  ## compute probablistic interaction
-  cellchat <- computeCommunProb(cellchat)
-  # Filter out the cell-cell communication if there are only few number of cells in certain cell groups
-  cellchat <- filterCommunication(cellchat, min.cells = 10)
-  
-  ## compute signaling pathway activations
-  cellchat <- computeCommunProbPathway(cellchat)
-  
-  ## aggregate comm networks
-  cellchat <- aggregateNet(cellchat)
+                 cellchat <- CellChat::createCellChat(object = plaqviewobj, 
+                                            group.by = input$selectlabelmethodforCCC)
+                 
+                 ## set the database##
+                 CellChatDB <- CellChatDB.human # use CellChatDB.mouse if running on mouse data
+                 # showDatabaseCategory(CellChatDB)
+                 
+                 ## subset the expression data of signaling genes for saving computation cost
+                 cellchat@DB <- CellChatDB
+                 cellchat <- subsetData(cellchat) # This step is necessary even if using the whole database
+                 
+                 cellchat <- identifyOverExpressedGenes(cellchat)
+                 cellchat <- identifyOverExpressedInteractions(cellchat)
+                 # cellchat <- projectData(cellchat, PPI.human) # this step is optional
+                 
+                 ## compute probablistic interaction
+                 cellchat <- computeCommunProb(cellchat)
+                 # Filter out the cell-cell communication if there are only few number of cells in certain cell groups
+                 cellchat <- filterCommunication(cellchat, min.cells = 10)
+                 
+                 ## compute signaling pathway activations
+                 cellchat <- computeCommunProbPathway(cellchat)
+                 
+                 ## aggregate comm networks
+                 cellchat <- aggregateNet(cellchat)
+                 show("selectCCCoutput")
                })# closes observe event
-
+  
   #### PANEL #5 DRUG FUNCTIONS ####
   observeEvent(input$rundgidb, {
     druggenes <- str_split(input$druggeneinput, ", ")[[1]]
@@ -818,7 +855,7 @@ server <- function(input, output) {
       user_genes <- str_split(input$genes, ", ")[[1]]
       FeaturePlot(plaqviewobj, 
                   features = druggenes[1:1], label = T, repel = T
-                  ) + # a trick to sep long string input
+      ) + # a trick to sep long string input
         theme(legend.position="bottom", legend.box = "vertical") + # group.by is important, use this to call metadata separation
         theme(plot.title = element_text(hjust = 1)) +
         theme(plot.title = element_text(hjust =  0.5)) 
@@ -838,7 +875,7 @@ server <- function(input, output) {
       isolatedtable <- nodrug
       fulltable <- nodrug
       
-      }
+    }
     
     if (class(fulltable) == "data.frame" ) {
       isolatedtable <-  fulltable %>% # reorder columns
