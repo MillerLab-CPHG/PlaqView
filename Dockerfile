@@ -56,4 +56,3 @@ RUN chown shiny.shiny /usr/bin/shiny-server.sh && chmod 755 /usr/bin/shiny-serve
 
 # Run the server setup script
 CMD ["/usr/bin/shiny-server.sh"]
- complete
