@@ -31,7 +31,7 @@ RUN wget --no-verbose https://s3.amazonaws.com/rstudio-shiny-server-os-build/ubu
     
 # Install R packages that are required
 ## CRAN packages
-RUN R -e "install.packages(c('BiocManager','shiny','shinythemes','Seurat','shinybusy','tidyverse','enrichR','imager','waiter','DT','readxl','shinyWidgets','shinyjs','RColorBrewer'))"
+RUN R -e "install.packages(c('BiocManager','shiny','shinythemes','Seurat','shinybusy','tidyverse','enrichR','imager','waiter','DT','readxl','shinyWidgets','shinyjs','RColorBrewer', 'devtools'))"
 
 ## GITHUB
 RUN R -e "devtools::install_github('sqjin/CellChat')"
