@@ -30,7 +30,7 @@ jobs:
         with:
           push: true
           no-cache: true
-          tags: ghcr.io/MillerLab-CPHG/plaqview:latest
+          tags: ghcr.io/millerlab-cphg/plaqview:latest
       -
         name: Image digest
         run: echo ${{ steps.docker_build.outputs.digest }}
