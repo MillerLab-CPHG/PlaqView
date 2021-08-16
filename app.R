@@ -18,6 +18,8 @@ library(CellChat)
 
 #### PreReq Codes ####
 # below line is commented for shinyapp.io deployment temp
+# py_install(c('umap-learn'))
+# source_python("umap-learn.py")
 
 # enrichR functions
 # handcurate db names 

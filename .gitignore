@@ -12,3 +12,5 @@ rsconnect/shinyapps.io/millerlab/PlaqView.dcf
 *.dcf
 *.dcf
 rsconnect/shinyapps.io/.DS_Store
+renv.lock
+renv/activate.R
