@@ -1,3 +1,48 @@
+#### PreReq Codes ####
+# below line is commented for shinyapp.io deployment temp
+library(reticulate)
+virtualenv_create("myenv_plaqview")
+use_virtualenv("myenv_plaqview", required = TRUE)
+py_install("umap-learn") 
+
+# enrichR functions
+# handcurate db names 
+dbs <- c("KEGG_2019_Human",
+         "WikiPathways_2019_Human",
+         "GO_Biological_Process_2018",
+         "ChEA_2016",
+         "GWAS_Catalog_2019",
+         "ENCODE_and_ChEA_Consensus_TFs_from_ChIP-X",
+         "Gene_Perturbations_from_GEO_down",
+         "Gene_Perturbations_from_GEO_up")
+enrichRdb <- sort(dbs)
+
+
+# color definitions
+original_color_list <-
+  {c("rosybrown2",
+     "cadetblue1",
+     "lemonchiffon3",
+     "darkseagreen",
+     "skyblue3",
+     "thistle3",
+     "cadetblue3",
+     "darkseagreen1",
+     "palevioletred3",
+     "palevioletred1",
+     "darkseagreen2",
+     "rosybrown3",
+     "thistle2",
+     "lightsteelblue3",
+     "salmon1",
+     "palevioletred4",
+     "lemonchiffon4",
+     "cadetblue2"
+  )}
+
+color_function <- colorRampPalette(original_color_list)
+manual_color_list <- color_function(40) # change this if clusters >40
+
 #### LIBRARIES #### 
 # library(BiocManager)
 library(shiny)
@@ -5,21 +50,23 @@ library(shinythemes)
 library(Seurat)
 library(shinybusy) #install.packages("shinybusy")
 library(enrichR) # install.packages("enrichR")
-library(imager)
+# library(imager)
 library(waiter)
 library(DT)
 library(readxl)
 library(shinyWidgets)
 library(shinyjs)
-library(RColorBrewer)
-library(rDGIdb)
+# library(RColorBrewer)
+library(rDGIdb) # BiocManager::install("rDGIdb")
 library(tidyverse)
-library(CellChat)
+library(CellChat) #devtools::install_github("sqjin/CellChat")
 
 #### PreReq Codes ####
 # below line is commented for shinyapp.io deployment temp
-# py_install(c('umap-learn'))
-# source_python("umap-learn.py")
+library(reticulate)
+virtualenv_create("myenv_plaqview")
+use_virtualenv("myenv_plaqview", required = TRUE)
+py_install("umap-learn") 
 
 # enrichR functions
 # handcurate db names 
