@@ -12,3 +12,12 @@ rsconnect/shinyapps.io/millerlab/PlaqView.dcf
 *.dcf
 *.dcf
 rsconnect/shinyapps.io/.DS_Store
+renv.lock
+renv/activate.R
+.github/workflows/main.yml
+.github/workflows/Icon
+.github/.DS_Store
+rsconnect/shinyapps.io/millerlab/.DS_Store
+.github/workflows/.DS_Store
+.DS_Store
+renv/.DS_Store
