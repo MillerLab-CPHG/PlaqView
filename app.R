@@ -1,9 +1,12 @@
 #### PreReq Codes ####
 # below line is commented for shinyapp.io deployment temp
-library(reticulate)
-virtualenv_create("myenv_plaqview")
-use_virtualenv("myenv_plaqview", required = TRUE)
-py_install("umap-learn") 
+# library(reticulate)
+# virtualenv_create("myenv_plaqview")
+# use_virtualenv("myenv_plaqview", required = TRUE)
+# py_install("umap-learn") 
+
+### set this once in terminal before deploying to shinyapps.io ###
+# options(repos = BiocManager::repositories())
 
 # enrichR functions
 # handcurate db names 
@@ -59,7 +62,7 @@ library(shinyjs)
 # library(RColorBrewer)
 library(rDGIdb) # BiocManager::install("rDGIdb")
 library(tidyverse)
-library(CellChat) #devtools::install_github("sqjin/CellChat")
+library(rsconnect)
 
 #### PreReq Codes ####
 # below line is commented for shinyapp.io deployment temp
@@ -380,54 +383,54 @@ ui <- fluidPage(
                       
              ), # tabPanel
              
-             # PANEL 4: CCC ####
-             tabPanel(title = "Cell-Cell Comm", value = "panel4",
-                      mainPanel(width = 12,
-                                fluidRow(
-                                  column(width = 6,
-                                         wellPanel(
-                                           h3("Infer Cell-to-Cell Communications"),
-                                           h5("Choose a Cell Labeling Method"),
-                                           selectInput("selectlabelmethodforCCC", label = NULL, 
-                                                       choices = list(
-                                                         "Author Supplied" = "manually_annotated_labels",
-                                                         "SingleR (Individual Cell ID)" = "SingleR.calls",
-                                                         "Seurat + Tabula sapiens Ref" = "predicted.id_tabulus.sapien",
-                                                         "Seurat Clusters (Numbered)" = "seurat_clusters",
-                                                         "scCATCH (Heart)" = "scCATCH_Heart",
-                                                         "scCATCH (Blood Vessels)" = "scCATCH_BV"),
-                                                       width = '75%',
-                                                       selected = "Seurat + Tabula sapiens Ref"),
-                                           textOutput("selecteddatasetID2"),  
-                                           
-                                           actionBttn(
-                                             inputId = "calculateCCC",
-                                             label = "Step 1: Calculate Interactions",
-                                             style = "pill",
-                                             color = "warning",
-                                             block = T),
-                                           
-                                           # show this after calculation is done
-                                           hidden(
-                                             actionBttn(
-                                               inputId = "selectCCCoutput",
-                                               label = "Step 2: Display Calculation",
-                                               color = "success",
-                                               block = T)
-                                           )
-                                         )),
-                                  column(width = 6,
-                                         wellPanel(
-                                           includeMarkdown("descriptionfiles/helptext_CCC.Rmd")
-                                         ))
-                                ), # fluid row
-                                fluidRow(
-                                  column(width = 12,
-                                         
-                                         
-                                  )# close column
-                                )# fluid row
-                      )),
+             # # PANEL 4: CCC ####
+             # tabPanel(title = "Cell-Cell Comm", value = "panel4",
+             #          mainPanel(width = 12,
+             #                    fluidRow(
+             #                      column(width = 6,
+             #                             wellPanel(
+             #                               h3("Infer Cell-to-Cell Communications"),
+             #                               h5("Choose a Cell Labeling Method"),
+             #                               selectInput("selectlabelmethodforCCC", label = NULL, 
+             #                                           choices = list(
+             #                                             "Author Supplied" = "manually_annotated_labels",
+             #                                             "SingleR (Individual Cell ID)" = "SingleR.calls",
+             #                                             "Seurat + Tabula sapiens Ref" = "predicted.id_tabulus.sapien",
+             #                                             "Seurat Clusters (Numbered)" = "seurat_clusters",
+             #                                             "scCATCH (Heart)" = "scCATCH_Heart",
+             #                                             "scCATCH (Blood Vessels)" = "scCATCH_BV"),
+             #                                           width = '75%',
+             #                                           selected = "Seurat + Tabula sapiens Ref"),
+             #                               textOutput("selecteddatasetID2"),  
+             #                               
+             #                               actionBttn(
+             #                                 inputId = "calculateCCC",
+             #                                 label = "Step 1: Calculate Interactions",
+             #                                 style = "pill",
+             #                                 color = "warning",
+             #                                 block = T),
+             #                               
+             #                               # show this after calculation is done
+             #                               hidden(
+             #                                 actionBttn(
+             #                                   inputId = "selectCCCoutput",
+             #                                   label = "Step 2: Display Calculation",
+             #                                   color = "success",
+             #                                   block = T)
+             #                               )
+             #                             )),
+             #                      column(width = 6,
+             #                             wellPanel(
+             #                               includeMarkdown("descriptionfiles/helptext_CCC.Rmd")
+             #                             ))
+             #                    ), # fluid row
+             #                    fluidRow(
+             #                      column(width = 12,
+             #                             
+             #                             
+             #                      )# close column
+             #                    )# fluid row
+             #          )),
              # PANEL 5: DRUGGABLE GENOME ----  
              tabPanel("Druggable Genome",
                       mainPanel(width = 12,
@@ -864,38 +867,38 @@ server <- function(input, output) {
   ) # renderplot 
   
   
-  #### PANEL #4 CCC FUNCTIONS ####
-  # transform seurat obj to cellchat obj#
-  observeEvent(input$calculateCCC,
-               { 
-                 cellchat <- CellChat::createCellChat(object = plaqviewobj, 
-                                            group.by = input$selectlabelmethodforCCC)
-                 
-                 ## set the database##
-                 CellChatDB <- CellChatDB.human # use CellChatDB.mouse if running on mouse data
-                 # showDatabaseCategory(CellChatDB)
-                 
-                 ## subset the expression data of signaling genes for saving computation cost
-                 cellchat@DB <- CellChatDB
-                 cellchat <- subsetData(cellchat) # This step is necessary even if using the whole database
-                 
-                 cellchat <- identifyOverExpressedGenes(cellchat)
-                 cellchat <- identifyOverExpressedInteractions(cellchat)
-                 # cellchat <- projectData(cellchat, PPI.human) # this step is optional
-                 
-                 ## compute probablistic interaction
-                 cellchat <- computeCommunProb(cellchat)
-                 # Filter out the cell-cell communication if there are only few number of cells in certain cell groups
-                 cellchat <- filterCommunication(cellchat, min.cells = 10)
-                 
-                 ## compute signaling pathway activations
-                 cellchat <- computeCommunProbPathway(cellchat)
-                 
-                 ## aggregate comm networks
-                 cellchat <- aggregateNet(cellchat)
-                 show("selectCCCoutput")
-               })# closes observe event
-  
+  # #### PANEL #4 CCC FUNCTIONS ####
+  # # transform seurat obj to cellchat obj#
+  # observeEvent(input$calculateCCC,
+  #              { 
+  #                cellchat <- CellChat::createCellChat(object = plaqviewobj, 
+  #                                           group.by = input$selectlabelmethodforCCC)
+  #                
+  #                ## set the database##
+  #                CellChatDB <- CellChatDB.human # use CellChatDB.mouse if running on mouse data
+  #                # showDatabaseCategory(CellChatDB)
+  #                
+  #                ## subset the expression data of signaling genes for saving computation cost
+  #                cellchat@DB <- CellChatDB
+  #                cellchat <- subsetData(cellchat) # This step is necessary even if using the whole database
+  #                
+  #                cellchat <- identifyOverExpressedGenes(cellchat)
+  #                cellchat <- identifyOverExpressedInteractions(cellchat)
+  #                # cellchat <- projectData(cellchat, PPI.human) # this step is optional
+  #                
+  #                ## compute probablistic interaction
+  #                cellchat <- computeCommunProb(cellchat)
+  #                # Filter out the cell-cell communication if there are only few number of cells in certain cell groups
+  #                cellchat <- filterCommunication(cellchat, min.cells = 10)
+  #                
+  #                ## compute signaling pathway activations
+  #                cellchat <- computeCommunProbPathway(cellchat)
+  #                
+  #                ## aggregate comm networks
+  #                cellchat <- aggregateNet(cellchat)
+  #                show("selectCCCoutput")
+  #              })# closes observe event
+  # 
   #### PANEL #5 DRUG FUNCTIONS ####
   observeEvent(input$rundgidb, {
     druggenes <- str_split(input$druggeneinput, ", ")[[1]]
@@ -977,12 +980,3 @@ shinyApp(ui = ui, server = server)
 
 
 #### NOTES ####
-# PUT IN P VALUES
-# GENE BASE RESULTS/TESTS TO HELP INTERPRET GWAS SIGNAL
-# DOWNLOAD MORAN'S I AND OTHER SUMMARY TABLE
-# DOWNLOAD DEG STATISTICS ON PG 1
-# https://bioconductor.org/packages/release/bioc/html/Qtlizer.html includsion
-# https://mrcieu.github.io/gwasglue/ # FUTURE ADDITIONAL
-# PATHWAY ENRICHMENT RESULTS? -> CAUSAL GWASGLUE
-# PUT IN 'COMING SOON' FEATURE MAP IN ABOUT SECTION TO PROTECT OURSELF IN NEXT VERSION
-### E.G. GWAS LOOK UP ETC.
