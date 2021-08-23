@@ -20,7 +20,6 @@ dbs <- c("KEGG_2019_Human",
          "Gene_Perturbations_from_GEO_up")
 enrichRdb <- sort(dbs)
 
-
 # color definitions
 original_color_list <-
   {c("rosybrown2",
@@ -173,7 +172,6 @@ ui <- fluidPage(
                                         "genes",
                                         width = '100%',
                                         h3("Query Gene Expression", h5("please follow HUGO conventions")),
-                                        
                                         value = "TREM2, CYBB",
                                         placeholder = "try: TREM2, CYBB"
                                       ),
@@ -181,7 +179,7 @@ ui <- fluidPage(
                                       # choose the type of output graph 
                                       helpText("Preferred Plot Type"),
                                       
-                                      selectInput("selectaplot", label = NULL, 
+                                      pickerInput("selectaplot", label = NULL, 
                                                   choices = list(
                                                     "Dot Plot (up to 9 genes)" = "Dot",
                                                     "Feature Plot (up to 4 genes)" = "Feature",
@@ -190,16 +188,14 @@ ui <- fluidPage(
                                                   selected = "Dot Plot"),
                                       
                                       helpText("Preferred Cell Labeling Method"),
-                                      selectInput("selectlabelmethodforgenequery", label = NULL, 
-                                                  choices = list(
-                                                    "Author Supplied" = "manually_annotated_labels",
-                                                    "SingleR (Individual Cell ID)" = "SingleR.calls",
-                                                    "Seurat + Tabula sapiens Ref" = "predicted.id_tabulus.sapien",
-                                                    "Seurat Clusters (Numbered)" = "seurat_clusters",
-                                                    "scCATCH (Heart)" = "scCATCH_Heart",
-                                                    "scCATCH (Blood Vessels)" = "scCATCH_BV"),
-                                                  width = '75%',
-                                                  selected = "Author Supplied"),
+                              
+                                      pickerInput(
+                                        inputId = "selectlabelmethodforgenequery",
+                                        label = "Select Labeling Method", 
+                                        choices = avaiablelabels,
+                                        width = '75%'
+                                      ),
+                                      
                                       # 'go' button
                                       actionButton(
                                         inputId = "runcode",
@@ -559,7 +555,7 @@ server <- function(input, output) {
   
   #### PANEL #1 FUNCTIONS ####
   #### umap ###
-  # UMAP plot, interactive #
+  # UMAP plot#
   observeEvent(input$runcode,{ 
     output$umaps <- 
       renderPlot(
@@ -580,6 +576,17 @@ server <- function(input, output) {
           guides(color = guide_legend(nrow = 5)
           )
       ) # closes renderPlot
+    
+    ### updates to correct capitalization nomenclature ###
+    if(df$Species[input$availabledatasettable_rows_selected] == "Human"){
+      corrected <- str_to_upper(input$genes)
+    } else{
+      corrected <- str_to_title(input$genes)
+    }
+    
+    updateTextInput(getDefaultReactiveDomain(),
+                    "genes", value = corrected)
+    
   })# closes observe event
   
   # this is for the download
@@ -590,6 +597,7 @@ server <- function(input, output) {
     content = function(file) {
       pdf(file, paper = "default") # paper = defult is a4 size
       user_genes <- str_split(input$genes, ", ")[[1]]
+
       validate(need(input$selectaplot=="Dot", message=FALSE))
       temp <- DimPlot(
         plaqviewobj,
