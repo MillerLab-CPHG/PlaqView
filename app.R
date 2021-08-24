@@ -577,7 +577,7 @@ server <- function(input, output) {
           )
       ) # closes renderPlot
     
-    ### updates to correct capitalization nomenclature ###
+    #### NOMENCLATURE UPDATE ####
     if(df$Species[input$availabledatasettable_rows_selected] == "Human"){
       corrected <- str_to_upper(input$genes)
     } else{
