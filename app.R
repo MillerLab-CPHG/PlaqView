@@ -62,6 +62,7 @@ library(shinyjs)
 library(rDGIdb) # BiocManager::install("rDGIdb")
 library(tidyverse)
 library(rsconnect)
+library(CellChat)
 
 #### PreReq Codes ####
 # below line is commented for shinyapp.io deployment temp
