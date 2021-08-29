@@ -62,7 +62,7 @@ library(shinyjs)
 library(rDGIdb) # BiocManager::install("rDGIdb")
 library(tidyverse)
 library(rsconnect)
-library(CellChat)
+# library(CellChat)
 
 #### PreReq Codes ####
 # below line is commented for shinyapp.io deployment temp
@@ -193,8 +193,17 @@ ui <- fluidPage(
                                       pickerInput(
                                         inputId = "selectlabelmethodforgenequery",
                                         label = "Select Labeling Method", 
-                                        choices = avaiablelabels,
-                                        width = '75%'
+                                        choices = list (
+                                          "Seurat_Clusters",
+                                          "scCATCH_Blood",
+                                          "scCATCH_BV",
+                                          "scCATCH_Heart",
+                                          "Author_Provided",
+                                          "SingleR.calls",
+                                          "Seurat_with_Tabula_Ref"  
+                                        ), 
+                                        selected = "Seurat_with_Tabula_Ref",
+                                        width = '75%' #neeed to fit this
                                       ),
                                       
                                       # 'go' button
@@ -284,29 +293,34 @@ ui <- fluidPage(
                                            
                                            selectInput("leftlabeltype", 
                                                        label = NULL,
-                                                       choices = list(
-                                                         "Author Supplied (Manual)" = "manually_annotated_labels",
-                                                         "SingleR (Individual Cell ID)" = "SingleR.calls",
-                                                         "Seurat + Tabula sapiens Ref" = "predicted.id_tabulus.sapien",
-                                                         
-                                                         "Seurat Clusters (Numbered)" = "seurat_clusters",
-                                                         "scCATCH (Heart)" = "scCATCH_Heart",
-                                                         "scCATCH (Blood Vessels)" = "scCATCH_BV"),
-                                                       selected = "Author Supplied (Manual)"),
+                                                       choices = list (
+                                                         "Seurat_Clusters",
+                                                         "scCATCH_Blood",
+                                                         "scCATCH_BV",
+                                                         "scCATCH_Heart",
+                                                         "Author_Provided",
+                                                         "SingleR.calls",
+                                                         "Seurat_with_Tabula_Ref"  
+                                                       ), 
+                                                       selected = "Seurat_with_Tabula_Ref"),
+                                                       
                                            plotOutput("leftlabelplot",
                                                       height = '500px')),
                                     
                                     column(width = 6,
                                            selectInput("rightlabeltype", 
                                                        label = NULL,
-                                                       choices = list(
-                                                         "SingleR (Individual Cell ID)" = "SingleR.calls",
-                                                         "Seurat Clusters (Numbered)" = "seurat_clusters",
-                                                         "Seurat + Tabula sapiens Ref" = "predicted.id_tabulus.sapien",
-                                                         
-                                                         "scCATCH (Heart)" = "scCATCH_Heart",
-                                                         "scCATCH (Blood Vessels)" = "scCATCH_BV"),
-                                                       selected = "SingleR (Individual Cell ID)"),
+                                                       choices = list (
+                                                         "Seurat_Clusters",
+                                                         "scCATCH_Blood",
+                                                         "scCATCH_BV",
+                                                         "scCATCH_Heart",
+                                                         "Author_Provided",
+                                                         "SingleR.calls",
+                                                         "Seurat_with_Tabula_Ref"  
+                                                       ), 
+                                                       selected = "SingleR.calls"),
+                                                       
                                            plotOutput("rightlabelplot",
                                                       height = '500px')
                                     ),# column
@@ -442,15 +456,17 @@ ui <- fluidPage(
                                                   ),
                                                   selectInput("drugcelllabelmethod", 
                                                               label = NULL,
-                                                              choices = list(
-                                                                "SingleR (Individual Cell ID)" = "SingleR.calls",
-                                                                "Author Supplied (Manual)" = "manually_annotated_labels",
-                                                                "Seurat + Tabula sapiens Ref" = "predicted.id_tabulus.sapien",
-                                                                
-                                                                "Seurat Clusters (Numbered)" = "seurat_clusters",
-                                                                "scCATCH (Heart)" = "scCATCH_Heart",
-                                                                "scCATCH (Blood Vessels)" = "scCATCH_BV"),
-                                                              selected = "SingleR (Individual Cell ID)"),
+                                                              choices = list (
+                                                                "Seurat_Clusters",
+                                                                "scCATCH_Blood",
+                                                                "scCATCH_BV",
+                                                                "scCATCH_Heart",
+                                                                "Author_Provided",
+                                                                "SingleR.calls",
+                                                                "Seurat_with_Tabula_Ref"  
+                                                              ), 
+                                                              selected = "Seurat_with_Tabula_Ref")
+                                                              
                                                 ),
                                                 
                                                 checkboxGroupInput(
