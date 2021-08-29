@@ -7,9 +7,9 @@ output: html_document
 
 ## About *PlaqView*
 
-*PlaqView* is a standalone, interactive, and reproducible Shiny- and R-based tool to explore single-cell RNA-sequencing data of human coronary artery samples. Our goal is to make these valuable data analytic tools publicly available to non-bioinformaticians. This is an open-sourced tool that is freely available and can be modified for other scRNA-seq data.
+*PlaqView* is a standalone, interactive, and reproducible Shiny- and R-based tool to explore single-cell RNA-sequencing data of human and mouse coronary artery samples. Our goal is to make these valuable data analytic tools publicly available to non-bioinformaticians. This is an open-sourced tool that is freely available and can be modified for other scRNA-seq data.
 
-*Plaqview* is currently in public beta as of April 26 (v.1.0), 2021. Last Updated: April 26, 2021.
+*Plaqview* is currently in public beta as of April 26 (v.1.0), 2021. Last Updated: Aug 29th, 2021.
 
 ### About the Datasets
 
@@ -20,19 +20,22 @@ Details of each dataset is available in their respective publication. Please use
 **More datasets are coming soon!**
 
 ### Features Coming Soon
-eQTL/GWAS, multi-variate analysis and visualization with patient metadata. Check back soon!
+
+eQTL/GWAS, multi-variate analysis and visualization with patient metadata. Cell-cell Communication and other intercellular and intracellular analysis tools are coming soon!
 
 ### Reproducibility and Code Availability
 
 *PlaqView* is designed to be open-source and publicly available and serve as a template for other scRNA-seq analysis pipelines. The code scripts are available on our [GitHub Page](https://github.com/MillerLab-CPHG/PlaqView). This application calls for .rds datafiles that are too large to host on Github, but you can find them at the source codes on GitHub or by emailing us, we will get back to you in 24hrs. To Run this application successfully, place all the .rds object file in the folder/subdiretory called 'data.'
 
+All scRNA-seq data submitted to *PlaqView* are processed in the same way. Please see the [Processing GitHub Page](https://github.com/MillerLab-CPHG/PlaqView) for scripts and details.
+
 ### Packages Used
 
-*Seurat, Monocle3, Tidyverse, EnrichR, scCATCH, Shiny.* See session info for detailed version and package history.
+*Seurat, Monocle3, Tidyverse, EnrichR, scCATCH, SingleR, Dynverse, Shiny.* See session info for detailed version and package history.
 
 ### About Our Lab
 
-The Miller Lab is a part of the Center for Public Health Genomics of the University of Virginia, School of Medicine in Charlottesville, VA. Our lab focuses on finding novel risk factors and mechanisms of heart diseases using next-generation sequencing techniques. For questions about our lab, please contact us [here](https://millerlab.org). For questions about *PlaqView*, raise a ticket in our [GitHub Page](https://github.com/MillerLab-CPHG/PlaqView). 
+The Miller Lab is a part of the Center for Public Health Genomics of the University of Virginia, School of Medicine in Charlottesville, VA. Our lab focuses on finding novel risk factors and mechanisms of heart diseases using next-generation sequencing techniques. For questions about our lab, please contact us [here](https://millerlab.org). For questions about *PlaqView*, raise a ticket in our [GitHub Page](https://github.com/MillerLab-CPHG/PlaqView).
 
 ### Where to Find Help
 

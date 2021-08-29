@@ -9,7 +9,7 @@ output: html_document
 
 **Please be patient, it might take a while to query.**
 
-Use this module to explore gene expression of any gene in your selected dataset. 
+Use this module to explore gene expression of any gene in your selected dataset. **Gene names will be converted to correct capitaliztion based on species.**
 
 For a **single** gene, feature and ridge plots work well. For **multiple** genes, use dot plots.
 
