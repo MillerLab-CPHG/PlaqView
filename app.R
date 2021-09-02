@@ -505,11 +505,17 @@ ui <- fluidPage(
                         
                         br(),
                         br(),
-                        downloadButton("downloadsessioninfo", "Download Session and Package Information")
+                        downloadButton("downloadsessioninfo", "Download Session and Package Information"),
                         
                         
-                      )) # close tab panel
+                      )), # close tab panel
              
+             ### JS to jump to top of page on click ###
+             tags$script(" $(document).ready(function () {
+                         $('#jumpto1').on('click', function (e) {
+                         window.scrollTo(0, 0)                
+                         });                 
+                         });")
              
   )# close navbarpage
   
