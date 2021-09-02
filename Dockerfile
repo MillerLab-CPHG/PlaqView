@@ -20,7 +20,8 @@ RUN apt-get update && apt-get install -y \
     libtiff5-dev \
     libjpeg-dev \
     git         \
-    libgdal-dev
+    libgdal-dev \
+    python3-venv
     
 # Install Shiny server
 RUN wget --no-verbose https://s3.amazonaws.com/rstudio-shiny-server-os-build/ubuntu-12.04/x86_64/VERSION -O "version.txt" && \
