@@ -3,7 +3,7 @@ name: Docker Build CI for PlaqView
 on:
   push:
     branches:
-    - 'staging_dcos' # this needs to refer to the branch in github
+    - 'staging_dcos' # change this whenever you switch branch
 
 jobs:
   Build:
@@ -29,7 +29,7 @@ jobs:
         with:
           push: true
           no-cache: true
-          tags: quay.io/uvarc/plaqview:dev # change this for different containers, needs to match 'image' in DC/OS
+          tags: quay.io/uvarc/plaqview:dev # change this tag to whichever to match container-image
       -
         name: Image digest
         run: echo ${{ steps.docker_build.outputs.digest }}
@@ -47,4 +47,5 @@ jobs:
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           AWS_DEFAULT_REGION: ${{ secrets.AWS_DEFAULT_REGION }}        # also change '--mesage-body to same' for different containers
         run: aws sqs send-message --queue-url 'https://queue.amazonaws.com/474683445819/dcos-refresh' --message-body 'cphg/plaqview-staging' || exit 1;
-#  --message-body neds to match the service name
+        
+        # message-body needs to match serviceID
