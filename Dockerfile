@@ -20,7 +20,8 @@ RUN apt-get update && apt-get install -y \
     libtiff5-dev \
     libjpeg-dev \
     git         \
-    libgdal-dev
+    libgdal-dev \
+    python3-venv
     
 # Install Shiny server
 RUN wget --no-verbose https://s3.amazonaws.com/rstudio-shiny-server-os-build/ubuntu-12.04/x86_64/VERSION -O "version.txt" && \
@@ -51,8 +52,10 @@ RUN cp -r PlaqView/* /srv/shiny-server/
 
 # Make the ShinyApp available at port 80
 EXPOSE 80
+WORKDIR /srv/shiny-server
+CMD R -e "options('shiny.port'=80,shiny.host='0.0.0.0');shiny::runApp('app.R')"
 
-RUN chown shiny.shiny /usr/bin/shiny-server.sh && chmod 755 /usr/bin/shiny-server.sh
+#RUN chown shiny.shiny /usr/bin/shiny-server.sh && chmod 755 /usr/bin/shiny-server.sh
 
 # Run the server setup script
-CMD ["/usr/bin/shiny-server.sh"]
+#CMD ["/usr/bin/shiny-server.sh"]
