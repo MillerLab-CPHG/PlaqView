@@ -1,10 +1,5 @@
 #### PreReq Codes ####
 # below line is commented for shinyapp.io deployment temp
-# library(reticulate)
-# virtualenv_create("myenv_plaqview")
-# use_virtualenv("myenv_plaqview", required = TRUE)
-# py_install("umap-learn") 
-
 ### set this once in terminal before deploying to shinyapps.io ###
 # options(repos = BiocManager::repositories())
 
@@ -178,9 +173,8 @@ ui <- fluidPage(
                                       ),
                                       
                                       # choose the type of output graph 
-                                      helpText("Preferred Plot Type"),
-                                      
-                                      pickerInput("selectaplot", label = NULL, 
+                                      pickerInput("selectaplot",
+                                                  label = "Select Plot Type", 
                                                   choices = list(
                                                     "Dot Plot (up to 9 genes)" = "Dot",
                                                     "Feature Plot (up to 4 genes)" = "Feature",
@@ -188,8 +182,6 @@ ui <- fluidPage(
                                                   width = '75%',
                                                   selected = "Dot Plot"),
                                       
-                                      helpText("Preferred Cell Labeling Method"),
-                              
                                       pickerInput(
                                         inputId = "selectlabelmethodforgenequery",
                                         label = "Select Labeling Method", 
@@ -291,8 +283,8 @@ ui <- fluidPage(
                                   fluidRow(
                                     column(width = 6, 
                                            
-                                           selectInput("leftlabeltype", 
-                                                       label = NULL,
+                                           pickerInput("leftlabeltype", 
+                                                       label = "Select Labeling Method #1",
                                                        choices = list (
                                                          "Seurat_Clusters",
                                                          "scCATCH_Blood",
@@ -308,8 +300,8 @@ ui <- fluidPage(
                                                       height = '500px')),
                                     
                                     column(width = 6,
-                                           selectInput("rightlabeltype", 
-                                                       label = NULL,
+                                           pickerInput("rightlabeltype", 
+                                                       label = "Select Labeling Method #2",
                                                        choices = list (
                                                          "Seurat_Clusters",
                                                          "scCATCH_Blood",
@@ -355,8 +347,8 @@ ui <- fluidPage(
                                 wellPanel(
                                   fluidRow(
                                     column(width = 6,
-                                           selectInput("lefttrajectorymethod",
-                                                       label = NULL,
+                                           pickerInput("lefttrajectorymethod",
+                                                       label = "Select Trajectory Method #1",
                                                        choices = list(
                                                          "Monocle3  (Trapnell Lab)" = "monocle3",
                                                          "PAGA (Theis Lab)" = "paga",
@@ -370,8 +362,8 @@ ui <- fluidPage(
                                     ), # column
                                     
                                     column(width = 6,
-                                           selectInput("righttrajectorymethod",
-                                                       label = NULL,
+                                           pickerInput("righttrajectorymethod",
+                                                       label = "Select Trajectory Method #2",
                                                        choices = list(
                                                          "PAGA (Theis Lab)" = "paga",
                                                          "Slingshot (Dudoit Lab)" = "slingshot",
@@ -454,8 +446,8 @@ ui <- fluidPage(
                                                     label = "Gene to Drug",
                                                     value = "EGFR"
                                                   ),
-                                                  selectInput("drugcelllabelmethod", 
-                                                              label = NULL,
+                                                  pickerInput("drugcelllabelmethod", 
+                                                              label = "Select Labeling Method",
                                                               choices = list (
                                                                 "Seurat_Clusters",
                                                                 "scCATCH_Blood",
@@ -528,6 +520,7 @@ ui <- fluidPage(
 
 
 
+
 #### SERVER ####
 # Define server logic required to draw a histogram
 server <- function(input, output) {
@@ -568,7 +561,7 @@ server <- function(input, output) {
                       selected = "panel1") # this is to switch to tab1
     
   })
-  
+
   
   #### PANEL #1 FUNCTIONS ####
   #### umap ###
@@ -639,7 +632,7 @@ server <- function(input, output) {
     
   )# close downloadhandler
   
-  #### dot plot ###
+  #### dot plot ####
   observeEvent(input$runcode,{ # observe event puts a pause until pushed
     
     # this is for the display
@@ -926,21 +919,31 @@ server <- function(input, output) {
   # 
   #### PANEL #5 DRUG FUNCTIONS ####
   observeEvent(input$rundgidb, {
-    druggenes <- str_split(input$druggeneinput, ", ")[[1]]
-    Idents(plaqviewobj) <- input$drugcelllabelmethod
-    output$featurefordrugs <- renderPlot({
-      user_genes <- str_split(input$genes, ", ")[[1]]
-      FeaturePlot(plaqviewobj, 
-                  features = druggenes[1:1], label = T, repel = T
-      ) + # a trick to sep long string input
-        theme(legend.position="bottom", legend.box = "vertical") + # group.by is important, use this to call metadata separation
-        theme(plot.title = element_text(hjust = 1)) +
-        theme(plot.title = element_text(hjust =  0.5)) 
-    }) # render plot
     
-    result <- queryDGIdb(input$druggeneinput,
+    #### NOMENCLATURE UPDATE ####
+    if(df$Species[input$availabledatasettable_rows_selected] == "Human"){
+      corrected <- str_to_upper(input$druggeneinput)
+    } else{
+      corrected <- str_to_title(input$druggeneinput)
+    }
+    
+    updateTextInput(getDefaultReactiveDomain(),
+                    "druggeneinput", # input ID of the textinput
+                    value = corrected) # correct to
+    
+    # updated gene name is now here
+    updated_druggeneinput <- input$druggeneinput
+    
+    druggenes <- str_split(updated_druggeneinput, ", ")[[1]]
+    
+    # set active. identity
+    Idents(plaqviewobj) <- input$drugcelllabelmethod
+  
+    
+    result <- queryDGIdb(updated_druggeneinput,
                          sourceDatabases = input$dgidbdatabase)
     fulltable <- result@data[["interactions"]][[1]]
+    
     
     # so if table becomes a list (empty), run the following
     # this is a table to show no drugs available
@@ -970,11 +973,22 @@ server <- function(input, output) {
       fulltable <- fulltable %>% mutate(pmids = map_chr(pmids, toString))
     }
     
+    # plots
+    output$featurefordrugs <- renderPlot({
+      user_genes <- str_split(corrected, ", ")[[1]]
+      FeaturePlot(plaqviewobj, 
+                  features = user_genes, label = T, repel = T
+      ) + # a trick to sep long string input
+        theme(legend.position="bottom", legend.box = "vertical") + # group.by is important, use this to call metadata separation
+        theme(plot.title = element_text(hjust = 1)) +
+        theme(plot.title = element_text(hjust =  0.5)) 
+    }) # render plot
+    
     
     output$dgidboutput <- DT::renderDataTable(isolatedtable, )
     output$downloaddgidboutput <- downloadHandler(
       filename = function() {
-        paste(input$druggeneinput, "_complete_drug-gene_int.csv", sep = "")
+        paste(updated_druggeneinput, "_complete_drug-gene_int.csv", sep = "")
       },
       content = function(file) {
         write.csv(fulltable, file, row.names = FALSE, col.names = T)
