@@ -4,11 +4,11 @@ author: "WeiMa"
 date: "1/2/2021"
 output: html_document
 ---
-### **PlaqView**: an interactive application to explore scRNA-seq of human coronary artery.
+### **PlaqView**: an interactive application to explore atherosclerosis-related scRNA-seq datasets.
 
 Use this module to **compare different cell annotation techniques.** 
 
-By default, *Plaqview* uses *SingleR* (Aran et al.), which uses reference-based algorithms to deduce cell identity of individual cells. Other tools, such as *scCATCH* (Shao et al.) can also annotate cell types without user-input. Alternatively, users can download differential gene expression lists created by *Seurat V4* (Satija Lab) and manually define cells by clusters. 
+By default, *Plaqview* uses *Seurat v4* (Butler et al.) with the [Tabula sapiens](https://www.biorxiv.org/content/10.1101/2021.07.19.452956v1) reference. Alternatively we found *SingleR* (Aran et al.), which uses reference-based algorithms to deduce cell identity of individual cells, to work better in some cases. Other tools, such as *scCATCH* (Shao et al.) can also annotate cell types without user-input. Lastly, users can download differential gene expression lists created by *Seurat v4* and manually define cells by clusters. 
 
 Note: *scCATCH* requires user-defined tissue type reference (e.g. Heart, Blood Vessels)
 
