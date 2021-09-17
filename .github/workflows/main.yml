@@ -1,9 +1,9 @@
 name: Docker Build CI for PlaqView
-
+ 
 on:
   push:
     branches:
-    - 'staging_dcos' # change this whenever you switch branch
+    - 'main' # change this whenever you switch branch
 
 jobs:
   Build:
