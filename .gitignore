@@ -7,6 +7,8 @@ data/Wirka_2019.rds
 *.RDS
 .Rproj.user
 rsconnect/shinyapps.io/millerlab/PlaqView.dcf
+.DS_Store
+Icon
 *.dcf
 *.dcf
 *.dcf
