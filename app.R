@@ -57,7 +57,7 @@ library(shinyjs)
 library(rDGIdb) # BiocManager::install("rDGIdb")
 library(tidyverse)
 library(rsconnect)
-# library(CellChat)
+library(CellChat)
 
 #### PreReq Codes ####
 # below line is commented for shinyapp.io deployment temp
@@ -187,9 +187,6 @@ ui <- fluidPage(
                                         label = "Select Labeling Method", 
                                         choices = list (
                                           "Seurat_Clusters",
-                                          "scCATCH_Blood",
-                                          "scCATCH_BV",
-                                          "scCATCH_Heart",
                                           "Author_Provided",
                                           "SingleR.calls",
                                           "Seurat_with_Tabula_Ref"  
@@ -287,9 +284,6 @@ ui <- fluidPage(
                                                        label = "Select Labeling Method #1",
                                                        choices = list (
                                                          "Seurat_Clusters",
-                                                         "scCATCH_Blood",
-                                                         "scCATCH_BV",
-                                                         "scCATCH_Heart",
                                                          "Author_Provided",
                                                          "SingleR.calls",
                                                          "Seurat_with_Tabula_Ref"  
@@ -304,9 +298,6 @@ ui <- fluidPage(
                                                        label = "Select Labeling Method #2",
                                                        choices = list (
                                                          "Seurat_Clusters",
-                                                         "scCATCH_Blood",
-                                                         "scCATCH_BV",
-                                                         "scCATCH_Heart",
                                                          "Author_Provided",
                                                          "SingleR.calls",
                                                          "Seurat_with_Tabula_Ref"  
@@ -450,9 +441,6 @@ ui <- fluidPage(
                                                               label = "Select Labeling Method",
                                                               choices = list (
                                                                 "Seurat_Clusters",
-                                                                "scCATCH_Blood",
-                                                                "scCATCH_BV",
-                                                                "scCATCH_Heart",
                                                                 "Author_Provided",
                                                                 "SingleR.calls",
                                                                 "Seurat_with_Tabula_Ref"  
@@ -531,7 +519,7 @@ ui <- fluidPage(
 # Define server logic required to draw a histogram
 server <- function(input, output) {
   #### WELCOME PANEL ####
-  df <- read_excel("Available_datasets.xlsx")
+  df <- read_excel("Processed_dataset_on_PlaqView.xlsx")
   df$DOI <- paste("<a href=",  df$DOI,">", "Link", "</a>") # this converts to clickable format
   # df <- column_to_rownames(df, var = "DataID")
   

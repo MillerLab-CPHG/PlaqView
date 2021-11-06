@@ -4,6 +4,7 @@ data/final_stanford_labeled.rds
 data/final_stanford_extendedlabels_02082021.rds
 data/utrecht_02172021.RDS
 data/Wirka_2019.rds
+data
 *.RDS
 .Rproj.user
 rsconnect/shinyapps.io/millerlab/PlaqView.dcf
