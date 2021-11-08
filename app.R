@@ -57,14 +57,14 @@ library(shinyjs)
 library(rDGIdb) # BiocManager::install("rDGIdb")
 library(tidyverse)
 library(rsconnect)
-library(CellChat)
+# library(CellChat)
 
 #### PreReq Codes ####
 # below line is commented for shinyapp.io deployment temp
-library(reticulate)
-virtualenv_create("myenv_plaqview")
-use_virtualenv("myenv_plaqview", required = TRUE)
-py_install("umap-learn") 
+# library(reticulate)
+# virtualenv_create("myenv_plaqview")
+# use_virtualenv("myenv_plaqview", required = TRUE)
+# py_install("umap-learn") 
 
 # enrichR functions
 # handcurate db names 
