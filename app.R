@@ -57,6 +57,7 @@ library(shinyjs)
 library(rDGIdb) # BiocManager::install("rDGIdb")
 library(tidyverse)
 library(rsconnect)
+library(ggforce)
 # library(CellChat)
 
 #### PreReq Codes ####
@@ -168,7 +169,7 @@ ui <- fluidPage(
                                         "genes",
                                         width = '100%',
                                         h3("Query Gene Expression", h5("please follow HUGO conventions")),
-                                        value = "TREM2, CYBB",
+                                        # value = "TREM2, CYBB",
                                         placeholder = "try: TREM2, CYBB"
                                       ),
                                       
