@@ -10,7 +10,8 @@ Use this module to **compare different cell annotation techniques.**
 
 By default, *Plaqview* uses *Seurat v4* (Butler et al.) with the [Tabula sapiens](https://www.biorxiv.org/content/10.1101/2021.07.19.452956v1) reference. Alternatively we found *SingleR* (Aran et al.), which uses reference-based algorithms to deduce cell identity of individual cells, to work better in some cases. Lastly, users can download differential gene expression lists created by *Seurat v4* and manually define cells by clusters. 
 
-Note: *scCATCH* is no longer supported due to its underperformance in cardiac tissues.
+Note: *scCATCH* is no longer supported due to its underperformance in cardiac tissues. Automatic labeling methods may not work well for mouse data, we are actively working on this and will release a resolution by Decc 2021. Thank you for your patience!
+
 
 *Please cite Ma et al., (2021) and dataset(s) used in your publications*
 
