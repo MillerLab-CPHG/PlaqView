@@ -56,7 +56,6 @@ library(shinyjs)
 # library(RColorBrewer)
 library(rDGIdb) # BiocManager::install("rDGIdb")
 library(tidyverse)
-library(rsconnect)
 # library(ggforce)
 # library(CellChat)
 
@@ -527,7 +526,7 @@ server <- function(input, output) {
   output$availabledatasettable <-
     DT::renderDataTable(df, server = F, # server is for speed/loading
                         selection = list(mode = 'single', selected = c(1)),
-                        options=list(columnDefs = list(list(visible=FALSE, targets=c(11)))), # this hides the 8th column, which is datasetID
+                        options=list(columnDefs = list(list(visible=FALSE, targets=c(11,12,13)))), # this hides the 8th column, which is datasetID
                         escape = FALSE) # this escapes rendering html (link) literally and makes link clickable
   
   observeEvent(input$loaddatabutton, {
