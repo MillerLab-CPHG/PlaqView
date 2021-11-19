@@ -56,15 +56,15 @@ library(shinyjs)
 # library(RColorBrewer)
 library(rDGIdb) # BiocManager::install("rDGIdb")
 library(tidyverse)
-# library(ggforce)
+library(rsconnect)
 # library(CellChat)
 
 #### PreReq Codes ####
 # below line is commented for shinyapp.io deployment temp
-# library(reticulate)
-# virtualenv_create("myenv_plaqview")
-# use_virtualenv("myenv_plaqview", required = TRUE)
-# py_install("umap-learn") 
+library(reticulate)
+virtualenv_create("myenv_plaqview")
+use_virtualenv("myenv_plaqview", required = TRUE)
+py_install("umap-learn") 
 
 # enrichR functions
 # handcurate db names 
@@ -168,7 +168,7 @@ ui <- fluidPage(
                                         "genes",
                                         width = '100%',
                                         h3("Query Gene Expression", h5("please follow HUGO conventions")),
-                                        # value = "TREM2, CYBB",
+                                        value = "TREM2, CYBB",
                                         placeholder = "try: TREM2, CYBB"
                                       ),
                                       
@@ -187,6 +187,9 @@ ui <- fluidPage(
                                         label = "Select Labeling Method", 
                                         choices = list (
                                           "Seurat_Clusters",
+                                          "scCATCH_Blood",
+                                          "scCATCH_BV",
+                                          "scCATCH_Heart",
                                           "Author_Provided",
                                           "SingleR.calls",
                                           "Seurat_with_Tabula_Ref"  
@@ -284,6 +287,9 @@ ui <- fluidPage(
                                                        label = "Select Labeling Method #1",
                                                        choices = list (
                                                          "Seurat_Clusters",
+                                                         "scCATCH_Blood",
+                                                         "scCATCH_BV",
+                                                         "scCATCH_Heart",
                                                          "Author_Provided",
                                                          "SingleR.calls",
                                                          "Seurat_with_Tabula_Ref"  
@@ -298,6 +304,9 @@ ui <- fluidPage(
                                                        label = "Select Labeling Method #2",
                                                        choices = list (
                                                          "Seurat_Clusters",
+                                                         "scCATCH_Blood",
+                                                         "scCATCH_BV",
+                                                         "scCATCH_Heart",
                                                          "Author_Provided",
                                                          "SingleR.calls",
                                                          "Seurat_with_Tabula_Ref"  
@@ -441,6 +450,9 @@ ui <- fluidPage(
                                                               label = "Select Labeling Method",
                                                               choices = list (
                                                                 "Seurat_Clusters",
+                                                                "scCATCH_Blood",
+                                                                "scCATCH_BV",
+                                                                "scCATCH_Heart",
                                                                 "Author_Provided",
                                                                 "SingleR.calls",
                                                                 "Seurat_with_Tabula_Ref"  
@@ -519,14 +531,14 @@ ui <- fluidPage(
 # Define server logic required to draw a histogram
 server <- function(input, output) {
   #### WELCOME PANEL ####
-  df <- read_excel("Processed_dataset_on_PlaqView.xlsx")
+  df <- read_excel("Available_datasets.xlsx")
   df$DOI <- paste("<a href=",  df$DOI,">", "Link", "</a>") # this converts to clickable format
   # df <- column_to_rownames(df, var = "DataID")
   
   output$availabledatasettable <-
     DT::renderDataTable(df, server = F, # server is for speed/loading
                         selection = list(mode = 'single', selected = c(1)),
-                        options=list(columnDefs = list(list(visible=FALSE, targets=c(11,12,13)))), # this hides the 8th column, which is datasetID
+                        options=list(columnDefs = list(list(visible=FALSE, targets=c(11)))), # this hides the 8th column, which is datasetID
                         escape = FALSE) # this escapes rendering html (link) literally and makes link clickable
   
   observeEvent(input$loaddatabutton, {
