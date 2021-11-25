@@ -5,15 +5,15 @@ Our publication introducing PlaqView has been accepted at Atherosclerosis (link 
 ## About *PlaqView*
 *PlaqView* is a standalone, interactive, and reproducible Shiny and R-based tool to explore atherosclerosis-related single-cell RNA-sequencing data. Our goal is to make these valuable data analytic tools publicly available to non-bioinformaticians. This is an open-sourced tool that is freely available and can be modified for other scRNA-seq data. Our latest preprint is available [HERE](https://www.biorxiv.org/content/10.1101/2020.10.27.357715v2). 
 
-PlaqView is LIVE! [Check it out here](https://millerlab.shinyapps.io/PlaqView)
+PlaqView is LIVE! [Check it out here](plaqview.com)
 
 ### Data Source
-The data used in this interactive session were first published by Wirka et al. (Nature Medicine, 2019). The data were later extensively analyzed and made available here by Ma et al. (2021). Overtime, we have included additional datasets, please see the [application webpage](https://millerlab.shinyapps.io/PlaqView) or the 'available_dataset' file for the latest available datasets!
+The data used in this interactive session were first published by Wirka et al. (Nature Medicine, 2019). The data were later extensively analyzed and made available here by Ma et al. (2021). Overtime, we have included additional datasets, please see the [application webpage](plaqview.com) or the 'available_dataset' file for the latest available datasets!
 
 #### Submitting Your Data
 Currently, PlaqView supports scRNA-seq type data. We are working on expanding to ATAC-seq and spatial transcriptomics. We welcome submission of all kinds of single-cell data related to cardiovascular genetics.
 
-To learn about how data is processed or to **submit your own data**, [Click Here](https://github.com/MillerLab-CPHG/PlaqView_DataProcessing).
+To learn about how data is processed or to **submit your own data**, [Click Here](plaqview.com) and click Contact Us.
 
 For scRNA-seq data, we require the following:
 1) *Seurat* object containing your count matrix and cell labels used in your publication. (Cell labels are often stored in the 'Metadata' tab in the *Seurat* obj.).
