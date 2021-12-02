@@ -187,9 +187,9 @@ ui <- fluidPage(
                                         label = "Select Labeling Method", 
                                         choices = list (
                                           "Seurat_Clusters",
-                                          "scCATCH_Blood",
-                                          "scCATCH_BV",
-                                          "scCATCH_Heart",
+                                          # "scCATCH_Blood",
+                                          # "scCATCH_BV",
+                                          # "scCATCH_Heart",
                                           "Author_Provided",
                                           "SingleR.calls",
                                           "Seurat_with_Tabula_Ref"  
@@ -287,9 +287,9 @@ ui <- fluidPage(
                                                        label = "Select Labeling Method #1",
                                                        choices = list (
                                                          "Seurat_Clusters",
-                                                         "scCATCH_Blood",
-                                                         "scCATCH_BV",
-                                                         "scCATCH_Heart",
+                                                         # "scCATCH_Blood",
+                                                         # "scCATCH_BV",
+                                                         # "scCATCH_Heart",
                                                          "Author_Provided",
                                                          "SingleR.calls",
                                                          "Seurat_with_Tabula_Ref"  
@@ -304,9 +304,9 @@ ui <- fluidPage(
                                                        label = "Select Labeling Method #2",
                                                        choices = list (
                                                          "Seurat_Clusters",
-                                                         "scCATCH_Blood",
-                                                         "scCATCH_BV",
-                                                         "scCATCH_Heart",
+                                                         # "scCATCH_Blood",
+                                                         # "scCATCH_BV",
+                                                         # "scCATCH_Heart",
                                                          "Author_Provided",
                                                          "SingleR.calls",
                                                          "Seurat_with_Tabula_Ref"  
@@ -450,9 +450,9 @@ ui <- fluidPage(
                                                               label = "Select Labeling Method",
                                                               choices = list (
                                                                 "Seurat_Clusters",
-                                                                "scCATCH_Blood",
-                                                                "scCATCH_BV",
-                                                                "scCATCH_Heart",
+                                                                # "scCATCH_Blood",
+                                                                # "scCATCH_BV",
+                                                                # "scCATCH_Heart",
                                                                 "Author_Provided",
                                                                 "SingleR.calls",
                                                                 "Seurat_with_Tabula_Ref"  
