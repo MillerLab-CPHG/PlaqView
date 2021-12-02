@@ -2,3 +2,4 @@ data/
 .Rproj.user/
 data
 *.csv
+.DS_Store
