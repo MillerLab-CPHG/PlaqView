@@ -1,0 +1,13 @@
+name: PlaqView_dev
+title: PlaqView_dev
+username:
+account: millerlab
+server: shinyapps.io
+hostUrl: https://api.shinyapps.io/v1
+appId: 4500264
+bundleId: 5064703
+url: https://millerlab.shinyapps.io/PlaqView_Dev/
+when: 1632412570.30866
+lastSyncTime: 1632412570.30867
+asMultiple: FALSE
+asStatic: FALSE
