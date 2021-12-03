@@ -489,26 +489,26 @@ ui <- fluidPage(
                       
              ),
              
-             # PANEL 6: ABOUT PANEL ----
-             tabPanel("About & Help",
-                      mainPanel(
-                        # descriptions
-                        includeMarkdown("descriptionfiles/aboutusdescription.Rmd"),
-                        br(),
-                        img(src = "millerlablogo.png", height = 83),
-                        img(src = "MSTPlogo.png", width = 233, height = 83),
-                        img(src = "umc.png", height = 83),
-                        br(),
-                        
-                        img(src = "PlaqOmics.png", width = 233, height = 83),
-                        img(src = "Leducq.png", width = 233, height = 83),
-                        
-                        br(),
-                        br(),
-                        downloadButton("downloadsessioninfo", "Download Session and Package Information"),
-                        
-                        
-                      )), # close tab panel
+             ## deprecated ## # PANEL 6: ABOUT PANEL ----
+             # tabPanel("About & Help",
+             #          mainPanel(
+             #            # descriptions
+             #            includeMarkdown("descriptionfiles/aboutusdescription.Rmd"),
+             #            br(),
+             #            img(src = "millerlablogo.png", height = 83),
+             #            img(src = "MSTPlogo.png", width = 233, height = 83),
+             #            img(src = "umc.png", height = 83),
+             #            br(),
+             #            
+             #            img(src = "PlaqOmics.png", width = 233, height = 83),
+             #            img(src = "Leducq.png", width = 233, height = 83),
+             #            
+             #            br(),
+             #            br(),
+             #            downloadButton("downloadsessioninfo", "Download Session and Package Information"),
+             #            
+             #            
+             #          )), # close tab panel
              
              ### JS to jump to top of page on click ###
              tags$script(" $(document).ready(function () {
