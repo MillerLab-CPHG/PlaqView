@@ -38,9 +38,7 @@ RUN R -e "install.packages(c('BiocManager','shiny','shinythemes','Seurat', 'mark
 RUN R -e "devtools::install_github('sqjin/CellChat')"
 
 ## BIOCONDUCTOR
-RUN R -e "BiocManager::install(c('BiocGenerics', 'DelayedArray', 'DelayedMatrixStats',
-                       'limma', 'S4Vectors', 'SingleCellExperiment',
-                       'SummarizedExperiment', 'batchelor', 'Matrix.utils', 'rDGIdb'))"
+RUN R -e "BiocManager::install(c('BiocGenerics', 'DelayedArray', 'DelayedMatrixStats','limma', 'S4Vectors', 'SingleCellExperiment','SummarizedExperiment','batchelor', 'Matrix.utils', 'rDGIdb'))"
 
 ## SPECIFIC FOR MONOCLE3
 RUN R -e "devtools::install_github('cole-trapnell-lab/leidenbase')"

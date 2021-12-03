@@ -57,6 +57,7 @@ library(shinyjs)
 library(rDGIdb) # BiocManager::install("rDGIdb")
 library(tidyverse)
 library(rsconnect)
+library(monocle3)
 # library(CellChat)
 
 #### PreReq Codes ####
