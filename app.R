@@ -1,3 +1,7 @@
+#### PlaqView Master Code ####
+#### Author: Wei Feng Ma, UVA.
+#### wm5wt@virginia.edu
+
 #### PreReq Codes ####
 # below line is commented for shinyapp.io deployment temp
 ### set this once in terminal before deploying to shinyapps.io ###
