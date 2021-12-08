@@ -180,7 +180,7 @@ ui <- fluidPage(
                                                     "Dot Plot (up to 9 genes)" = "Dot",
                                                     "Feature Plot (up to 4 genes)" = "Feature",
                                                     "Ridge Plot (single gene)" = "Ridge"),
-                                                  width = '75%',
+                                                  width = '90%',
                                                   selected = "Dot Plot"),
                                       
                                       pickerInput(
@@ -196,7 +196,7 @@ ui <- fluidPage(
                                           "Seurat_with_Tabula_Ref"  
                                         ), 
                                         selected = "Seurat_with_Tabula_Ref",
-                                        width = '75%' #neeed to fit this
+                                        width = '90%' #neeed to fit this
                                       ),
                                       
                                       # 'go' button
@@ -341,46 +341,51 @@ ui <- fluidPage(
                       
                       
              ), # tabPanel
-             # PANEL 3: COMPARE TRAJECTORY METHODS ----
+             # PANEL 3: MONOCLE3 ----
              tabPanel("Trajectory",
                       mainPanel(width = 12, # 12/12 is full panel,
-                                wellPanel(includeMarkdown("descriptionfiles/helptext_comparetrajectories.Rmd")),
+                                ### top panel
+                                wellPanel(fluidRow(
+                                  column(width = 5,
+                                         includeMarkdown("descriptionfiles/helptext_comparetrajectories.Rmd"),
+                                         # done button
+                                         actionButton("choose_toggle", "Choose/Unchoose"),
+                                         # clear button
+                                         actionButton("reset", "Clear Selection"),
+                                         # done button
+                                         actionButton("redomonocle3", "Recalculate"),
+                                         h4("Instructions:"),
+                                         tags$ol(
+                                           tags$li("Highlight points by clicking and dragging."),
+                                           tags$li("Click the 'Choose/unchoose' button."),
+                                           tags$li("Repeat until all of the desired cells are black."),
+                                           tags$li("Click 'Done'.")
+                                         ),
+                                         h4("Details:"),
+                                         tags$ul(
+                                           tags$li("To start over, click 'Clear'"),
+                                           tags$li(paste("You can also choose/unchoose specific cells",
+                                                         "by clicking on them directly."))),
+                                         ), # column
+                                       column(width = 6, plotOutput("plot1", 
+                                                                    click = "plot1_click",
+                                                                    brush = brushOpts(id = "plot1_brush")),
+                                              
+                                       actionButton("downloadoriginaltrajectory", label = "Download Original Trajectory"),
+                                       ), # column
+                                ), # fluidrow
+                                ), # wellpanel
+             
+                                ### bottom panel
                                 wellPanel(
                                   fluidRow(
-                                    column(width = 6,
-                                           pickerInput("lefttrajectorymethod",
-                                                       label = "Select Trajectory Method #1",
-                                                       choices = list(
-                                                         "Monocle3  (Trapnell Lab)" = "monocle3",
-                                                         "PAGA (Theis Lab)" = "paga",
-                                                         "Slingshot (Dudoit Lab)" = "slingshot",
-                                                         "SCORPIUS (Saeys Lab)" = "scorpius"
-                                                       ),
-                                                       selected = "Monocle3  (Trapnell Lab)"),
-                                           plotOutput("lefttrajectorygraph",
-                                                      height = '500px')
-                                           
-                                    ), # column
-                                    
-                                    column(width = 6,
-                                           pickerInput("righttrajectorymethod",
-                                                       label = "Select Trajectory Method #2",
-                                                       choices = list(
-                                                         "PAGA (Theis Lab)" = "paga",
-                                                         "Slingshot (Dudoit Lab)" = "slingshot",
-                                                         "SCORPIUS (Saeys Lab)" = "scorpius"
-                                                       ),
-                                                       selected ="PAGA (Theis Lab)"),
-                                           plotOutput("righttrajectorygraph",
-                                                      height = '500px')        
-                                    ) # column
-                                    
-                                    
-                                    
-                                    
-                                    
-                                  ) # fluidrow
-                                ) # close wellpanel
+                                    plotOutput("originaltrajectory",
+                                               height = '500px'),
+
+                                   
+                                  )# fluidrow
+                                      
+                                ),
                       ), # mainPanel
                       
                       
@@ -466,7 +471,7 @@ ui <- fluidPage(
                                                   inputId = "dgidbdatabase",
                                                   label = "Choose a Database", 
                                                   inline = TRUE, 
-                                                  selected = c("FDA", "DrugBank"),
+                                                  selected = sourceDatabases(), # preselects all
                                                   choices = sourceDatabases()
                                                 ),
                                                 
@@ -528,9 +533,10 @@ ui <- fluidPage(
 
 
 
+
 #### SERVER ####
 # Define server logic required to draw a histogram
-server <- function(input, output) {
+server <- function(input, output, session) {
   #### WELCOME PANEL ####
   df <- read_excel("Available_datasets.xlsx")
   df$DOI <- paste("<a href=",  df$DOI,">", "Link", "</a>") # this converts to clickable format
@@ -546,7 +552,11 @@ server <- function(input, output) {
     path <- file.path(paste("data/", df$DataID[input$availabledatasettable_rows_selected], "/",
                             df$DataID[input$availabledatasettable_rows_selected],
                             ".rds", sep=""))
+    pathcds <- file.path(paste("data/", df$DataID[input$availabledatasettable_rows_selected], "/",
+                            df$DataID[input$availabledatasettable_rows_selected],
+                            "_cds.rds", sep=""))
     plaqviewobj <<- readRDS(file = path)
+    plaqviewobj.cds <<- readRDS(file = pathcds)
     
     ## these are just for displaying current data name in other tabs##
     output$selecteddatasetID <- renderText({
@@ -878,18 +888,62 @@ server <- function(input, output) {
     }  )# close downloadhandler
   
   #### PANEL #3 TRAJ FUNCTIONS ####
-  output$lefttrajectorygraph <- renderPlot(
-    readRDS(file =  normalizePath(file.path('data/', # this will dynamically read the file containing the right name
-                                            df$DataID[input$availabledatasettable_rows_selected], "/",
-                                            paste(input$lefttrajectorymethod, '.rds', sep=''))))
-    
-  ) # renderplot 
   
-  output$righttrajectorygraph <- renderPlot(
-    readRDS(file =  normalizePath(file.path('data/', # this will dynamically read the file containing the right name
-                                            df$DataID[input$availabledatasettable_rows_selected], "/",
-                                            paste(input$righttrajectorymethod, '.rds', sep='')))) 
-  ) # renderplot 
+  output$originaltrajectory <-
+    renderPlot(
+      plot_cells(plaqviewobj.cds)
+      ) # renderplot
+  
+  observeEvent(input$loaddatabutton, {
+    reduction_method <- "UMAP"
+    
+    reduced_dims <- as.data.frame(reducedDims(plaqviewobj.cds)[[reduction_method]])
+    names(reduced_dims)[1:2] <- c("V1", "V2")
+    
+    
+    vals <- reactiveValues(
+      keeprows = rep(FALSE, nrow(colData(plaqviewobj.cds)))
+    )
+    
+    output$plot1 <- renderPlot({
+      # Plot the kept and excluded points as two separate data sets
+      colData(plaqviewobj.cds)$keep <- vals$keeprows
+      
+      suppressMessages(plot_cells(plaqviewobj.cds, reduction_method = reduction_method,
+                                  cell_size = 1, label_cell_groups = FALSE,
+                                  rasterize=FALSE) +
+                         geom_point(alpha = colData(plaqviewobj.cds)$keep)) +
+        theme(legend.position = "none")
+    }, height = function() {
+      session$clientData$output_plot1_width
+    })
+  })
+
+  
+  # Toggle points that are clicked
+  observeEvent(input$plot1_click, {
+    res <- nearPoints(reduced_dims,
+                             xvar = "V1", yvar = "V2", input$plot1_click,
+                             allRows = TRUE)
+    vals$keeprows <- vals$keeprows | res$selected_
+  })
+  
+  # Toggle points that are brushed, when button is clicked
+  observeEvent(input$choose_toggle, {
+    res <- brushedPoints(reduced_dims,
+                                xvar = "V1", yvar = "V2", input$plot1_brush,
+                                allRows = TRUE)
+    vals$keeprows <- vals$keeprows | res$selected_
+  })
+  
+  # Reset all points
+  observeEvent(input$reset, {
+    vals$keeprows <- rep(FALSE, nrow(colData(cds)))
+  })
+  
+  observeEvent(input$done, {
+    print(vals$keeprows)
+  })
   
   
   # #### PANEL #4 CCC FUNCTIONS ####
@@ -1018,6 +1072,8 @@ server <- function(input, output) {
   #### Waiter ####
   waiter_hide()
   
+  
+
   
 } # ends server function
 
