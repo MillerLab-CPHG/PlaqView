@@ -785,7 +785,13 @@ server <- function(input, output, session) {
   #### PANEL #3 TRAJ FUNCTIONS ####
   output$originaltrajectory <-
     renderPlot(
-      plot_cells(plaqviewobj.cds)
+      plot_cells(plaqviewobj.cds,
+                 color_cells_by = "assigned_cell_type",
+                 label_groups_by_cluster=F,
+                 show_trajectory_graph = T,
+                 trajectory_graph_segment_size = 1,
+                 graph_label_size = 1, # size of # in circle
+                 group_label_size = 4)
       ) # renderplot
   
   #### selectable plot
@@ -809,7 +815,12 @@ server <- function(input, output, session) {
       colData(plaqviewobj.cds)$keep <- vals$keeprows
       
       suppressMessages(plot_cells(plaqviewobj.cds, reduction_method = reduction_method,
-                                  cell_size = 1, label_cell_groups = FALSE,
+                                  color_cells_by = "assigned_cell_type",
+                                  label_groups_by_cluster=F,
+                                  show_trajectory_graph = T,
+                                  trajectory_graph_segment_size = 1,
+                                  graph_label_size = 1, # size of # in circle
+                                  group_label_size = 4,
                                   rasterize=FALSE) +
                          geom_point(alpha = colData(plaqviewobj.cds)$keep)) +
         theme(legend.position = "none")
@@ -849,18 +860,58 @@ server <- function(input, output, session) {
     # get selected cells id
     cds_subsetIDs <- row.names(colData(plaqviewobj.cds)[selectedcells,])
     
-    # select from original cds
-    cds_subset <- plaqviewobj.cds[,cds_subsetIDs]
+    # recreate a cds obj that doesnt contain any prior UMAPS
+    expressiondata <- plaqviewobj@assays[["RNA"]]@data
     
+    cellmd <- plaqviewobj@meta.data
     
-    # redo-dimensional reduction
-    cds_subset <<- reduce_dimension(cds_subset) #gradient descent is ON
+    genemd <- data.frame(gene_short_name = row.names(expressiondata), 
+                         row.names = row.names(expressiondata))
 
+    plaqviewobj.cds_NEW <- new_cell_data_set(expression_data = expressiondata,
+                                         cell_metadata = cellmd,
+                                         gene_metadata = genemd)
+    
+    subsetted <- plaqviewobj.cds[,cds_subsetIDs]
+    
+    subsetted <- preprocess_cds(subsetted, num_dim = 30) # we used 30 in earlier seurat scripts
+    
+    
+    # reproject cells now
+    subsetted <- reduce_dimension(subsetted, reduction_method = "UMAP")
+    subsetted <- cluster_cells(subsetted, reduction_method = "UMAP")
+    
+    subsetted <- learn_graph(subsetted)
+    
+    # a helper function to identify the root principal points:
+    get_earliest_principal_node <- function(cds, assigned_cell_type= "SMCs"){ # change celltype if desired
+      cell_ids <- which(colData(cds)[, "assigned_cell_type"] == assigned_cell_type)
+      
+      closest_vertex <-
+        cds@principal_graph_aux[["UMAP"]]$pr_graph_cell_proj_closest_vertex
+      closest_vertex <- as.matrix(closest_vertex[colnames(cds), ])
+      root_pr_nodes <-
+        igraph::V(principal_graph(cds)[["UMAP"]])$name[as.numeric(names
+                                                                  (which.max(table(closest_vertex[cell_ids,]))))]
+      
+      root_pr_nodes
+    }
+    
+    subsetted <<- order_cells(subsetted, root_pr_nodes=get_earliest_principal_node(subsetted),
+                                   reduction_method = "UMAP")
     # plot subset plots 
     output$subsettrajectory <-
       renderPlot(
-        plot_cells(cds_subset)
-      ) # renderplot
+        plot_cells(subsetted,
+                   color_cells_by = "assigned_cell_type",
+                   label_groups_by_cluster=F,
+                   show_trajectory_graph = T,
+                   trajectory_graph_segment_size = 1,
+                   graph_label_size = 1, # size of # in circle
+                   group_label_size = 4,
+                   cell_size = 1,
+                   alpha = 0.7,
+                   scale_to_range = T)       ) # renderplot
 
   })
 
