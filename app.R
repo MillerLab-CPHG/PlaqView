@@ -326,10 +326,11 @@ ui <- fluidPage(
                                          tags$ul(
                                            tags$li("To start over, click 'Clear'"),
                                            tags$li(paste("You can also choose/unchoose specific cells",
-                                                         "by clicking on them directly."))
+                                                         "by clicking on them directly.")),
                                            ),
                                          ), # column
                                        column(width = 6, 
+                                             
                                               plotOutput("plot1", click = "plot1_click", 
                                                          brush = brushOpts(id = "plot1_brush"), height = "600px"),
                                               actionButton("downloadoriginaltrajectory", label = "Download Original Trajectory"),
@@ -340,6 +341,7 @@ ui <- fluidPage(
                                 ### bottom panel
                                 wellPanel(
                                   fluidRow(
+                             
                                     plotOutput("originaltrajectory",
                                                width = '500px'),
                                     plotOutput("subsettrajectory",
@@ -781,7 +783,6 @@ server <- function(input, output, session) {
     }  )# close downloadhandler
   
   #### PANEL #3 TRAJ FUNCTIONS ####
-  
   output$originaltrajectory <-
     renderPlot(
       plot_cells(plaqviewobj.cds)
@@ -789,19 +790,21 @@ server <- function(input, output, session) {
   
   #### selectable plot
   reduction_method <- "UMAP"
- 
+
   observeEvent(input$loaddatabutton, {
-    
+    vals <<- reactiveValues(
+      keeprows = rep(FALSE, nrow(colData(plaqviewobj.cds)))
+    )
     reduced_dims <- as.data.frame(reducedDims(plaqviewobj.cds)[[reduction_method]])
     names(reduced_dims)[1:2] <- c("V1", "V2")
     
     
-    vals <- shiny::reactiveValues(
+    vals <<- shiny::reactiveValues(
       keeprows = rep(FALSE, nrow(colData(plaqviewobj.cds)))
     )
     
 
-    output$plot1 <- renderPlot({
+    output$plot1 <<- renderPlot({
       # Plot the kept and excluded points as two separate data sets
       colData(plaqviewobj.cds)$keep <- vals$keeprows
       
@@ -819,7 +822,7 @@ server <- function(input, output, session) {
       res <- nearPoints(reduced_dims,
                         xvar = "V1", yvar = "V2", input$plot1_click,
                         allRows = TRUE)
-      vals$keeprows <- vals$keeprows | res$selected_
+      vals$keeprows <<- vals$keeprows | res$selected_
     })
     
     # Toggle points that are brushed, when button is clicked
@@ -839,18 +842,26 @@ server <- function(input, output, session) {
   
   ### selected/recalulated trajectory
   observeEvent(input$redomonocle3, {
+    
+    # this is the selected cells
     selectedcells <- vals$keeprows
     
-    cds_subset <- row.names(colData(plaqviewobj.cds)[selectedcells,])
+    # get selected cells id
+    cds_subsetIDs <- row.names(colData(plaqviewobj.cds)[selectedcells,])
     
-    cds_subset <- reduce_dimension(cds_subset, umap.fast_sgd=TRUE) #gradient descent is ON
+    # select from original cds
+    cds_subset <- plaqviewobj.cds[,cds_subsetIDs]
     
     
+    # redo-dimensional reduction
+    cds_subset <<- reduce_dimension(cds_subset) #gradient descent is ON
+
+    # plot subset plots 
     output$subsettrajectory <-
       renderPlot(
         plot_cells(cds_subset)
       ) # renderplot
-    
+
   })
 
   #### PANEL #5 DRUG FUNCTIONS ####
