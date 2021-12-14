@@ -41,9 +41,8 @@ original_color_list <-
      "cadetblue2"
   )}
 
-metcolors <- MetBrewer::met.brewer("Juarez", n = 6) 
-# color_function <- colorRampPalette(original_color_list)
-color_function <- colorRampPalette(metcolors)
+color_function <- colorRampPalette(original_color_list)
+# color_function <- colorRampPalette(metcolors)
 
 manual_color_list <- color_function(40) # change this if clusters >40
 
@@ -328,28 +327,43 @@ ui <- fluidPage(
                                            tags$li(paste("You can also choose/unchoose specific cells",
                                                          "by clicking on them directly.")),
                                            ),
+                                         h5("Recalculation may take up to 2mins. Results will appear below."),
+                                         
                                          ), # column
                                        column(width = 6, 
-                                             
                                               plotOutput("plot1", click = "plot1_click", 
-                                                         brush = brushOpts(id = "plot1_brush"), height = "600px"),
-                                              actionButton("downloadoriginaltrajectory", label = "Download Original Trajectory"),
+                                                         brush = brushOpts(id = "plot1_brush")),
+                                              br(),
+                                              downloadButton("downloadoriginaltrajectory", 
+                                                             label = "Download Original Trajectory", 
+                                                             width = '50%'),
+                                              br(),
+                                              disabled(downloadButton("downloadsubsettrajectory", 
+                                                                      label = "Download Subset Trajectory",
+                                                                      width = '50%')),
+
                                        ), # column
                                 ), # fluidrow
                                 ), # wellpanel
              
                                 ### bottom panel
-                                wellPanel(
-                                  fluidRow(
-                             
-                                    plotOutput("originaltrajectory",
-                                               width = '500px'),
-                                    plotOutput("subsettrajectory",
-                                               width = '500px'),
-
-                                   
-                                  )# fluidrow
-                                ),
+                                hidden(
+                                  wellPanel(id = "subset.trajectory", 
+                                            fluidRow(width = 12,
+                                                     column(width = 6,
+                                                            h4("Original Full Trajecotry"),
+                                                            plotOutput("originaltrajectory"),
+                                                     ),
+                                                     column(width = 6,
+                                                            h4("Trajectory of Selected Cells"),
+                                                            plotOutput("subsettrajectory"),
+                                                     ),
+                                                     
+                                                     
+                                            ) # fluidrow
+                                  ) # wellpanel
+                                ),# hidden
+                           
                       ), # mainPanel monocle3
                       
              ), # tabPanel
@@ -783,7 +797,7 @@ server <- function(input, output, session) {
     }  )# close downloadhandler
   
   #### PANEL #3 TRAJ FUNCTIONS ####
-  output$originaltrajectory <-
+  output$originaltrajectory <- 
     renderPlot(
       plot_cells(plaqviewobj.cds,
                  color_cells_by = "assigned_cell_type",
@@ -792,9 +806,32 @@ server <- function(input, output, session) {
                  trajectory_graph_segment_size = 1,
                  graph_label_size = 1, # size of # in circle
                  group_label_size = 4)
+      
       ) # renderplot
   
-  #### selectable plot
+  # this is for the download
+  output$downloadoriginaltrajectory<- downloadHandler(
+    filename = function() {
+      paste(df$DataID[input$availabledatasettable_rows_selected], "_original_trajectory.pdf", sep = "")
+    },
+    content = function(file) {
+      pdf(file, paper = "default") # paper = defult is a4 size
+    
+      temp <- plot_cells(plaqviewobj.cds,
+                 color_cells_by = "assigned_cell_type",
+                 label_groups_by_cluster=F,
+                 show_trajectory_graph = T,
+                 trajectory_graph_segment_size = 1,
+                 graph_label_size = 1, # size of # in circle
+                 group_label_size = 4)
+      plot(temp)
+      dev.off()
+    }
+    
+  )# close downloadhandler
+  
+  
+  #### subset plot
   reduction_method <- "UMAP"
 
   observeEvent(input$loaddatabutton, {
@@ -813,7 +850,6 @@ server <- function(input, output, session) {
     output$plot1 <<- renderPlot({
       # Plot the kept and excluded points as two separate data sets
       colData(plaqviewobj.cds)$keep <- vals$keeprows
-      
       suppressMessages(plot_cells(plaqviewobj.cds, reduction_method = reduction_method,
                                   color_cells_by = "assigned_cell_type",
                                   label_groups_by_cluster=F,
@@ -824,9 +860,9 @@ server <- function(input, output, session) {
                                   rasterize=FALSE) +
                          geom_point(alpha = colData(plaqviewobj.cds)$keep)) +
         theme(legend.position = "none")
-    }, height = function() {
-      session$clientData$output_plot1_width
-    })
+    }, 
+    
+    )
     
     # Toggle points that are clicked
     observeEvent(input$plot1_click, {
@@ -855,26 +891,24 @@ server <- function(input, output, session) {
   observeEvent(input$redomonocle3, {
     
     # this is the selected cells
-    selectedcells <- vals$keeprows
+    selectedcells <<- vals$keeprows
+    
     
     # get selected cells id
     cds_subsetIDs <- row.names(colData(plaqviewobj.cds)[selectedcells,])
-    
     # recreate a cds obj that doesnt contain any prior UMAPS
     expressiondata <- plaqviewobj@assays[["RNA"]]@data
-    
     cellmd <- plaqviewobj@meta.data
     
     genemd <- data.frame(gene_short_name = row.names(expressiondata), 
                          row.names = row.names(expressiondata))
-
     plaqviewobj.cds_NEW <- new_cell_data_set(expression_data = expressiondata,
                                          cell_metadata = cellmd,
                                          gene_metadata = genemd)
     
     subsetted <- plaqviewobj.cds[,cds_subsetIDs]
     
-    subsetted <- preprocess_cds(subsetted, num_dim = 30) # we used 30 in earlier seurat scripts
+    subsetted <- preprocess_cds(subsetted, num_dim = 25) # we used 30 in earlier seurat scripts
     
     
     # reproject cells now
@@ -912,8 +946,39 @@ server <- function(input, output, session) {
                    cell_size = 1,
                    alpha = 0.7,
                    scale_to_range = T)       ) # renderplot
-
-  })
+    }) # observe event
+  
+  output$downloadsubsettrajectory<- downloadHandler(
+    filename = function() {
+      paste(df$DataID[input$availabledatasettable_rows_selected], "_subset_trajectory.pdf", sep = "")
+    },
+    content = function(file) {
+      pdf(file, paper = "default") # paper = defult is a4 size
+      
+      temp <- plot_cells(subsetted,
+                         color_cells_by = "assigned_cell_type",
+                         label_groups_by_cluster=F,
+                         show_trajectory_graph = T,
+                         trajectory_graph_segment_size = 1,
+                         graph_label_size = 1, # size of # in circle
+                         group_label_size = 4,
+                         cell_size = 1,
+                         alpha = 0.7,
+                         scale_to_range = T)
+      plot(temp)
+      dev.off()
+    }
+    
+  )# close downloadhandler
+  
+  
+  #### show subset.trajectory 
+    observeEvent(input$redomonocle3, {
+      shinyjs::showElement(id= "subset.trajectory")
+    })
+    observeEvent(input$redomonocle3, {
+      enable("downloadsubsettrajectory")
+    })
 
   #### PANEL #5 DRUG FUNCTIONS ####
   observeEvent(input$rundgidb, {
