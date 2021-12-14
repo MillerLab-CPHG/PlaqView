@@ -1,8 +1,8 @@
-#### PlaqView Master Code ####
-#### Author: Wei Feng Ma, UVA.
-#### wm5wt@virginia.edu
+###### PlaqView Master Code ######
+##### Author: Wei Feng Ma, UVA.
+##### wm5wt@virginia.edu
 
-#### PreReq Codes ####
+#### DATABASE NAMES AND COLOR SCHEMES ####
 # below line is commented for shinyapp.io deployment temp
 ### set this once in terminal before deploying to shinyapps.io ###
 # options(repos = BiocManager::repositories())
@@ -42,6 +42,8 @@ original_color_list <-
   )}
 
 color_function <- colorRampPalette(original_color_list)
+# color_function <- colorRampPalette(metcolors)
+
 manual_color_list <- color_function(40) # change this if clusters >40
 
 #### LIBRARIES #### 
@@ -51,7 +53,6 @@ library(shinythemes)
 library(Seurat)
 library(shinybusy) #install.packages("shinybusy")
 library(enrichR) # install.packages("enrichR")
-# library(imager)
 library(waiter)
 library(DT)
 library(readxl)
@@ -60,54 +61,8 @@ library(shinyjs)
 # library(RColorBrewer)
 library(rDGIdb) # BiocManager::install("rDGIdb")
 library(tidyverse)
-library(rsconnect)
+# library(rsconnect)
 library(monocle3)
-# library(CellChat)
-
-#### PreReq Codes ####
-# below line is commented for shinyapp.io deployment temp
-library(reticulate)
-virtualenv_create("myenv_plaqview")
-use_virtualenv("myenv_plaqview", required = TRUE)
-py_install("umap-learn") 
-
-# enrichR functions
-# handcurate db names 
-dbs <- c("KEGG_2019_Human",
-         "WikiPathways_2019_Human",
-         "GO_Biological_Process_2018",
-         "ChEA_2016",
-         "GWAS_Catalog_2019",
-         "ENCODE_and_ChEA_Consensus_TFs_from_ChIP-X",
-         "Gene_Perturbations_from_GEO_down",
-         "Gene_Perturbations_from_GEO_up")
-enrichRdb <- sort(dbs)
-
-
-# color definitions
-original_color_list <-
-  {c("rosybrown2",
-     "cadetblue1",
-     "lemonchiffon3",
-     "darkseagreen",
-     "skyblue3",
-     "thistle3",
-     "cadetblue3",
-     "darkseagreen1",
-     "palevioletred3",
-     "palevioletred1",
-     "darkseagreen2",
-     "rosybrown3",
-     "thistle2",
-     "lightsteelblue3",
-     "salmon1",
-     "palevioletred4",
-     "lemonchiffon4",
-     "cadetblue2"
-  )}
-
-color_function <- colorRampPalette(original_color_list)
-manual_color_list <- color_function(40) # change this if clusters >40
 
 #### UI ####
 # Define UI for application that draws a histogram
@@ -123,7 +78,7 @@ ui <- fluidPage(
   # defining each 'tab' here
   navbarPage("PlaqView", id = "inTabset",
              
-             #### WELCOME Panel ####
+             #### FRONT PANEL Panel ####
              tabPanel("Select Dataset", 
                       mainPanel(width = 12,
                                 fluidRow(
@@ -161,7 +116,7 @@ ui <- fluidPage(
                       )
              ),
              
-             # PANEL 1: QUERY GENE   ----
+             #### PANEL 1: QUERY GENE   ----
              tabPanel(title = "Gene Lookup", value = "panel1",
                       mainPanel(width = 12, # 12/12 is full panel
                                 fluidRow(## panel for gene input
@@ -280,7 +235,7 @@ ui <- fluidPage(
              
              
              
-             # PANEL 2: COMPARE LABELING METHODS  ----  
+             #### PANEL 2: COMPARE LABELING METHODS  ----  
              tabPanel("Cell Labeling",
                       mainPanel(width = 12, # 12/12 is full panel,
                                 wellPanel(includeMarkdown("descriptionfiles/helptext_comparelabels.Rmd")),
@@ -345,18 +300,19 @@ ui <- fluidPage(
                       
                       
              ), # tabPanel
-             # PANEL 3: MONOCLE3 ----
+             #### PANEL 3: MONOCLE3 ----
              tabPanel("Trajectory",
                       mainPanel(width = 12, # 12/12 is full panel,
                                 ### top panel
-                                wellPanel(fluidRow(
-                                  column(width = 5,
+                                wellPanel(
+                                  fluidRow(
+                                  column(width = 6,
                                          includeMarkdown("descriptionfiles/helptext_comparetrajectories.Rmd"),
-                                         # done button
+                                         # choose button
                                          actionButton("choose_toggle", "Choose/Unchoose"),
                                          # clear button
                                          actionButton("reset", "Clear Selection"),
-                                         # done button
+                                         # recal button
                                          actionButton("redomonocle3", "Recalculate"),
                                          h4("Instructions:"),
                                          tags$ol(
@@ -364,87 +320,55 @@ ui <- fluidPage(
                                            tags$li("Click the 'Choose/unchoose' button."),
                                            tags$li("Repeat until all of the desired cells are black."),
                                            tags$li("Click 'Done'.")
-                                         ),
+                                                ),
                                          h4("Details:"),
                                          tags$ul(
                                            tags$li("To start over, click 'Clear'"),
                                            tags$li(paste("You can also choose/unchoose specific cells",
-                                                         "by clicking on them directly."))),
+                                                         "by clicking on them directly.")),
+                                           ),
+                                         h5("Recalculation may take up to 2mins. Results will appear below."),
+                                         
                                          ), # column
-                                       column(width = 6, plotOutput("plot1", 
-                                                                    click = "plot1_click",
-                                                                    brush = brushOpts(id = "plot1_brush")),
-                                              
-                                       actionButton("downloadoriginaltrajectory", label = "Download Original Trajectory"),
+                                       column(width = 6, 
+                                              plotOutput("plot1", click = "plot1_click", 
+                                                         brush = brushOpts(id = "plot1_brush")),
+                                              br(),
+                                              downloadButton("downloadoriginaltrajectory", 
+                                                             label = "Download Original Trajectory", 
+                                                             width = '50%'),
+                                              br(),
+                                              disabled(downloadButton("downloadsubsettrajectory", 
+                                                                      label = "Download Subset Trajectory",
+                                                                      width = '50%')),
+
                                        ), # column
                                 ), # fluidrow
                                 ), # wellpanel
              
                                 ### bottom panel
-                                wellPanel(
-                                  fluidRow(
-                                    plotOutput("originaltrajectory",
-                                               height = '500px'),
-
-                                   
-                                  )# fluidrow
-                                      
-                                ),
-                      ), # mainPanel
-                      
-                      
+                                hidden(
+                                  wellPanel(id = "subset.trajectory", 
+                                            fluidRow(width = 12,
+                                                     column(width = 6,
+                                                            h4("Original Full Trajecotry"),
+                                                            plotOutput("originaltrajectory"),
+                                                     ),
+                                                     column(width = 6,
+                                                            h4("Trajectory of Selected Cells"),
+                                                            plotOutput("subsettrajectory"),
+                                                     ),
+                                                     
+                                                     
+                                            ) # fluidrow
+                                  ) # wellpanel
+                                ),# hidden
+                           
+                      ), # mainPanel monocle3
                       
              ), # tabPanel
              
-             # # PANEL 4: CCC ####
-             # tabPanel(title = "Cell-Cell Comm", value = "panel4",
-             #          mainPanel(width = 12,
-             #                    fluidRow(
-             #                      column(width = 6,
-             #                             wellPanel(
-             #                               h3("Infer Cell-to-Cell Communications"),
-             #                               h5("Choose a Cell Labeling Method"),
-             #                               selectInput("selectlabelmethodforCCC", label = NULL, 
-             #                                           choices = list(
-             #                                             "Author Supplied" = "manually_annotated_labels",
-             #                                             "SingleR (Individual Cell ID)" = "SingleR.calls",
-             #                                             "Seurat + Tabula sapiens Ref" = "predicted.id_tabulus.sapien",
-             #                                             "Seurat Clusters (Numbered)" = "seurat_clusters",
-             #                                             "scCATCH (Heart)" = "scCATCH_Heart",
-             #                                             "scCATCH (Blood Vessels)" = "scCATCH_BV"),
-             #                                           width = '75%',
-             #                                           selected = "Seurat + Tabula sapiens Ref"),
-             #                               textOutput("selecteddatasetID2"),  
-             #                               
-             #                               actionBttn(
-             #                                 inputId = "calculateCCC",
-             #                                 label = "Step 1: Calculate Interactions",
-             #                                 style = "pill",
-             #                                 color = "warning",
-             #                                 block = T),
-             #                               
-             #                               # show this after calculation is done
-             #                               hidden(
-             #                                 actionBttn(
-             #                                   inputId = "selectCCCoutput",
-             #                                   label = "Step 2: Display Calculation",
-             #                                   color = "success",
-             #                                   block = T)
-             #                               )
-             #                             )),
-             #                      column(width = 6,
-             #                             wellPanel(
-             #                               includeMarkdown("descriptionfiles/helptext_CCC.Rmd")
-             #                             ))
-             #                    ), # fluid row
-             #                    fluidRow(
-             #                      column(width = 12,
-             #                             
-             #                             
-             #                      )# close column
-             #                    )# fluid row
-             #          )),
-             # PANEL 5: DRUGGABLE GENOME ----  
+             #### PANEL 5: DRUGGABLE GENOME ----  
              tabPanel("Druggable Genome",
                       mainPanel(width = 12,
                                 fluidRow(width = 12,
@@ -499,26 +423,6 @@ ui <- fluidPage(
                       
              ),
              
-             ## deprecated ## # PANEL 6: ABOUT PANEL ----
-             # tabPanel("About & Help",
-             #          mainPanel(
-             #            # descriptions
-             #            includeMarkdown("descriptionfiles/aboutusdescription.Rmd"),
-             #            br(),
-             #            img(src = "millerlablogo.png", height = 83),
-             #            img(src = "MSTPlogo.png", width = 233, height = 83),
-             #            img(src = "umc.png", height = 83),
-             #            br(),
-             #            
-             #            img(src = "PlaqOmics.png", width = 233, height = 83),
-             #            img(src = "Leducq.png", width = 233, height = 83),
-             #            
-             #            br(),
-             #            br(),
-             #            downloadButton("downloadsessioninfo", "Download Session and Package Information"),
-             #            
-             #            
-             #          )), # close tab panel
              
              ### JS to jump to top of page on click ###
              tags$script(" $(document).ready(function () {
@@ -598,7 +502,8 @@ server <- function(input, output, session) {
           repel = T,
           # repel labels
           pt.size = 1,
-          cols = manual_color_list,
+          cols = color_function(length(unique(plaqviewobj@meta.data[[input$selectlabelmethodforgenequery]]))),
+                        # this enables dynamic # of colors based on # of labels given, sorry about the horrible nesting
           group.by = input$selectlabelmethodforgenequery) + # group.by is important, use this to call metadata separation
           theme(legend.position="bottom", 
                 legend.box = "vertical") +
@@ -638,7 +543,7 @@ server <- function(input, output, session) {
         repel = T,
         # repel labels
         pt.size = 1,
-        cols = manual_color_list,
+        cols = color_function(length(unique(plaqviewobj@meta.data[[input$selectlabelmethodforgenequery]]))),
         group.by = input$selectlabelmethodforgenequery) + # group.by is important, use this to call metadata separation
         theme(legend.position="bottom", 
               legend.box = "vertical") +
@@ -732,7 +637,7 @@ server <- function(input, output, session) {
       user_genes <- str_split(input$genes, ", ")[[1]]
       validate(need(input$selectaplot=="Ridge", message=FALSE))
       RidgePlot(plaqviewobj,
-                cols = manual_color_list,
+                cols = color_function(length(unique(plaqviewobj@meta.data[[input$selectlabelmethodforgenequery]]))),
                 group.by = input$selectlabelmethodforgenequery,
                 features =  user_genes[1:1]
       ) + # a trick to sep long string input
@@ -752,7 +657,7 @@ server <- function(input, output, session) {
         user_genes <- str_split(input$genes, ", ")[[1]]
         validate(need(input$selectaplot=="Ridge", message=FALSE))
         temp <- RidgePlot(plaqviewobj,
-                          cols = manual_color_list,
+                          cols = color_function(length(unique(plaqviewobj@meta.data[[input$selectlabelmethodforgenequery]]))),
                           group.by = input$selectlabelmethodforgenequery,
                           features =  user_genes[1:1]
         ) + # a trick to sep long string input
@@ -831,7 +736,7 @@ server <- function(input, output, session) {
         repel = T,
         # repel labels
         pt.size = 1,
-        cols = manual_color_list,
+        cols = color_function(length(unique(plaqviewobj@meta.data[[input$leftlabeltype]]))),
         group.by = input$leftlabeltype ) + # group.by is important, use this to call metadata separation
         theme(legend.position="bottom", 
               legend.box = "vertical") +
@@ -850,7 +755,7 @@ server <- function(input, output, session) {
         repel = T,
         # repel labels
         pt.size = 1,
-        cols = manual_color_list,
+        cols = color_function(length(unique(plaqviewobj@meta.data[[input$rightlabeltype]]))),
         group.by = input$rightlabeltype ) + # group.by is important, use this to call metadata separation
         theme(legend.position="bottom", 
               legend.box = "vertical") +
@@ -892,96 +797,189 @@ server <- function(input, output, session) {
     }  )# close downloadhandler
   
   #### PANEL #3 TRAJ FUNCTIONS ####
-  
-  output$originaltrajectory <-
+  output$originaltrajectory <- 
     renderPlot(
-      plot_cells(plaqviewobj.cds)
+      plot_cells(plaqviewobj.cds,
+                 color_cells_by = "assigned_cell_type",
+                 label_groups_by_cluster=F,
+                 show_trajectory_graph = T,
+                 trajectory_graph_segment_size = 1,
+                 graph_label_size = 1, # size of # in circle
+                 group_label_size = 4)
+      
       ) # renderplot
   
-  observeEvent(input$loaddatabutton, {
-    reduction_method <- "UMAP"
+  # this is for the download
+  output$downloadoriginaltrajectory<- downloadHandler(
+    filename = function() {
+      paste(df$DataID[input$availabledatasettable_rows_selected], "_original_trajectory.pdf", sep = "")
+    },
+    content = function(file) {
+      pdf(file, paper = "default") # paper = defult is a4 size
     
+      temp <- plot_cells(plaqviewobj.cds,
+                 color_cells_by = "assigned_cell_type",
+                 label_groups_by_cluster=F,
+                 show_trajectory_graph = T,
+                 trajectory_graph_segment_size = 1,
+                 graph_label_size = 1, # size of # in circle
+                 group_label_size = 4)
+      plot(temp)
+      dev.off()
+    }
+    
+  )# close downloadhandler
+  
+  
+  #### subset plot
+  reduction_method <- "UMAP"
+
+  observeEvent(input$loaddatabutton, {
+    vals <<- reactiveValues(
+      keeprows = rep(FALSE, nrow(colData(plaqviewobj.cds)))
+    )
     reduced_dims <- as.data.frame(reducedDims(plaqviewobj.cds)[[reduction_method]])
     names(reduced_dims)[1:2] <- c("V1", "V2")
     
     
-    vals <- reactiveValues(
+    vals <<- shiny::reactiveValues(
       keeprows = rep(FALSE, nrow(colData(plaqviewobj.cds)))
     )
     
-    output$plot1 <- renderPlot({
+
+    output$plot1 <<- renderPlot({
       # Plot the kept and excluded points as two separate data sets
       colData(plaqviewobj.cds)$keep <- vals$keeprows
-      
       suppressMessages(plot_cells(plaqviewobj.cds, reduction_method = reduction_method,
-                                  cell_size = 1, label_cell_groups = FALSE,
+                                  color_cells_by = "assigned_cell_type",
+                                  label_groups_by_cluster=F,
+                                  show_trajectory_graph = T,
+                                  trajectory_graph_segment_size = 1,
+                                  graph_label_size = 1, # size of # in circle
+                                  group_label_size = 4,
                                   rasterize=FALSE) +
                          geom_point(alpha = colData(plaqviewobj.cds)$keep)) +
         theme(legend.position = "none")
-    }, height = function() {
-      session$clientData$output_plot1_width
+    }, 
+    
+    )
+    
+    # Toggle points that are clicked
+    observeEvent(input$plot1_click, {
+      res <- nearPoints(reduced_dims,
+                        xvar = "V1", yvar = "V2", input$plot1_click,
+                        allRows = TRUE)
+      vals$keeprows <<- vals$keeprows | res$selected_
     })
+    
+    # Toggle points that are brushed, when button is clicked
+    observeEvent(input$choose_toggle, {
+      res <- brushedPoints(reduced_dims,
+                           xvar = "V1", yvar = "V2", input$plot1_brush,
+                           allRows = TRUE)
+      vals$keeprows <- vals$keeprows | res$selected_
+    })
+    
+    # Reset all points
+    observeEvent(input$reset, {
+      vals$keeprows <- rep(FALSE, nrow(colData(plaqviewobj.cds)))
+    })
+    
   })
+  
+  ### selected/recalulated trajectory
+  observeEvent(input$redomonocle3, {
+    
+    # this is the selected cells
+    selectedcells <<- vals$keeprows
+    
+    
+    # get selected cells id
+    cds_subsetIDs <- row.names(colData(plaqviewobj.cds)[selectedcells,])
+    # recreate a cds obj that doesnt contain any prior UMAPS
+    expressiondata <- plaqviewobj@assays[["RNA"]]@data
+    cellmd <- plaqviewobj@meta.data
+    
+    genemd <- data.frame(gene_short_name = row.names(expressiondata), 
+                         row.names = row.names(expressiondata))
+    plaqviewobj.cds_NEW <- new_cell_data_set(expression_data = expressiondata,
+                                         cell_metadata = cellmd,
+                                         gene_metadata = genemd)
+    
+    subsetted <- plaqviewobj.cds[,cds_subsetIDs]
+    
+    subsetted <- preprocess_cds(subsetted, num_dim = 25) # we used 30 in earlier seurat scripts
+    
+    
+    # reproject cells now
+    subsetted <- reduce_dimension(subsetted, reduction_method = "UMAP")
+    subsetted <- cluster_cells(subsetted, reduction_method = "UMAP")
+    
+    subsetted <- learn_graph(subsetted)
+    
+    # a helper function to identify the root principal points:
+    get_earliest_principal_node <- function(cds, assigned_cell_type= "SMCs"){ # change celltype if desired
+      cell_ids <- which(colData(cds)[, "assigned_cell_type"] == assigned_cell_type)
+      
+      closest_vertex <-
+        cds@principal_graph_aux[["UMAP"]]$pr_graph_cell_proj_closest_vertex
+      closest_vertex <- as.matrix(closest_vertex[colnames(cds), ])
+      root_pr_nodes <-
+        igraph::V(principal_graph(cds)[["UMAP"]])$name[as.numeric(names
+                                                                  (which.max(table(closest_vertex[cell_ids,]))))]
+      
+      root_pr_nodes
+    }
+    
+    subsetted <<- order_cells(subsetted, root_pr_nodes=get_earliest_principal_node(subsetted),
+                                   reduction_method = "UMAP")
+    # plot subset plots 
+    output$subsettrajectory <-
+      renderPlot(
+        plot_cells(subsetted,
+                   color_cells_by = "assigned_cell_type",
+                   label_groups_by_cluster=F,
+                   show_trajectory_graph = T,
+                   trajectory_graph_segment_size = 1,
+                   graph_label_size = 1, # size of # in circle
+                   group_label_size = 4,
+                   cell_size = 1,
+                   alpha = 0.7,
+                   scale_to_range = T)       ) # renderplot
+    }) # observe event
+  
+  output$downloadsubsettrajectory<- downloadHandler(
+    filename = function() {
+      paste(df$DataID[input$availabledatasettable_rows_selected], "_subset_trajectory.pdf", sep = "")
+    },
+    content = function(file) {
+      pdf(file, paper = "default") # paper = defult is a4 size
+      
+      temp <- plot_cells(subsetted,
+                         color_cells_by = "assigned_cell_type",
+                         label_groups_by_cluster=F,
+                         show_trajectory_graph = T,
+                         trajectory_graph_segment_size = 1,
+                         graph_label_size = 1, # size of # in circle
+                         group_label_size = 4,
+                         cell_size = 1,
+                         alpha = 0.7,
+                         scale_to_range = T)
+      plot(temp)
+      dev.off()
+    }
+    
+  )# close downloadhandler
+  
+  
+  #### show subset.trajectory 
+    observeEvent(input$redomonocle3, {
+      shinyjs::showElement(id= "subset.trajectory")
+    })
+    observeEvent(input$redomonocle3, {
+      enable("downloadsubsettrajectory")
+    })
 
-  
-  # Toggle points that are clicked
-  observeEvent(input$plot1_click, {
-    res <- nearPoints(reduced_dims,
-                             xvar = "V1", yvar = "V2", input$plot1_click,
-                             allRows = TRUE)
-    vals$keeprows <- vals$keeprows | res$selected_
-  })
-  
-  # Toggle points that are brushed, when button is clicked
-  observeEvent(input$choose_toggle, {
-    res <- brushedPoints(reduced_dims,
-                                xvar = "V1", yvar = "V2", input$plot1_brush,
-                                allRows = TRUE)
-    vals$keeprows <- vals$keeprows | res$selected_
-  })
-  
-  # Reset all points
-  observeEvent(input$reset, {
-    vals$keeprows <- rep(FALSE, nrow(colData(cds)))
-  })
-  
-  observeEvent(input$done, {
-    print(vals$keeprows)
-  })
-  
-  
-  # #### PANEL #4 CCC FUNCTIONS ####
-  # # transform seurat obj to cellchat obj#
-  # observeEvent(input$calculateCCC,
-  #              { 
-  #                cellchat <- CellChat::createCellChat(object = plaqviewobj, 
-  #                                           group.by = input$selectlabelmethodforCCC)
-  #                
-  #                ## set the database##
-  #                CellChatDB <- CellChatDB.human # use CellChatDB.mouse if running on mouse data
-  #                # showDatabaseCategory(CellChatDB)
-  #                
-  #                ## subset the expression data of signaling genes for saving computation cost
-  #                cellchat@DB <- CellChatDB
-  #                cellchat <- subsetData(cellchat) # This step is necessary even if using the whole database
-  #                
-  #                cellchat <- identifyOverExpressedGenes(cellchat)
-  #                cellchat <- identifyOverExpressedInteractions(cellchat)
-  #                # cellchat <- projectData(cellchat, PPI.human) # this step is optional
-  #                
-  #                ## compute probablistic interaction
-  #                cellchat <- computeCommunProb(cellchat)
-  #                # Filter out the cell-cell communication if there are only few number of cells in certain cell groups
-  #                cellchat <- filterCommunication(cellchat, min.cells = 10)
-  #                
-  #                ## compute signaling pathway activations
-  #                cellchat <- computeCommunProbPathway(cellchat)
-  #                
-  #                ## aggregate comm networks
-  #                cellchat <- aggregateNet(cellchat)
-  #                show("selectCCCoutput")
-  #              })# closes observe event
-  # 
   #### PANEL #5 DRUG FUNCTIONS ####
   observeEvent(input$rundgidb, {
     
