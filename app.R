@@ -430,6 +430,8 @@ ui <- fluidPage(
                          window.scrollTo(0, 0)                
                          });                 
                          });")
+
+             
              
   )# close navbarpage
   
@@ -700,13 +702,21 @@ server <- function(input, output, session) {
       cellpop
     })
     
-    # Gene ontology table #
-    {
+    ### GSEA #####
+    
       parsed.genes <- str_split(input$genes, ", ")[[1]]
       enriched <- enrichr(genes = parsed.genes, 
                           database = enrichRdb) # this queries all of them
       cleanedenrichedtable <- select(enriched[[input$selectedenrichRdb]], -Old.Adjusted.P.value, -Old.P.value,)
       cleanedenrichedtable <- top_n(cleanedenrichedtable, 100) # top 100 will be rendered
+      
+      #select columns to display
+      cleanedenrichedtable <- cleanedenrichedtable %>% select(Term, Overlap, Adjusted.P.value, Combined.Score, Genes)
+      
+      # force as.numeric to remove a bug in DT pkg
+      cleanedenrichedtable$Adjusted.P.value <- as.numeric(cleanedenrichedtable$Adjusted.P.value)
+      cleanedenrichedtable$Adjusted.P.value <- as.numeric(cleanedenrichedtable$Combined.Score)
+      
       output$enrichtable <- DT::renderDataTable(cleanedenrichedtable)
       
       # Downloadable csv of selected dataset
@@ -718,7 +728,7 @@ server <- function(input, output, session) {
           write.csv(enriched[[input$selectedenrichRdb]], file, row.names = FALSE)
         } 
       )# close downloadhandler
-    }
+    
     
     
   }) # observe event closure
@@ -835,6 +845,8 @@ server <- function(input, output, session) {
   reduction_method <- "UMAP"
 
   observeEvent(input$loaddatabutton, {
+    show("jumpto1")
+    
     vals <<- reactiveValues(
       keeprows = rep(FALSE, nrow(colData(plaqviewobj.cds)))
     )
