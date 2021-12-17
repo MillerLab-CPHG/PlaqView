@@ -30,68 +30,20 @@ RUN wget --no-verbose https://s3.amazonaws.com/rstudio-shiny-server-os-build/ubu
     gdebi -n ss-latest.deb && \
     rm -f version.txt ss-latest.deb
     
-    
-#### ESSENTIAL R PACKAGES ####
-## FROM CRAN 
-RUN install2.r --error --skipinstalled --ncpus -1 \
-    BiocManager \
-    shiny \
-    shinythemes \
-    Seurat\
-    markdown\
-    shinybusy\
-    tidyverse \
-    enrichR\
-    imager\
-    waiter\
-    DT\
-    igraph\
-    readxl\
-    shinyWidgets\
-    shinyjs\
-    RColorBrewer\
-    devtools\
-    tidyverse\
-    magrittr\
-    ggrepel\
-    data.table\
-    matrixStats\
-    Matrix
+##### Install R packages that are required ######
+## CRAN packages
+RUN R -e "install.packages(c('BiocManager','shiny','shinythemes','Seurat', 'markdown','shinybusy','tidyverse','enrichR','imager','waiter','readxl','shinyWidgets','shinyjs','RColorBrewer', 'devtools', 'rsconnect'))"
 
-## FROM GITHUB
-RUN R -e "devtools::install_github('satijalab/seurat-data')"
-RUN R -e "devtools::install_github('mojaveazure/seurat-disk')"
-RUN R -e "devtools::install_github('welch-lab/liger')"
+## GITHUB
+RUN R -e "devtools::install_github('rstudio/DT')"
 
-## FROM BIOCONDUCTOR
-RUN R -e "BiocManager::install('BiocGenerics')"
-RUN R -e "BiocManager::install('DelayedArray')"
-RUN R -e "BiocManager::install('DelayedMatrixStats')"
-RUN R -e "BiocManager::install('limma')"
-RUN R -e "BiocManager::install('SingleCellExperiment')"
-RUN R -e "BiocManager::install('SummarizedExperiment')"
-RUN R -e "BiocManager::install('batchelor')"
-RUN R -e "BiocManager::install('Matrix.utils')"
-RUN R -e "BiocManager::install('rDGIdb')"
+## BIOCONDUCTOR
+RUN R -e "BiocManager::install(c('BiocGenerics', 'DelayedArray', 'DelayedMatrixStats','limma', 'S4Vectors', 'SingleCellExperiment','SummarizedExperiment','batchelor', 'Matrix.utils', 'rDGIdb'))"
 
-RUN R -e "BiocManager::install('SingleR')"
-RUN R -e "BiocManager::install('celldex')"
-RUN R -e "BiocManager::install('bayNorm')"
 
-#### SPECIFIC R PACKAGES
-## MONOCLE3
+## SPECIFIC FOR MONOCLE3
 RUN R -e "devtools::install_github('cole-trapnell-lab/leidenbase')"
 RUN R -e "devtools::install_github('cole-trapnell-lab/monocle3')"
-
-## CIPR
-RUN R -e "devtools::install_github('atakanekiz/CIPR-Package', build_vignettes = TRUE)"
-
-## ENSEMBLE
-RUN R -e "BiocManager::install('ensembldb')"
-
-## SingleCellExperiment (scater)
-RUN R -e "BiocManager::install('scater')"
-
 
 # Copy configuration files into the Docker image
 COPY shiny-server.conf /etc/shiny-server/shiny-server.conf
