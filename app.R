@@ -457,7 +457,36 @@ server <- function(input, output, session) {
                         selection = list(mode = 'single', selected = c(1)),
                         options=list(columnDefs = list(list(visible=FALSE, targets=c(11)))), # this hides the 8th column, which is datasetID
                         escape = FALSE) # this escapes rendering html (link) literally and makes link clickable
+  observeEvent(input$loaddatabutton, {
+    
+    show("jumpto1")
+    
+  }) 
   
+   observeEvent(input$loaddatabutton, {
+    path <- file.path(paste("data/", df$DataID[input$availabledatasettable_rows_selected], "/",
+                            df$DataID[input$availabledatasettable_rows_selected],
+                            ".rds", sep=""))
+    pathcds <- file.path(paste("data/", df$DataID[input$availabledatasettable_rows_selected], "/",
+                            df$DataID[input$availabledatasettable_rows_selected],
+                            "_cds.rds", sep=""))
+    plaqviewobj <<- readRDS(file = path)
+    plaqviewobj.cds <<- readRDS(file = pathcds)
+    
+    ## these are just for displaying current data name in other tabs##
+    output$selecteddatasetID <- renderText({
+      paste0("Current dataset: ", df$DataID[input$availabledatasettable_rows_selected])
+    }) 
+    output$selecteddatasetID2 <- renderText({
+      paste0("Current dataset: ", df$DataID[input$availabledatasettable_rows_selected])
+    }) 
+    output$selecteddatasetID3 <- renderText({
+      paste0("Current dataset: ", df$DataID[input$availabledatasettable_rows_selected])
+    }) 
+   
+    show("jumpto1")
+    
+  })
   observeEvent(input$loaddatabutton, {
     path <- file.path(paste("data/", df$DataID[input$availabledatasettable_rows_selected], "/",
                             df$DataID[input$availabledatasettable_rows_selected],
