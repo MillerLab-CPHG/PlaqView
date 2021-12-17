@@ -35,7 +35,7 @@ RUN wget --no-verbose https://s3.amazonaws.com/rstudio-shiny-server-os-build/ubu
 RUN R -e "install.packages(c('BiocManager','shiny','shinythemes','Seurat', 'markdown','shinybusy','tidyverse','enrichR','imager','waiter','readxl','shinyWidgets','shinyjs','RColorBrewer', 'devtools', 'rsconnect'))"
 
 ## GITHUB
-RUN R -e "devtools::install_github('sqjin/rstudio/DT')"
+RUN R -e "devtools::install_github('rstudio/DT')"
 
 ## BIOCONDUCTOR
 RUN R -e "BiocManager::install(c('BiocGenerics', 'DelayedArray', 'DelayedMatrixStats','limma', 'S4Vectors', 'SingleCellExperiment','SummarizedExperiment','batchelor', 'Matrix.utils', 'rDGIdb'))"

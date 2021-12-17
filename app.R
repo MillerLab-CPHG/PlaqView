@@ -430,6 +430,8 @@ ui <- fluidPage(
                          window.scrollTo(0, 0)                
                          });                 
                          });")
+
+             
              
   )# close navbarpage
   
