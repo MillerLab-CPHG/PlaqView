@@ -317,7 +317,7 @@ ui <- fluidPage(
                                          h4("Instructions:"),
                                          tags$ol(
                                            tags$li("Highlight points by clicking and dragging."),
-                                           tags$li("Click the 'Choose/unchoose' button."),
+                                           tags$li("Click the 'Choose/unchoose' button."), # change server code to toggle
                                            tags$li("Repeat until all of the desired cells are black."),
                                            tags$li("Click 'Done'.")
                                                 ),

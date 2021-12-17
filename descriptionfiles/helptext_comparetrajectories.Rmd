@@ -7,6 +7,6 @@ output: html_document
 
 ### ***Trajectory Explorer***
 
-By default, *Plaqview* uses *Monocle3* [(Trapnell Lab)](https://cole-trapnell-lab.github.io/monocle3/) for cell RNA trajectory inference. We found that *Monocle3* was the most flexible in handling complex datasets with multiple cell origins (as opposed to purified/cultured samples).
+*Plaqview* uses *Monocle3* [(Trapnell Lab)](https://cole-trapnell-lab.github.io/monocle3/) for cell RNA trajectory inference. We found that *Monocle3* was the most flexible in handling complex datasets with multiple cell origins (as opposed to purified/cultured samples).
 
-To further explore subsets of the data, use the lower modules to select and re-project cells. It may take a few moments to recalculate, please be patient.
+To further explore subsets of the data, use the right modules to select and re-cluster cells. It may take a few moments to recalculate, please be patient.
