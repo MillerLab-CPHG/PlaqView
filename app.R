@@ -745,7 +745,7 @@ server <- function(input, output, session) {
       cleanedenrichedtable$Adjusted.P.value <- as.numeric(cleanedenrichedtable$Adjusted.P.value)
       cleanedenrichedtable$Adjusted.P.value <- as.numeric(cleanedenrichedtable$Combined.Score)
       
-      output$enrichtable <- DT::renderDataTable(cleanedenrichedtable)
+      output$enrichtable <- DT::renderDataTable(cleanedenrichedtable, server = F)
       
       # Downloadable csv of selected dataset
       output$downloadenrichRdata <- downloadHandler(
@@ -1087,7 +1087,7 @@ server <- function(input, output, session) {
     }) # render plot
     
     
-    output$dgidboutput <- DT::renderDataTable(isolatedtable, )
+    output$dgidboutput <- DT::renderDataTable(isolatedtable,  server = F)
     output$downloaddgidboutput <- downloadHandler(
       filename = function() {
         paste(updated_druggeneinput, "_complete_drug-gene_int.csv", sep = "")
