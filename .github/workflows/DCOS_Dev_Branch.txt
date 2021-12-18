@@ -15,13 +15,13 @@ jobs:
       -
         name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v1
-      - 
+      -
         name: Login to Docker Hub
         uses: docker/login-action@v1
         with:
           registry: quay.io
-          username: ${{ secrets.QUAY_USERNAME }}
-          password: ${{ secrets.QUAY_PASSWORD }}
+          username: ${{ secrets.QUAY_USERNAME }} # new 12-07-21
+          password: ${{ secrets.QUAY_PASSWORD }} # new 12-07-21
       -
         name: Build and push
         id: docker_build
@@ -29,7 +29,7 @@ jobs:
         with:
           push: true
           no-cache: true
-          tags: quay.io/uvarc/plaqview:dev # change this tag to whichever to match container-image
+          tags: quay.io/wfma888/plaqview:dev # change this tag to whichever to match container-image
       -
         name: Image digest
         run: echo ${{ steps.docker_build.outputs.digest }}
@@ -49,4 +49,3 @@ jobs:
         run: aws sqs send-message --queue-url 'https://queue.amazonaws.com/474683445819/dcos-refresh' --message-body 'cphg/millerlab-plaqviewdev' || exit 1;
         
         # message-body needs to match serviceID
-### updated nov 18 2021
