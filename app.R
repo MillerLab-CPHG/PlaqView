@@ -429,9 +429,9 @@ ui <- fluidPage(
                          $('#jumpto1').on('click', function (e) {
                          window.scrollTo(0, 0)                
                          });
-                         $.fn.dataTable.ext.errMode = 'throw';
-                         });")
-
+                         });"),
+             tags$script(("$.fn.dataTable.ext.errMode = 'none';")),
+             
              
              
   )# close navbarpage
