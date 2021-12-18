@@ -1,4 +1,4 @@
-parsed.genes <- str_split(input$genes, ", ")[[1]]
+parsed.genes <- c("TP53", "EGFR")
 enriched <- enrichr(genes = parsed.genes, 
                     database = enrichRdb) # this queries all of them
 
