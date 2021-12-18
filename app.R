@@ -484,8 +484,7 @@ server <- function(input, output, session) {
       paste0("Current dataset: ", df$DataID[input$availabledatasettable_rows_selected])
     }) 
    
-    show("jumpto1")
-    
+
   })
   observeEvent(input$loaddatabutton, {
     path <- file.path(paste("data/", df$DataID[input$availabledatasettable_rows_selected], "/",
@@ -508,8 +507,7 @@ server <- function(input, output, session) {
       paste0("Current dataset: ", df$DataID[input$availabledatasettable_rows_selected])
     }) 
    
-    show("jumpto1")
-    
+
   })
   
   observeEvent(input$jumpto1, {
@@ -874,8 +872,6 @@ server <- function(input, output, session) {
   reduction_method <- "UMAP"
 
   observeEvent(input$loaddatabutton, {
-    show("jumpto1")
-    
     vals <<- reactiveValues(
       keeprows = rep(FALSE, nrow(colData(plaqviewobj.cds)))
     )
@@ -1048,6 +1044,7 @@ server <- function(input, output, session) {
                          sourceDatabases = input$dgidbdatabase)
     fulltable <- result@data[["interactions"]][[1]]
     
+    fulltable$score <- as.numeric(fulltable$score) # bypass DT error
     
     # so if table becomes a list (empty), run the following
     # this is a table to show no drugs available
@@ -1099,9 +1096,7 @@ server <- function(input, output, session) {
       } 
     )# close downloadhandler
     
-    # complete druggable genome
-    # finan.genome <- read_delim("/data/Druggable_genome_finan.txt", 
-    #                            "\t", escape_double = FALSE, trim_ws = TRUE)
+  
   })# observer event
   
   #### PANEL #6 ABOUT FUNCTIONS #### 
