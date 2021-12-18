@@ -58,7 +58,7 @@ RUN install2.r --error --skipinstalled --ncpus -1 \
     Matrix
 
 ## GITHUB
-RUN R -e "devtools::install_github('sqjin/CellChat')"
+# RUN R -e "devtools::install_github('sqjin/CellChat')"
 
 ## BIOCONDUCTOR
 RUN R -e "BiocManager::install(c('BiocGenerics', 'DelayedArray', 'DelayedMatrixStats','limma', 'S4Vectors', 'SingleCellExperiment','SummarizedExperiment','batchelor', 'Matrix.utils', 'rDGIdb'))"
