@@ -32,14 +32,13 @@ RUN wget --no-verbose https://s3.amazonaws.com/rstudio-shiny-server-os-build/ubu
     
 ##### Install R packages that are required ######
 ## CRAN packages
-RUN R -e "install.packages(c('BiocManager','shiny','shinythemes','Seurat', 'markdown','shinybusy','tidyverse','enrichR','imager','waiter','readxl','shinyWidgets','shinyjs','RColorBrewer', 'devtools', 'rsconnect'))"
+RUN R -e "install.packages(c('BiocManager','shiny','shinythemes','Seurat', 'markdown','shinybusy','tidyverse','enrichR','imager','waiter','DT','readxl','shinyWidgets','shinyjs','RColorBrewer', 'devtools', 'rsconnect'))"
 
 ## GITHUB
-RUN R -e "devtools::install_github('rstudio/DT')"
+RUN R -e "devtools::install_github('sqjin/CellChat')"
 
 ## BIOCONDUCTOR
 RUN R -e "BiocManager::install(c('BiocGenerics', 'DelayedArray', 'DelayedMatrixStats','limma', 'S4Vectors', 'SingleCellExperiment','SummarizedExperiment','batchelor', 'Matrix.utils', 'rDGIdb'))"
-
 
 ## SPECIFIC FOR MONOCLE3
 RUN R -e "devtools::install_github('cole-trapnell-lab/leidenbase')"
