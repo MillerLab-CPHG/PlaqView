@@ -9,8 +9,8 @@ output: html_document
 
 1.  Click on the dataset you wish to explore in the data table below.
 
-2.  Click the Load Data Button to load into your session.
+2.  Click 'Load Dataset'.
 
-3.  Explore your dataset! (visit the various tabs like Gene Lookup).
+3.  Start Exploring (visit the various tabs like Gene Lookup).
 
 4.  (Optional) return to this page to change to another dataset.
