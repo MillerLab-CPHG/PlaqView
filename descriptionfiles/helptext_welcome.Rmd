@@ -11,4 +11,4 @@ output: html_document
 
 *PlaqView* is officially published at [*Atherosclerosis*](https://doi.org/10.1016/j.atherosclerosis.2021.11.025)!
 
-Please cite PlaqView if you find us helpful. Submit your data to us at [plaqview@virginia.edu](mailto:plaqview@virginia.edu).
+Please cite PlaqView if you find us helpful. Submit your data to us at [plaqview\@virginia.edu](mailto:plaqview@virginia.edu).

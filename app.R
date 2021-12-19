@@ -82,9 +82,16 @@ ui <- fluidPage(
              tabPanel("Select Dataset", 
                       mainPanel(width = 12,
                                 fluidRow(
-                                  column(width = 6,
+                                  column(width = 5,
                                          wellPanel(
-                                           includeMarkdown("descriptionfiles/helptext_instructions.Rmd"),
+                                           img(src = "logo.png", width = '100%'),
+                                           h4("Instructions:"),
+                                           tags$ol(
+                                             tags$li("Start by clicking on the dataset you want from the table below."),
+                                             tags$li("Click the blue 'Load Dataset' button"), # change server code to toggle
+                                             tags$li("The 'Start Exploring' button will appear when data is loaded."),
+                                             tags$li("(Optional) come back to this page to load another dataset.")
+                                           ),
                                            br(),
                                            fluidRow(
                                              column(width = 12,
@@ -116,7 +123,7 @@ ui <- fluidPage(
                                            ),
                                            )
                                   ),
-                                  column(width = 6,
+                                  column(width = 7,
                                          wellPanel(
                                            includeMarkdown("descriptionfiles/helptext_welcome.Rmd"),
                                            img(src = "abstract.png", width = '100%'),
@@ -779,8 +786,8 @@ server <- function(input, output, session) {
       cleanedenrichedtable <- cleanedenrichedtable %>% select(Term, Overlap, Adjusted.P.value, Combined.Score, Genes)
       
       # force as.numeric to remove a bug in DT pkg
-      cleanedenrichedtable$Adjusted.P.value <- as.numeric(cleanedenrichedtable$Adjusted.P.value)
-      cleanedenrichedtable$Adjusted.P.value <- as.numeric(cleanedenrichedtable$Combined.Score)
+      #cleanedenrichedtable$Adjusted.P.value <- as.numeric(cleanedenrichedtable$Adjusted.P.value)
+      #cleanedenrichedtable$Adjusted.P.value <- as.numeric(cleanedenrichedtable$Combined.Score)
       
       output$enrichtable <- DT::renderDataTable(cleanedenrichedtable, server = F)
       
@@ -1082,7 +1089,7 @@ server <- function(input, output, session) {
                          sourceDatabases = input$dgidbdatabase)
     fulltable <- result@data[["interactions"]][[1]]
     
-    fulltable$score <- as.numeric(fulltable$score) # bypass DT error
+    #fulltable$score <- as.numeric(fulltable$score) # bypass DT error
     
     # so if table becomes a list (empty), run the following
     # this is a table to show no drugs available

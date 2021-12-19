@@ -3,8 +3,6 @@ title: "helptext_instructions"
 output: html_document
 ---
 
-# Welcome to *PlaqView* !
-
 ## **Instructions:**
 
 1.  Click on the dataset you wish to explore in the data table below.
