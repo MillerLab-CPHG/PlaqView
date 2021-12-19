@@ -78,41 +78,64 @@ ui <- fluidPage(
   # defining each 'tab' here
   navbarPage("PlaqView", id = "inTabset",
              
-             #### FRONT PANEL Panel ####
+             #### WELCOME PANEL ####
              tabPanel("Select Dataset", 
                       mainPanel(width = 12,
                                 fluidRow(
-                                  column(width = 12,
+                                  column(width = 6,
+                                         wellPanel(
+                                           includeMarkdown("descriptionfiles/helptext_instructions.Rmd"),
+                                           br(),
+                                           fluidRow(
+                                             column(width = 12,
+                                                    # load data button
+                                                    actionBttn(
+                                                      inputId = "loaddatabutton",
+                                                      label = "Load Dataset",
+                                                      style = "material-flat",
+                                                      color = "primary",
+                                                      block = T),
+                                                    
+                                                    textOutput("loadeddatasetID"),
+                                                    
+                                                    br(),
+                                                    # jump to page 1 button
+                                                    hidden(
+                                                      actionBttn(
+                                                        inputId = "jumpto1",
+                                                        label = "Start Exploring",
+                                                        style = "material-flat",
+                                                        color = "success",
+                                                        block = T)
+                                                    ),
+                                                    
+                                             ),
+                                           
+                                                    
+                                             
+                                           ),
+                                           )
+                                  ),
+                                  column(width = 6,
                                          wellPanel(
                                            includeMarkdown("descriptionfiles/helptext_welcome.Rmd"),
                                            img(src = "abstract.png", width = '100%'),
-                                         )),
-                                  
-                                )),
-                      mainPanel(width = 12,
-                                DT::dataTableOutput('availabledatasettable'),
-                                br(),
-                                fluidRow(
-                                  column(width = 6,
-                                         actionBttn(
-                                           inputId = "loaddatabutton",
-                                           label = "Step 1: Click Here to Load Dataset",
-                                           style = "unite",
-                                           color = "primary",
-                                           block = T)
-                                  ),
-                                  column(width = 6,
-                                         hidden(
-                                           actionBttn(
-                                             inputId = "jumpto1",
-                                             label = "Step 2: Start PlaqView",
-                                             color = "success",
-                                             block = T)
                                          )
-                                  )
-                                ),
-                                br(),
-                                br(),
+                                         ), # column
+                                  
+                                 
+                                  
+                                ) # fluid row 
+                                ), # mainpanel
+                      mainPanel(width = 12,
+                                wellPanel(
+                                  h3("Click to Select a Single-Cell Dataset"),
+                                  br(),
+                                  DT::dataTableOutput('availabledatasettable'),
+                                          br(),
+
+                                          ),
+                              
                       )
              ),
              
@@ -128,7 +151,7 @@ ui <- fluidPage(
                                         "genes",
                                         width = '100%',
                                         h3("Query Gene Expression", h5("please follow HUGO conventions")),
-                                        value = "TREM2, CYBB",
+                                        # value = "TREM2, CYBB",
                                         placeholder = "try: TREM2, CYBB"
                                       ),
                                       
@@ -139,7 +162,7 @@ ui <- fluidPage(
                                                     "Dot Plot (up to 9 genes)" = "Dot",
                                                     "Feature Plot (up to 4 genes)" = "Feature",
                                                     "Ridge Plot (single gene)" = "Ridge"),
-                                                  width = '90%',
+                                                  width = '80%',
                                                   selected = "Dot Plot"),
                                       
                                       pickerInput(
@@ -155,15 +178,18 @@ ui <- fluidPage(
                                           "Seurat_with_Tabula_Ref"  
                                         ), 
                                         selected = "Seurat_with_Tabula_Ref",
-                                        width = '90%' #neeed to fit this
+                                        width = '80%' #neeed to fit this
                                       ),
                                       
                                       # 'go' button
-                                      actionButton(
+                                      actionBttn(
                                         inputId = "runcode",
                                         label = "Start Query",
-                                        width = '100%'
-                                      ))
+                                        style = "material-flat",
+                                        color = "success",
+                                        block = T)
+                                    
+                                      )
                                     
                                   ),
                                   
@@ -181,7 +207,7 @@ ui <- fluidPage(
                                 
                                 ## lower panel for graphic outputs
                                 wellPanel(width = 12,
-                                          textOutput("selecteddatasetID"),  
+                                          # textOutput("selecteddatasetID"),  
                                           fluidRow( # top split rows
                                             column(width = 6, align = "center", 
                                                    plotOutput("umaps", width = "auto", height = '500px'),
@@ -309,25 +335,27 @@ ui <- fluidPage(
                                   column(width = 6,
                                          includeMarkdown("descriptionfiles/helptext_comparetrajectories.Rmd"),
                                          # choose button
-                                         actionButton("choose_toggle", "Choose/Unchoose"),
+                                         actionBttn("choose_toggle", "Choose", style = "material-flat", color = "success", block = F, size = "sm"),
                                          # clear button
-                                         actionButton("reset", "Clear Selection"),
+                                         actionBttn("reset", "Clear", style = "material-flat", color = "success", block = F, size = "sm"),
                                          # recal button
-                                         actionButton("redomonocle3", "Recalculate"),
+                                         actionBttn("redomonocle3", "Calculate", style = "material-flat", color = "success", block = F, size = "sm"),
                                          h4("Instructions:"),
                                          tags$ol(
                                            tags$li("Highlight points by clicking and dragging."),
-                                           tags$li("Click the 'Choose/unchoose' button."), # change server code to toggle
+                                           tags$li("Click the 'Choose' button."), # change server code to toggle
                                            tags$li("Repeat until all of the desired cells are black."),
-                                           tags$li("Click 'Done'.")
+                                           tags$li("Click 'Calculate'.")
                                                 ),
                                          h4("Details:"),
                                          tags$ul(
                                            tags$li("To start over, click 'Clear'"),
                                            tags$li(paste("You can also choose/unchoose specific cells",
                                                          "by clicking on them directly.")),
+                                           tags$li(paste("You can un-select a cluster of cells",
+                                                         "by clicking 'Choose' again.")),
                                            ),
-                                         h5("Recalculation may take up to 2mins. Results will appear below."),
+                                         h5("Calculation may take up to 5mins. Results will appear below."),
                                          
                                          ), # column
                                        column(width = 6, 
@@ -458,11 +486,7 @@ server <- function(input, output, session) {
                         selection = list(mode = 'single', selected = c(1)),
                         options=list(columnDefs = list(list(visible=FALSE, targets=c(11)))), # this hides the 8th column, which is datasetID
                         escape = FALSE) # this escapes rendering html (link) literally and makes link clickable
-  observeEvent(input$loaddatabutton, {
-    
-    show("jumpto1")
-    
-  }) 
+  
   
    observeEvent(input$loaddatabutton, {
     path <- file.path(paste("data/", df$DataID[input$availabledatasettable_rows_selected], "/",
@@ -471,6 +495,11 @@ server <- function(input, output, session) {
     pathcds <- file.path(paste("data/", df$DataID[input$availabledatasettable_rows_selected], "/",
                             df$DataID[input$availabledatasettable_rows_selected],
                             "_cds.rds", sep=""))
+    
+    # this is for welcome page display
+    loadeddatasetID <<- paste("Loaded Dataset: ", print(df$DataID[input$availabledatasettable_rows_selected]))
+    output$loadeddatasetID <- renderText(loadeddatasetID)
+    
     plaqviewobj <<- readRDS(file = path)
     plaqviewobj.cds <<- readRDS(file = pathcds)
     
@@ -511,6 +540,14 @@ server <- function(input, output, session) {
 
   })
   
+  # server code to show jumpto1
+  observeEvent(input$loaddatabutton, {
+    
+    shinyjs::show(id = "jumpto1")  
+    
+  }) 
+  
+  # server code to jump to page 1
   observeEvent(input$jumpto1, {
     updateTabsetPanel(session = getDefaultReactiveDomain(), "inTabset",
                       selected = "panel1") # this is to switch to tab1

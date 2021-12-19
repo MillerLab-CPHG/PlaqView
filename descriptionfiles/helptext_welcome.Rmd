@@ -5,12 +5,10 @@ date: "03/20/2021"
 output: html_document
 ---
 
-# Welcome to *PlaqView* !
+## About
 
-### This interactive web application is designed for lay scientists to explore complex single-cell RNA datasets from human and mouse cardiovascular tissues.
+**This interactive web application is designed for lay scientists to explore complex single-cell RNA datasets from human and mouse cardiovascular tissues.**
 
-We are working constantly to update *PlaqView* with the most up-to-date analysis tools and are actively incorporating new datasets.
+*PlaqView* is officially published at [*Atherosclerosis*](https://doi.org/10.1016/j.atherosclerosis.2021.11.025)!
 
-We are actively working on two types of datasets: human and mouse. Currently, only human datasets are available. Mouse dataset will be available in late May with our next release. Our our latest preprint [here](https://www.biorxiv.org/content/10.1101/2020.10.27.357715v2).
-
-**To begin using PlaqView, choose a dataset below and click "Step1: Load Dataset", (please be patient while the data loads), then click "Step2: Enter PlaqView".**
+Please cite PlaqView if you find us helpful. Submit your data to us at [plaqview@virginia.edu](mailto:plaqview@virginia.edu).
