@@ -5,7 +5,7 @@ date: "03/20/2021"
 output: html_document
 ---
 
-## About
+## About Us
 
 **This interactive web application is designed for lay scientists to explore complex single-cell RNA datasets from human and mouse cardiovascular tissues.**
 

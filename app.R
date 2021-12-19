@@ -370,11 +370,10 @@ ui <- fluidPage(
                                                          brush = brushOpts(id = "plot1_brush")),
                                               br(),
                                               downloadButton("downloadoriginaltrajectory", 
-                                                             label = "Download Original Trajectory", 
+                                                             label = "Original Trajectory", 
                                                              width = '50%'),
-                                              br(),
                                               disabled(downloadButton("downloadsubsettrajectory", 
-                                                                      label = "Download Subset Trajectory",
+                                                                      label = "Subset Trajectory",
                                                                       width = '50%')),
 
                                        ), # column
@@ -407,51 +406,63 @@ ui <- fluidPage(
              tabPanel("Druggable Genome",
                       mainPanel(width = 12,
                                 fluidRow(width = 12,
-                                         column(width = 6,
-                                                includeMarkdown("descriptionfiles/helptext_druggablegenome.Rmd"),
-                                                wellPanel(
-                                                  textInput(
-                                                    inputId = "druggeneinput",
-                                                    label = "Gene to Drug",
-                                                    value = "EGFR"
-                                                  ),
-                                                  pickerInput("drugcelllabelmethod", 
-                                                              label = "Select Labeling Method",
-                                                              choices = list (
-                                                                "Seurat_Clusters",
-                                                                # "scCATCH_Blood",
-                                                                # "scCATCH_BV",
-                                                                # "scCATCH_Heart",
-                                                                "Author_Provided",
-                                                                "SingleR.calls",
-                                                                "Seurat_with_Tabula_Ref"  
-                                                              ), 
-                                                              selected = "Seurat_with_Tabula_Ref")
-                                                              
-                                                ),
-                                                
-                                                checkboxGroupInput(
-                                                  inputId = "dgidbdatabase",
-                                                  label = "Choose a Database", 
-                                                  inline = TRUE, 
-                                                  selected = sourceDatabases(), # preselects all
-                                                  choices = sourceDatabases()
-                                                ),
-                                                
-                                                actionButton(inputId = "rundgidb",
-                                                             label = "Start Query",
-                                                             width = '100%')
-                                         ), 
-                                         br(),
+                                           column(width = 6,
+                                                  wellPanel(
+                                                    includeMarkdown("descriptionfiles/helptext_druggablegenome.Rmd"),
+                                                    textInput(
+                                                      inputId = "druggeneinput",
+                                                      label = "Gene to Drug",
+                                                      value = "EGFR"
+                                                    ),
+                                                    
+                                                    actionBttn(
+                                                      inputId = "rundgidb",
+                                                      label = "Start Query",
+                                                      style = "material-flat",
+                                                      color = "success",
+                                                      block = T,
+                                                      size = "lg"),
+                                                    br(),
+                                                    pickerInput("drugcelllabelmethod", 
+                                                                label = "Change Labeling Method",
+                                                                choices = list (
+                                                                  "Seurat_Clusters",
+                                                                  # "scCATCH_Blood",
+                                                                  # "scCATCH_BV",
+                                                                  # "scCATCH_Heart",
+                                                                  "Author_Provided",
+                                                                  "SingleR.calls",
+                                                                  "Seurat_with_Tabula_Ref"  
+                                                                ), 
+                                                                selected = "Seurat_with_Tabula_Ref"),
+                                                    checkboxGroupInput(
+                                                      inputId = "dgidbdatabase",
+                                                      label = "Choose a Database", 
+                                                      inline = TRUE, 
+                                                      selected = sourceDatabases(), # preselects all
+                                                      choices = sourceDatabases()
+                                                    ),
+                                                    
+                                                    helpText("You must restart query if you change database. PubMed ID and citations of interactions are available in full download file."),
+                                                    
+                                                  ), # wellpanel
+                                                  
+                                           ), 
                                          column(width = 6, 
                                                 wellPanel(plotOutput("featurefordrugs",
-                                                                     height = '500px')  )),
+                                                                     height = '500px'),
+                                                          br(),
+                                                          disabled(
+                                                            downloadButton("downloadfeaturefordrugumap", 
+                                                                           label = "Download this UMAP")) #disable
+                                                )),
                                          br(),
                                          column(width = 12,
                                                 DT::dataTableOutput("dgidboutput", width = "100%"),
-                                                helpText("You must restart query if you change database. PubMed ID and citations of interactions are available in full download file."),
                                                 br(),
-                                                downloadButton("downloaddgidboutput", label = "Download Full Gene-Drug Interaction Table")
+                                                disabled(downloadButton("downloaddgidboutput", label = "Download Full Gene-Drug Interaction Table")
+                                                         ),
+                                                
                                          )
                                 )
                       )
@@ -606,7 +617,7 @@ server <- function(input, output, session) {
     },
     content = function(file) {
       pdf(file, paper = "default") # paper = defult is a4 size
-      user_genes <- str_split(input$genes, ", ")[[1]]
+      user_genes <<- str_split(input$genes, ", ")[[1]]
 
       validate(need(input$selectaplot=="Dot", message=FALSE))
       temp <- DimPlot(
@@ -1065,6 +1076,7 @@ server <- function(input, output, session) {
   #### PANEL #5 DRUG FUNCTIONS ####
   observeEvent(input$rundgidb, {
     
+
     #### NOMENCLATURE UPDATE ####
     if(df$Species[input$availabledatasettable_rows_selected] == "Human"){
       corrected <- str_to_upper(input$druggeneinput)
@@ -1088,6 +1100,10 @@ server <- function(input, output, session) {
     result <- queryDGIdb(updated_druggeneinput,
                          sourceDatabases = input$dgidbdatabase)
     fulltable <- result@data[["interactions"]][[1]]
+    
+    # show download buttons
+    enable("downloadfeaturefordrugumap")
+    enable("downloaddgidboutput")
     
     #fulltable$score <- as.numeric(fulltable$score) # bypass DT error
     
@@ -1121,7 +1137,7 @@ server <- function(input, output, session) {
     
     # plots
     output$featurefordrugs <- renderPlot({
-      user_genes <- str_split(corrected, ", ")[[1]]
+      user_genes <<- str_split(corrected, ", ")[[1]]
       FeaturePlot(plaqviewobj, 
                   features = user_genes, label = T, repel = T
       ) + # a trick to sep long string input
@@ -1129,6 +1145,24 @@ server <- function(input, output, session) {
         theme(plot.title = element_text(hjust = 1)) +
         theme(plot.title = element_text(hjust =  0.5)) 
     }) # render plot
+    
+    output$downloadfeaturefordrugumap<- downloadHandler(
+      filename = function() {
+        paste(df$DataID[input$availabledatasettable_rows_selected], "-querydrug_umap.pdf", sep = "")
+      },
+      content = function(file) {
+        pdf(file, paper = "default") # paper = defult is a4 size
+        
+        temp <- FeaturePlot(plaqviewobj,
+                            features = user_genes, label = T, repel = T) + # a trick to sep long string input
+          theme(legend.position="bottom", legend.box = "vertical") + # group.by is important, use this to call metadata separation
+          theme(plot.title = element_text(hjust = 1)) +
+          theme(plot.title = element_text(hjust =  0.5)) 
+        plot(temp)
+        dev.off()
+      }
+      
+    )# close downloadhandler
     
     
     output$dgidboutput <- DT::renderDataTable(isolatedtable,  server = F)
