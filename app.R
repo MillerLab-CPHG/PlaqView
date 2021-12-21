@@ -78,7 +78,7 @@ ui <- fluidPage(
   # defining each 'tab' here
   navbarPage("PlaqView", id = "inTabset",
              
-             #### WELCOME PANEL ####
+             #### UI: Data ####
              tabPanel("Select Dataset", 
                       mainPanel(width = 12,
                                 fluidRow(
@@ -146,7 +146,7 @@ ui <- fluidPage(
                       )
              ),
              
-             #### PANEL 1: QUERY GENE   ----
+             #### UI: Genes   ----
              tabPanel(title = "Gene Lookup", value = "panel1",
                       mainPanel(width = 12, # 12/12 is full panel
                                 fluidRow(## panel for gene input
@@ -268,7 +268,7 @@ ui <- fluidPage(
              
              
              
-             #### PANEL 2: COMPARE LABELING METHODS  ----  
+             #### UI: Labels  ----  
              tabPanel("Cell Labeling",
                       mainPanel(width = 12, # 12/12 is full panel,
                                 wellPanel(includeMarkdown("descriptionfiles/helptext_comparelabels.Rmd")),
@@ -333,7 +333,7 @@ ui <- fluidPage(
                       
                       
              ), # tabPanel
-             #### PANEL 3: MONOCLE3 ----
+             #### UI: RNATraject ----
              tabPanel("Trajectory",
                       mainPanel(width = 12, # 12/12 is full panel,
                                 ### top panel
@@ -402,7 +402,7 @@ ui <- fluidPage(
                       
              ), # tabPanel
              
-             #### PANEL 5: DRUGGABLE GENOME ----  
+             #### UI: Drugs ----  
              tabPanel("Druggable Genome",
                       mainPanel(width = 12,
                                 fluidRow(width = 12,
@@ -487,11 +487,6 @@ ui <- fluidPage(
 
 
 
-
-
-
-
-#### SERVER ####
 # Define server logic required to draw a histogram
 server <- function(input, output, session) {
   #### WELCOME PANEL ####
