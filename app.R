@@ -91,6 +91,7 @@ ui <- fluidPage(
                                              tags$li("Click the blue 'Load Dataset' button"), # change server code to toggle
                                              tags$li("The 'Start Exploring' button will appear when data is loaded."),
                                              tags$li("(Optional) come back to this page to load another dataset.")
+                                             
                                            ),
                                            br(),
                                            fluidRow(
@@ -158,7 +159,7 @@ ui <- fluidPage(
                                         "genes",
                                         width = '100%',
                                         h3("Query Gene Expression", h5("please follow HUGO conventions")),
-                                        # value = "TREM2, CYBB",
+                                        value = "APOE, COL1A1, FBLN1, FBLN2",
                                         placeholder = "try: TREM2, CYBB"
                                       ),
                                       

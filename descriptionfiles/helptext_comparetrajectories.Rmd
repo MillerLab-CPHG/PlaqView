@@ -11,4 +11,4 @@ Use this module to explore **RNA velocity and inferred cell differentiation path
 
 *Plaqview* uses *Monocle3* [(Trapnell Lab)](https://cole-trapnell-lab.github.io/monocle3/) for cell RNA trajectory inference. We found that *Monocle3* was the most flexible in handling complex datasets with multiple cell origins (as opposed to purified/cultured samples).
 
-To further explore subsets of the data, use the right modules to select and re-cluster cells. It may take a few moments to recalculate, please be patient.
+To further explore subsets of the data, use the right modules to select and re-cluster cells. **It may take a up to 5mins** to recalculate depending on number of cells and complexity, please be patient.
