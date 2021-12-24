@@ -64,6 +64,7 @@ library(tidyverse)
 # library(rsconnect)
 library(monocle3)
 
+
 #### UI ####
 # Define UI for application that draws a histogram
 ui <- fluidPage(
@@ -490,15 +491,27 @@ ui <- fluidPage(
 
 # Define server logic required to draw a histogram
 server <- function(input, output, session) {
-  #### WELCOME PANEL ####
-  df <- read_excel("Available_datasets.xlsx")
+  #### SER: Data ####
+  # we used to read data as an excel but migrated to google doc
+  # df <- read_excel("Available_datasets.xlsx")
+  # df$DOI <- paste("<a href=",  df$DOI,">", "Link", "</a>") # this converts to clickable format
+  # # df <- column_to_rownames(df, var = "DataID")
+  
+  googlesheets4::gs4_deauth() # this tells google sheet to read-only
+  df <- googlesheets4::read_sheet("https://docs.google.com/spreadsheets/d/1hLyjPFA2ZRpBLHnTgUnmDz7kimMZWFbz_ZGTml3-hRA/edit#gid=0")
+  
   df$DOI <- paste("<a href=",  df$DOI,">", "Link", "</a>") # this converts to clickable format
-  # df <- column_to_rownames(df, var = "DataID")
+  
+  # subset data rows that are marked 'deployed = Yes"
+  df <- filter(df, `Deployed` == "Yes")
+  df <- df %>% 
+    select(Authors, Year, Journal, DOI, Species, Tissue, Notes, Population, 'Cell#', 'DataID', `Article Title` )
+  
   
   output$availabledatasettable <-
     DT::renderDataTable(df, server = F, # server is for speed/loading
                         selection = list(mode = 'single', selected = c(1)),
-                        options=list(columnDefs = list(list(visible=FALSE, targets=c(11)))), # this hides the 8th column, which is datasetID
+                        options=list(columnDefs = list(list(visible=FALSE, targets=c(10)))), # this hides the #8 col (datasetID)
                         escape = FALSE) # this escapes rendering html (link) literally and makes link clickable
   
   
