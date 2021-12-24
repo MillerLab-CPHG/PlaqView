@@ -506,8 +506,8 @@ server <- function(input, output, session) {
   # subset data rows that are marked 'deployed = Yes"
   df <- filter(df, `Deployed` == "Yes")
   df <- df %>% 
-    select(Authors, Year, Journal, DOI, Species, Tissue, Notes, Population, 'Cell#', 'DataID', `Article Title` )
-  
+    select(Authors, Year, Journal, DOI, Species, Tissue, Notes, Population, 'Cell#', 'DataID', `Article Title` ) 
+  df$`Article Title` <- str_to_title(df$`Article Title`) # autocaps
   
   output$availabledatasettable <-
     DT::renderDataTable(df, server = F, # server is for speed/loading
@@ -583,7 +583,7 @@ server <- function(input, output, session) {
   })
 
   
-  #### PANEL #1 FUNCTIONS ####
+  #### SER: Genes ####
   #### umap ###
   # UMAP plot#
   observeEvent(input$runcode,{ 
@@ -653,7 +653,7 @@ server <- function(input, output, session) {
     
   )# close downloadhandler
   
-  #### dot plot ####
+  #### dot plot ###
   observeEvent(input$runcode,{ # observe event puts a pause until pushed
     
     # this is for the display
@@ -828,7 +828,7 @@ server <- function(input, output, session) {
   
   
   
-  #### PANEL #2 LABELS FUNCTIONS ####
+  #### SER: Labels ####
   output$leftlabelplot <-
     renderPlot(
       DimPlot(
@@ -899,7 +899,7 @@ server <- function(input, output, session) {
                       "diff_by_predicted.id_tabulus.sapien.csv", sep = ""), file)      
     }  )# close downloadhandler
   
-  #### PANEL #3 TRAJ FUNCTIONS ####
+  #### SER: RNATraject ####
   output$originaltrajectory <- 
     renderPlot(
       plot_cells(plaqviewobj.cds,
@@ -1083,7 +1083,7 @@ server <- function(input, output, session) {
       enable("downloadsubsettrajectory")
     })
 
-  #### PANEL #5 DRUG FUNCTIONS ####
+  #### SER: Drugs ####
   observeEvent(input$rundgidb, {
     
 
@@ -1188,7 +1188,7 @@ server <- function(input, output, session) {
   
   })# observer event
   
-  #### PANEL #6 ABOUT FUNCTIONS #### 
+  #### SER: About Functions #### 
   
   output$downloadsessioninfo <- downloadHandler(
     filename = paste(date(), "sesssioninfo.txt"),
@@ -1196,7 +1196,7 @@ server <- function(input, output, session) {
       write_lines(sessionInfo(), file)
     }  )# close downloadhandler
   
-  #### Waiter ####
+  #### SER: Waiter ####
   waiter_hide()
   
   
@@ -1207,5 +1207,3 @@ server <- function(input, output, session) {
 # Run the application 
 shinyApp(ui = ui, server = server)
 
-
-#### NOTES ####
