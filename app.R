@@ -75,7 +75,7 @@ ui <- fluidPage(
   use_waiter(), 
   waiter_show_on_load(html = spin_rotate()),
   useShinyjs(),
-  div(DT::dataTableOutput("table"), style = "font-size: 75%; width: 75%"),
+  div(DT::dataTableOutput("table"), style = "font-size: 75%; width: 75%"), # DT font sinzes
   
   # defining each 'tab' here
   navbarPage("PlaqView", id = "inTabset",
@@ -517,20 +517,21 @@ server <- function(input, output, session) {
   
   
    observeEvent(input$loaddatabutton, {
+    # create path for loading data
     path <- file.path(paste("data/", df$DataID[input$availabledatasettable_rows_selected], "/",
                             df$DataID[input$availabledatasettable_rows_selected],
                             ".rds", sep=""))
     pathcds <- file.path(paste("data/", df$DataID[input$availabledatasettable_rows_selected], "/",
                             df$DataID[input$availabledatasettable_rows_selected],
                             "_cds.rds", sep=""))
+  
+    plaqviewobj <<- readRDS(file = path)
+    plaqviewobj.cds <<- readRDS(file = pathcds)
     
-    # this is for welcome page display
+    # show which data is read
     loadeddatasetID <<- paste("Loaded Dataset: ", print(df$DataID[input$availabledatasettable_rows_selected]))
     output$loadeddatasetID <- renderText(loadeddatasetID)
     
-    plaqviewobj <<- readRDS(file = path)
-    plaqviewobj.cds <<- readRDS(file = pathcds)
-    
     ## these are just for displaying current data name in other tabs##
     output$selecteddatasetID <- renderText({
       paste0("Current dataset: ", df$DataID[input$availabledatasettable_rows_selected])
@@ -544,35 +545,11 @@ server <- function(input, output, session) {
    
 
   })
-  observeEvent(input$loaddatabutton, {
-    path <- file.path(paste("data/", df$DataID[input$availabledatasettable_rows_selected], "/",
-                            df$DataID[input$availabledatasettable_rows_selected],
-                            ".rds", sep=""))
-    pathcds <- file.path(paste("data/", df$DataID[input$availabledatasettable_rows_selected], "/",
-                            df$DataID[input$availabledatasettable_rows_selected],
-                            "_cds.rds", sep=""))
-    plaqviewobj <<- readRDS(file = path)
-    plaqviewobj.cds <<- readRDS(file = pathcds)
-    
-    ## these are just for displaying current data name in other tabs##
-    output$selecteddatasetID <- renderText({
-      paste0("Current dataset: ", df$DataID[input$availabledatasettable_rows_selected])
-    }) 
-    output$selecteddatasetID2 <- renderText({
-      paste0("Current dataset: ", df$DataID[input$availabledatasettable_rows_selected])
-    }) 
-    output$selecteddatasetID3 <- renderText({
-      paste0("Current dataset: ", df$DataID[input$availabledatasettable_rows_selected])
-    }) 
-   
 
-  })
-  
   # server code to show jumpto1
   observeEvent(input$loaddatabutton, {
     
     shinyjs::show(id = "jumpto1")  
-    
   }) 
   
   # server code to jump to page 1
