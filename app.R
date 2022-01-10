@@ -64,7 +64,6 @@ library(tidyverse)
 # library(rsconnect)
 library(monocle3)
 
-
 #### UI ####
 # Define UI for application that draws a histogram
 ui <- fluidPage(
@@ -89,7 +88,7 @@ ui <- fluidPage(
                                            img(src = "logo.png", width = '100%'),
                                            h4("Instructions:"),
                                            tags$ol(
-                                             tags$li("Start by clicking on the dataset you want from the table below."),
+                                             tags$li("Start by clicking on desired dataset."),
                                              tags$li("Click the blue 'Load Dataset' button"), # change server code to toggle
                                              tags$li("The 'Start Exploring' button will appear when data is loaded."),
                                              tags$li("(Optional) come back to this page to load another dataset.")
@@ -345,15 +344,15 @@ ui <- fluidPage(
                                   column(width = 6,
                                          includeMarkdown("descriptionfiles/helptext_comparetrajectories.Rmd"),
                                          # choose button
-                                         actionBttn("choose_toggle", "Choose", style = "material-flat", color = "success", block = F, size = "sm"),
+                                         actionBttn("choose_toggle", "Select", style = "material-flat", color = "primary", block = F, size = "sm"),
                                          # clear button
-                                         actionBttn("reset", "Clear", style = "material-flat", color = "success", block = F, size = "sm"),
+                                         (actionBttn("reset", "Clear", style = "material-flat", color = "primary", block = F, size = "sm")),
                                          # recal button
-                                         actionBttn("redomonocle3", "Calculate", style = "material-flat", color = "success", block = F, size = "sm"),
+                                         (actionBttn("redomonocle3", "Calculate", style = "material-flat", color = "success", block = F, size = "sm")),
                                          h4("Instructions:"),
                                          tags$ol(
                                            tags$li("Highlight points by clicking and dragging."),
-                                           tags$li("Click the 'Choose' button."), # change server code to toggle
+                                           tags$li("Click the 'Select' button."), # change server code to toggle
                                            tags$li("Repeat until all of the desired cells are black."),
                                            tags$li("Click 'Calculate'.")
                                                 ),
@@ -365,7 +364,7 @@ ui <- fluidPage(
                                            tags$li(paste("You can un-select a cluster of cells",
                                                          "by clicking 'Choose' again.")),
                                            ),
-                                         h5("Calculation may take up to 5mins. Results will appear below."),
+                                         h5("Calculation may take up to 10mins. Results will appear below."),
                                          
                                          ), # column
                                        column(width = 6, 
