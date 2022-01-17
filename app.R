@@ -573,6 +573,8 @@ server <- function(input, output, session) {
     pathcds <- file.path(paste("data/", df$DataID[input$availabledatasettable_rows_selected], "/",
                             df$DataID[input$availabledatasettable_rows_selected],
                             "_cds.rds", sep=""))
+    pathdiffex <- file.path(paste("data/", df$DataID[input$availabledatasettable_rows_selected], "/",
+                               "diff_by_predicted.id_Tabula.csv", sep=""))
   
     plaqviewobj <<- readRDS(file = path)
     plaqviewobj.cds <<- readRDS(file = pathcds)
@@ -929,7 +931,7 @@ server <- function(input, output, session) {
   
   observeEvent(input$runCIPR, {
     
-    ciprinput <- read.csv(file = "../DataProcessing/data/Litvinukova_2020/diff_by_Seurat_with_Tabula_Ref.csv")
+    ciprinput <- read.csv(file = pathdiffex)
     
     ciprinput$gene <- str_to_lower(ciprinput$gene)
     
