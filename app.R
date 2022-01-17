@@ -104,7 +104,7 @@ ui <- fluidPage(
                                                     actionBttn(
                                                       inputId = "loaddatabutton",
                                                       label = "Load Dataset",
-                                                      style = "jelly",
+                                                      style = "unite",
                                                       color = "primary",
                                                       block = T),
                                                     
@@ -116,7 +116,7 @@ ui <- fluidPage(
                                                       actionBttn(
                                                         inputId = "jumpto1",
                                                         label = "Start Exploring",
-                                                        style = "jelly",
+                                                        style = "unite",
                                                         color = "success",
                                                         block = T)
                                                     ),
@@ -197,7 +197,7 @@ ui <- fluidPage(
                                       actionBttn(
                                         inputId = "runcode",
                                         label = "Start Query",
-                                        style = "jelly",
+                                        style = "unite",
                                         color = "success",
                                         block = T)
                                     
@@ -362,7 +362,7 @@ ui <- fluidPage(
                                                                     "Spearman (all genes)", "Pearson (all genes)"), 
                                                         selected = "logFC dot product"), 
                                            br(), br(), 
-                                           actionBttn(inputId = "runCIPR", label="Run CIPR", style = "jelly"),
+                                           actionBttn(inputId = "runCIPR", label="Run CIPR", style = "unite"),
                                            br(), br(), 
                                            disabled(downloadButton("download_res", "Download results")),
                                            br(), br(), 
@@ -374,8 +374,8 @@ ui <- fluidPage(
                                            # plotOutput("CIPRplot"),
                                            plotOutput("CIPRplot", click = "brushtop5",
                                                       brush = brushOpts(id = "brushtop5")),
-                                           DT::dataTableOutput('CIPRtable'),
-                                           
+                                           # DT::dataTableOutput('CIPRtable'),
+                                           DT::dataTableOutput("brushedtop5")
                                            
                                     ),
                                   ) # fluid row
@@ -394,11 +394,11 @@ ui <- fluidPage(
                                   column(width = 6,
                                          includeMarkdown("descriptionfiles/helptext_comparetrajectories.Rmd"),
                                          # choose button
-                                         actionBttn("choose_toggle", "Select", style = "jelly", color = "primary", block = F, size = "sm"),
+                                         actionBttn("choose_toggle", "Select", style = "unite", color = "primary", block = F, size = "sm"),
                                          # clear button
-                                         (actionBttn("reset", "Clear", style = "jelly", color = "primary", block = F, size = "sm")),
+                                         (actionBttn("reset", "Clear", style = "unite", color = "primary", block = F, size = "sm")),
                                          # recal button
-                                         (actionBttn("redomonocle3", "Calculate", style = "jelly", color = "success", block = F, size = "sm")),
+                                         (actionBttn("redomonocle3", "Calculate", style = "unite", color = "success", block = F, size = "sm")),
                                          h4("Instructions:"),
                                          tags$ol(
                                            tags$li("Highlight points by clicking and dragging."),
@@ -470,7 +470,7 @@ ui <- fluidPage(
                                                     actionBttn(
                                                       inputId = "rundgidb",
                                                       label = "Start Query",
-                                                      style = "jelly",
+                                                      style = "unite",
                                                       color = "success",
                                                       block = T,
                                                       size = "lg"),
@@ -479,20 +479,20 @@ ui <- fluidPage(
                                                                 label = "Change Labeling Method",
                                                                 choices = list (
                                                                   "Seurat_Clusters",
-                                                                  # "scCATCH_Blood",
-                                                                  # "scCATCH_BV",
-                                                                  # "scCATCH_Heart",
                                                                   "Author_Provided",
                                                                   "SingleR.calls",
                                                                   "Seurat_with_Tabula_Ref"  
                                                                 ), 
                                                                 selected = "Seurat_with_Tabula_Ref"),
-                                                    checkboxGroupInput(
+                                                    pickerInput(
                                                       inputId = "dgidbdatabase",
-                                                      label = "Choose a Database", 
+                                                      label = "Choose Database(s)", 
                                                       inline = TRUE, 
-                                                      selected = sourceDatabases(), # preselects all
-                                                      choices = sourceDatabases()
+                                                      selected = c("COSMIC", "DrugBank", "FDA"), # preselect
+                                                      choices = sourceDatabases(),
+                                                      options = list(
+                                                        `actions-box` = TRUE), 
+                                                      multiple = TRUE, width = "100%"
                                                     ),
                                                     
                                                     helpText("You must restart query if you change database. PubMed ID and citations of interactions are available in full download file."),
@@ -931,11 +931,13 @@ server <- function(input, output, session) {
   
   observeEvent(input$runCIPR, {
     
-    ciprinput <- read.csv(file = pathdiffex)
-    
+    #ciprinput <- read.csv(file = pathdiffex)
+    ciprinput <- read.csv(file = "../DataProcessing/data/Litvinukova_2020/diff_by_Seurat_with_Tabula_Ref.csv")
+
     ciprinput$gene <- str_to_lower(ciprinput$gene)
     
-    CIPR <<- CIPR(input_dat = ciprinput,
+    # actual CIPR code
+    CIPR <- CIPR(input_dat = ciprinput,
          comp_method = "logfc_dot_product", 
          reference = "hpca", 
          plot_ind = F,
@@ -944,19 +946,27 @@ server <- function(input, output, session) {
          global_results_obj = T,
          top_num = 3)  
     
-
+    # plot
     output$CIPRplot <- renderPlot(
       CIPR
     )
     
+    # table for all groups
     output$CIPRtable <- DT::renderDataTable(CIPR_top_results)
+    
+    # table for selected groups
+    output$brushedtop5 <- renderDataTable({
       
+      validate(
+        need(input$brushtop5, "Draw a rectangle around data points for further information")
+      )
+      
+      brushedPoints(CIPR_top_results, input$brushtop5)
+    })
     
-    
+      
   }
-    
-  
-  ) # obsevent cipr
+  ) # obsevent runcipr
   
 
 
