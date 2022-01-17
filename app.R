@@ -63,6 +63,9 @@ library(rDGIdb) # BiocManager::install("rDGIdb")
 library(tidyverse)
 # library(rsconnect)
 library(monocle3)
+library(ggpubr)
+library(gtools)
+library(CIPR)
 
 #### UI ####
 # Define UI for application that draws a histogram
@@ -101,7 +104,7 @@ ui <- fluidPage(
                                                     actionBttn(
                                                       inputId = "loaddatabutton",
                                                       label = "Load Dataset",
-                                                      style = "material-flat",
+                                                      style = "jelly",
                                                       color = "primary",
                                                       block = T),
                                                     
@@ -113,7 +116,7 @@ ui <- fluidPage(
                                                       actionBttn(
                                                         inputId = "jumpto1",
                                                         label = "Start Exploring",
-                                                        style = "material-flat",
+                                                        style = "jelly",
                                                         color = "success",
                                                         block = T)
                                                     ),
@@ -194,7 +197,7 @@ ui <- fluidPage(
                                       actionBttn(
                                         inputId = "runcode",
                                         label = "Start Query",
-                                        style = "material-flat",
+                                        style = "jelly",
                                         color = "success",
                                         block = T)
                                     
@@ -270,7 +273,7 @@ ui <- fluidPage(
              
              
              
-             #### UI: Labels  ----  
+             #### UI: Labels/CIPR  ----  
              tabPanel("Cell Labeling",
                       mainPanel(width = 12, # 12/12 is full panel,
                                 wellPanel(includeMarkdown("descriptionfiles/helptext_comparelabels.Rmd")),
@@ -329,7 +332,54 @@ ui <- fluidPage(
                                            helpText("This will download a .csv of differentially expressed genes as identified by individual cells")
                                     ) # column
                                   ) # fluidrow
-                                ) # close wellpanel
+                                ), # close wellpanel
+                                
+                                wellPanel(
+                                  fluidRow(
+                                    column(width = 7,
+                                           h4("CIPR: Cluster Identity Predictor"),
+                                           includeMarkdown("descriptionfiles/helptext_CIPR.Rmd")
+                                           ), # column
+                                    br(),
+                                    
+                                    # CIPR reference selectors
+                                    column(width = 5, 
+                                           pickerInput("sel_reference", 
+                                                       label = "Select CIPR Reference", 
+                                                       choices = c("ImmGen (mouse)",
+                                                                   "Presorted RNAseq (mouse)",
+                                                                   "Blueprint-Encode (human)",
+                                                                   "Primary Cell Atlas (human)",
+                                                                   "DICE (human)",
+                                                                   "Hematopoietic diff (human)",
+                                                                   "Presorted RNAseq (human)",
+                                                                   "Custom"), 
+                                                       selected = "ImmGen (mouse)"), 
+                                           
+                                           radioButtons("comp_method", 
+                                                        label = "Select method for comparisons", 
+                                                        choices = c("logFC dot product", "logFC Spearman", "logFC Pearson",
+                                                                    "Spearman (all genes)", "Pearson (all genes)"), 
+                                                        selected = "logFC dot product"), 
+                                           br(), br(), 
+                                           actionBttn(inputId = "runCIPR", label="Run CIPR", style = "jelly"),
+                                           br(), br(), 
+                                           disabled(downloadButton("download_res", "Download results")),
+                                           br(), br(), 
+                                           disabled(downloadButton("download_top5", "Download top5 hits")), 
+                                           
+                                           # uiOutput("downloadData_ui") #THIS ALSO WORKS TO SHOW BUTTON AFTER ANALYSIS
+                                    ), # column
+                                    column(width = 12, 
+                                           # plotOutput("CIPRplot"),
+                                           plotOutput("CIPRplot", click = "brushtop5",
+                                                      brush = brushOpts(id = "brushtop5")),
+                                           DT::dataTableOutput('CIPRtable'),
+                                           
+                                           
+                                    ),
+                                  ) # fluid row
+                                ),
                       ), # mainPanel
                       
                       
@@ -344,11 +394,11 @@ ui <- fluidPage(
                                   column(width = 6,
                                          includeMarkdown("descriptionfiles/helptext_comparetrajectories.Rmd"),
                                          # choose button
-                                         actionBttn("choose_toggle", "Select", style = "material-flat", color = "primary", block = F, size = "sm"),
+                                         actionBttn("choose_toggle", "Select", style = "jelly", color = "primary", block = F, size = "sm"),
                                          # clear button
-                                         (actionBttn("reset", "Clear", style = "material-flat", color = "primary", block = F, size = "sm")),
+                                         (actionBttn("reset", "Clear", style = "jelly", color = "primary", block = F, size = "sm")),
                                          # recal button
-                                         (actionBttn("redomonocle3", "Calculate", style = "material-flat", color = "success", block = F, size = "sm")),
+                                         (actionBttn("redomonocle3", "Calculate", style = "jelly", color = "success", block = F, size = "sm")),
                                          h4("Instructions:"),
                                          tags$ol(
                                            tags$li("Highlight points by clicking and dragging."),
@@ -420,7 +470,7 @@ ui <- fluidPage(
                                                     actionBttn(
                                                       inputId = "rundgidb",
                                                       label = "Start Query",
-                                                      style = "material-flat",
+                                                      style = "jelly",
                                                       color = "success",
                                                       block = T,
                                                       size = "lg"),
@@ -488,7 +538,7 @@ ui <- fluidPage(
 
 
 
-
+#### SERVER FUNCTIONS ####
 # Define server logic required to draw a histogram
 server <- function(input, output, session) {
   #### SER: Data ####
@@ -874,6 +924,40 @@ server <- function(input, output, session) {
       file.copy(paste("data/", df$DataID[input$availabledatasettable_rows_selected], "/",
                       "diff_by_predicted.id_tabulus.sapien.csv", sep = ""), file)      
     }  )# close downloadhandler
+  
+  #### SER: CIPR ####
+  
+  observeEvent(input$runCIPR, {
+    
+    ciprinput <- read.csv(file = "../DataProcessing/data/Litvinukova_2020/diff_by_Seurat_with_Tabula_Ref.csv")
+    
+    ciprinput$gene <- str_to_lower(ciprinput$gene)
+    
+    CIPR <<- CIPR(input_dat = ciprinput,
+         comp_method = "logfc_dot_product", 
+         reference = "hpca", 
+         plot_ind = F,
+         plot_top = T,
+         global_plot_obj = T,
+         global_results_obj = T,
+         top_num = 3)  
+    
+
+    output$CIPRplot <- renderPlot(
+      CIPR
+    )
+    
+    output$CIPRtable <- DT::renderDataTable(CIPR_top_results)
+      
+    
+    
+  }
+    
+  
+  ) # obsevent cipr
+  
+
+
   
   #### SER: RNATraject ####
   output$originaltrajectory <- 
