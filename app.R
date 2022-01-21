@@ -71,7 +71,7 @@ library(CIPR)
 # Define UI for application that draws a histogram
 ui <- fluidPage(
   
-  # AESTHETICS####
+  # Aesthetics ####
   theme = shinytheme("flatly"),
   add_busy_bar(color = "#ff9142", height = "100px"), # THIS IS THE BUSY BAR
   use_waiter(), 
@@ -79,7 +79,7 @@ ui <- fluidPage(
   useShinyjs(),
   div(DT::dataTableOutput("table"), style = "font-size: 75%; width: 75%"), # DT font sinzes
   
-  # defining each 'tab' here
+  # Pages ####
   navbarPage("PlaqView", id = "inTabset",
              
              #### UI: Data ####
@@ -186,7 +186,7 @@ ui <- fluidPage(
                                           # "scCATCH_BV",
                                           # "scCATCH_Heart",
                                           "Author_Provided",
-                                          "SingleR.calls",
+                                          "SingleR_calls" = "SingleR.calls",
                                           "Seurat_with_Tabula_Ref"  
                                         ), 
                                         selected = "Seurat_with_Tabula_Ref",
@@ -289,7 +289,7 @@ ui <- fluidPage(
                                                          # "scCATCH_BV",
                                                          # "scCATCH_Heart",
                                                          "Author_Provided",
-                                                         "SingleR.calls",
+                                                         "SingleR.calls" = "SingleR_calls",
                                                          "Seurat_with_Tabula_Ref"  
                                                        ), 
                                                        selected = "Seurat_with_Tabula_Ref"),
@@ -306,10 +306,10 @@ ui <- fluidPage(
                                                          # "scCATCH_BV",
                                                          # "scCATCH_Heart",
                                                          "Author_Provided",
-                                                         "SingleR.calls",
+                                                         "SingleR_calls" = "SingleR.calls",
                                                          "Seurat_with_Tabula_Ref"  
                                                        ), 
-                                                       selected = "SingleR.calls"),
+                                                       selected = "SingleR_calls"),
                                                        
                                            plotOutput("rightlabelplot",
                                                       height = '500px')
@@ -353,15 +353,12 @@ ui <- fluidPage(
                                            pickerInput("CIPRoriginal", 
                                                        label = "Select PlaqView Labeling Method to Benchmark",
                                                        choices = list (
-                                                         "Seurat_Clusters",
-                                                         # "scCATCH_Blood",
-                                                         # "scCATCH_BV",
-                                                         # "scCATCH_Heart",
-                                                         "Author_Provided",
-                                                         "SingleR.calls",
-                                                         "Seurat_with_Tabula_Ref"  
+                                                         "Seurat_Clusters" = "diff_by_seurat.csv",
+                                                         "Author_Provided" = "diff_by_author.csv",
+                                                         "SingleR_calls" = "diff_by_singleR.csv",
+                                                         "Seurat_with_Tabula_Ref" = "diff_by_Seurat_with_Tabula_Ref.csv"
                                                        ), 
-                                                       selected = "SingleR.calls"),
+                                                       selected = "SingleR_calls"),
                                            pickerInput("CIPRreference", 
                                                        label = "Select CIPR Reference", 
                                                        choices = list("ImmGen (mouse)" = "immgen",
@@ -373,15 +370,15 @@ ui <- fluidPage(
                                                                    "Presorted RNAseq (human)" = "hsrnaseq"), 
                                                        selected = "Primary Cell Atlas (human)"), 
                                            
-                                           pickerInput("CIPRmethod", 
-                                                        label = "Select CIPR Method", 
-                                                        choices = list("logFC Dot Product" = "logfc_dot_product", 
-                                                                       "logFC Spearman" = "logfc_spearman", 
-                                                                       "logFC Pearson" = "logfc_pearson",
-                                                                    "Spearman (All Genes)" = "all_genes_spearman", 
-                                                                    "Pearson (All Genes)" = "all_genes_pearson"
-                                                                    ), 
-                                                        selected = "logFC dot product"), 
+                                           # pickerInput("CIPRmethod", 
+                                           #              label = "Select CIPR Method", 
+                                           #              choices = list("logFC Dot Product" = "logfc_dot_product", 
+                                           #                             "logFC Spearman" = "logfc_spearman", 
+                                           #                             "logFC Pearson" = "logfc_pearson",
+                                           #                          "Spearman (All Genes)" = "all_genes_spearman", 
+                                           #                          "Pearson (All Genes)" = "all_genes_pearson"
+                                           #                          ), 
+                                           #              selected = "logFC Dot Product"), 
                                            br(),
                                            actionBttn(inputId = "runCIPR", label="Run CIPR", style = "unite", size = 'lg', color = "success"),
                                        
@@ -521,7 +518,7 @@ ui <- fluidPage(
                                                                 choices = list (
                                                                   "Seurat_Clusters",
                                                                   "Author_Provided",
-                                                                  "SingleR.calls",
+                                                                  "SingleR_calls" = "SingleR.calls",
                                                                   "Seurat_with_Tabula_Ref"  
                                                                 ), 
                                                                 selected = "Seurat_with_Tabula_Ref"),
@@ -614,8 +611,6 @@ server <- function(input, output, session) {
     pathcds <- file.path(paste("data/", df$DataID[input$availabledatasettable_rows_selected], "/",
                             df$DataID[input$availabledatasettable_rows_selected],
                             "_cds.rds", sep=""))
-    pathdiffex <- file.path(paste("data/", df$DataID[input$availabledatasettable_rows_selected], "/",
-                               "diff_by_predicted.id_Tabula.csv", sep=""))
   
     plaqviewobj <<- readRDS(file = path)
     plaqviewobj.cds <<- readRDS(file = pathcds)
@@ -969,10 +964,13 @@ server <- function(input, output, session) {
     }  )# close downloadhandler
   
   #### SER: CIPR ####
-  
-  
   observeEvent(input$runCIPR, {
-    ciprinput <- tryCatch(read.csv(file = "../DataProcessing/data/Wirka_2019/diff_by_singleR.csv"), error=function(e) NULL)
+    pathforCIPR <- file.path(paste("data/", df$DataID[input$availabledatasettable_rows_selected], "/",
+                                   input$CIPRoriginal, sep=""))
+    ciprinput <- tryCatch(read.csv(file = pathforCIPR), error=function(e) NULL)
+    
+    # this line is for wei's trouble shooting only
+    # ciprinput <- tryCatch(read.csv(file = "../DataProcessing/data/Wirka_2019/diff_by_singleR.csv"), error=function(e) NULL)
     
     if(is.null(ciprinput) == TRUE){ # if author did not provide annotation
       output$CIPRplot <- 
@@ -991,7 +989,7 @@ server <- function(input, output, session) {
       
       # actual CIPR calculation
       CIPR <- CIPR(input_dat = ciprinput,
-                   comp_method = input$CIPRmethod, 
+                   comp_method = "logfc_dot_product", 
                    reference = input$CIPRreference, 
                    plot_ind = F,
                    plot_top = T,
@@ -1047,7 +1045,7 @@ server <- function(input, output, session) {
                 "_CIPRplot.pdf", sep = "")
         },
         content = function(file) {
-          pdf(file, paper = "a4r") # paper = defult is a4 size, a4r = a4 rotated
+          pdf(file, width = 18, height = 5) # paper = defult is a4 size, a4r = a4 rotated
           plot(CIPR)
           dev.off()
         }
