@@ -274,7 +274,7 @@ ui <- fluidPage(
              
              
              #### UI: Labels/CIPR  ----  
-             tabPanel("Cell Labeling",
+             tabPanel("Cell Labeling/CIPR",
                       mainPanel(width = 12, # 12/12 is full panel,
                                 wellPanel(includeMarkdown("descriptionfiles/helptext_comparelabels.Rmd")),
                                 wellPanel(
@@ -336,46 +336,87 @@ ui <- fluidPage(
                                 
                                 wellPanel(
                                   fluidRow(
-                                    column(width = 7,
-                                           h4("CIPR: Cluster Identity Predictor"),
-                                           includeMarkdown("descriptionfiles/helptext_CIPR.Rmd")
-                                           ), # column
-                                    br(),
-                                    
                                     # CIPR reference selectors
                                     column(width = 5, 
-                                           pickerInput("sel_reference", 
+                                           tags$h3(tags$b("CIPR: Cluster Identity Predictor")),
+                                           h5("Use this module to compare our annotation against CIPR references."),
+                                           
+                                           h4("Instructions:"),
+                                           tags$ol(
+                                             tags$li("Choose the PlaqView Annotation Method."),
+                                             tags$li("Choose the CIPR Reference Database."), 
+                                             tags$li("Choose the CIPR Method (Calculates Cell Identity Score)."), 
+                                             tags$li("Click Run CIPR."),
+                                             tags$li("Optional: Drag a Box on CIPR Graph and Select Clusters for More Details.")
+                                           ),
+                                           
+                                           pickerInput("CIPRoriginal", 
+                                                       label = "Select PlaqView Labeling Method to Benchmark",
+                                                       choices = list (
+                                                         "Seurat_Clusters",
+                                                         # "scCATCH_Blood",
+                                                         # "scCATCH_BV",
+                                                         # "scCATCH_Heart",
+                                                         "Author_Provided",
+                                                         "SingleR.calls",
+                                                         "Seurat_with_Tabula_Ref"  
+                                                       ), 
+                                                       selected = "SingleR.calls"),
+                                           pickerInput("CIPRreference", 
                                                        label = "Select CIPR Reference", 
-                                                       choices = c("ImmGen (mouse)",
-                                                                   "Presorted RNAseq (mouse)",
-                                                                   "Blueprint-Encode (human)",
-                                                                   "Primary Cell Atlas (human)",
-                                                                   "DICE (human)",
-                                                                   "Hematopoietic diff (human)",
-                                                                   "Presorted RNAseq (human)",
-                                                                   "Custom"), 
-                                                       selected = "ImmGen (mouse)"), 
+                                                       choices = list("ImmGen (mouse)" = "immgen",
+                                                                   "Presorted RNAseq (mouse)" = "mmrnaseq",
+                                                                   "Blueprint-Encode (human)" = "blueprint",
+                                                                   "Primary Cell Atlas (human)" = "hpca",
+                                                                   "DICE (human)" = "dice",
+                                                                   "Hematopoietic diff (human)" = "hema",
+                                                                   "Presorted RNAseq (human)" = "hsrnaseq"), 
+                                                       selected = "Primary Cell Atlas (human)"), 
                                            
-                                           radioButtons("comp_method", 
-                                                        label = "Select method for comparisons", 
-                                                        choices = c("logFC dot product", "logFC Spearman", "logFC Pearson",
-                                                                    "Spearman (all genes)", "Pearson (all genes)"), 
+                                           pickerInput("CIPRmethod", 
+                                                        label = "Select CIPR Method", 
+                                                        choices = list("logFC Dot Product" = "logfc_dot_product", 
+                                                                       "logFC Spearman" = "logfc_spearman", 
+                                                                       "logFC Pearson" = "logfc_pearson",
+                                                                    "Spearman (All Genes)" = "all_genes_spearman", 
+                                                                    "Pearson (All Genes)" = "all_genes_pearson"
+                                                                    ), 
                                                         selected = "logFC dot product"), 
-                                           br(), br(), 
-                                           actionBttn(inputId = "runCIPR", label="Run CIPR", style = "unite"),
-                                           br(), br(), 
-                                           disabled(downloadButton("download_res", "Download results")),
-                                           br(), br(), 
-                                           disabled(downloadButton("download_top5", "Download top5 hits")), 
+                                           br(),
+                                           actionBttn(inputId = "runCIPR", label="Run CIPR", style = "unite", size = 'lg', color = "success"),
+                                       
                                            
-                                           # uiOutput("downloadData_ui") #THIS ALSO WORKS TO SHOW BUTTON AFTER ANALYSIS
                                     ), # column
+                                    
+                                    br(),
+                                    
+                                    column(width = 7,
+                                           includeMarkdown("descriptionfiles/helptext_CIPR.Rmd"),
+                                           h4("Definitions:"),
+                                           tags$ul( # ul is unordered and ol is ordered
+                                             tags$li("Cluster: Cluster annotation provided by PlaqView."),
+                                             tags$li("Reference: Broad classification of the reference cell type."), # change server code to toggle
+                                             tags$li("Ref.ID: Shortened unique identifier for reference cell type."),
+                                             tags$li("Full.Name: Human-readable long name of the reference cell type."),
+                                             tags$li("Description: Additional details about this cell type."),
+                                             tags$li("Identity.Score: Identity score for the given reference cell type calculated via logFC dot product or correlation methods (see CIPR documents for more details)."),
+                                             tags$li("Percent.Pos.Cor.: The percentage of the differentially expressed genes in PlaqView clusters is also differentially expressed in a similar fashion in the reference cell subsets (e.g. both upregulated and downregulated)."),
+
+                                           ),
+                                    ), # column
+                                    
+                                    
                                     column(width = 12, 
-                                           # plotOutput("CIPRplot"),
+                                           br(),
                                            plotOutput("CIPRplot", click = "brushtop5",
                                                       brush = brushOpts(id = "brushtop5")),
                                            # DT::dataTableOutput('CIPRtable'),
-                                           DT::dataTableOutput("brushedtop5")
+                                           disabled(downloadButton("download_top5", "Download CIPR Result Table")), 
+                                           disabled(downloadButton("download_CIPRplot", "Download CIPR Plot")), 
+                                           br(),
+                                           DT::dataTableOutput("brushedtop5"),
+                                           br(), br(), 
+                                        
                                            
                                     ),
                                   ) # fluid row
@@ -929,40 +970,93 @@ server <- function(input, output, session) {
   
   #### SER: CIPR ####
   
+  
   observeEvent(input$runCIPR, {
+    ciprinput <- tryCatch(read.csv(file = "../DataProcessing/data/Wirka_2019/diff_by_singleR.csv"), error=function(e) NULL)
     
-    #ciprinput <- read.csv(file = pathdiffex)
-    ciprinput <- read.csv(file = "../DataProcessing/data/Litvinukova_2020/diff_by_Seurat_with_Tabula_Ref.csv")
-
-    ciprinput$gene <- str_to_lower(ciprinput$gene)
-    
-    # actual CIPR code
-    CIPR <- CIPR(input_dat = ciprinput,
-         comp_method = "logfc_dot_product", 
-         reference = "hpca", 
-         plot_ind = F,
-         plot_top = T,
-         global_plot_obj = T,
-         global_results_obj = T,
-         top_num = 3)  
-    
-    # plot
-    output$CIPRplot <- renderPlot(
-      CIPR
-    )
-    
-    # table for all groups
-    output$CIPRtable <- DT::renderDataTable(CIPR_top_results)
-    
-    # table for selected groups
-    output$brushedtop5 <- renderDataTable({
+    if(is.null(ciprinput) == TRUE){ # if author did not provide annotation
+      output$CIPRplot <- 
+        renderPlot({
+          plot.new()
+          par(bg = "#f7f7f7")
+          text(x = 0.5, y = 0.5, paste("This Dataset Does NOT Have Author-Provided Annotations \n",
+                                       "Please Select Another Labeling Method"), 
+               cex = 1.6, col = "black")
+          
+        })
       
-      validate(
-        need(input$brushtop5, "Draw a rectangle around data points for further information")
-      )
+    } else { # if its not empty
       
-      brushedPoints(CIPR_top_results, input$brushtop5)
-    })
+      ciprinput$gene <- str_to_lower(ciprinput$gene)
+      
+      # actual CIPR calculation
+      CIPR <- CIPR(input_dat = ciprinput,
+                   comp_method = input$CIPRmethod, 
+                   reference = input$CIPRreference, 
+                   plot_ind = F,
+                   plot_top = T,
+                   global_plot_obj = T,
+                   global_results_obj = T,
+                   top_num = 3)  
+      
+      
+      # plot
+      output$CIPRplot <- renderPlot({
+        CIPR
+      }) # renderplot
+      
+      # table for selected groups
+      output$brushedtop5 <- renderDataTable({
+        validate(
+          need(input$brushtop5, "Select data points for detailed information")
+        )
+        brushedtable <- brushedPoints(CIPR_top_results, input$brushtop5)
+        
+        brushedtable.cleaned <<- brushedtable %>% 
+          select(Cluster = cluster,
+                 Reference = reference_cell_type, 
+                 Ref.ID = reference_id,
+                 Full.Name = long_name,
+                 Description = description,
+                 Identity.Score = identity_score,
+                 Percent.Pos.Cor. = percent_pos_correlation
+          )
+        
+        brushedtable.cleaned$Percent.Pos.Cor. <<- paste(round(brushedtable.cleaned$Percent.Pos.Cor., 1), "%")
+        brushedtable.cleaned$Identity.Score <<- paste(round(brushedtable.cleaned$Identity.Score, 1), "")
+        
+        brushedtable.cleaned
+      })
+      
+      output$download_top5<- downloadHandler(
+        filename = function() {
+          paste(df$DataID[input$availabledatasettable_rows_selected], "_",
+                input$CIPRoriginal, "_", input$CIPRreference, "_", input$CIPRmethod,
+                "_result_tables.csv", sep = "")
+        },
+        content = function(file) {
+          write.csv(brushedtable.cleaned, file, row.names = FALSE, col.names = T)
+        }
+        
+      )# close downloadhandler
+      
+      output$download_CIPRplot<- downloadHandler(
+        filename = function() {
+          paste(df$DataID[input$availabledatasettable_rows_selected], "_",
+                input$CIPRoriginal, "_", input$CIPRreference, "_", input$CIPRmethod,
+                "_CIPRplot.pdf", sep = "")
+        },
+        content = function(file) {
+          pdf(file, paper = "a4r") # paper = defult is a4 size, a4r = a4 rotated
+          plot(CIPR)
+          dev.off()
+        }
+        
+      )# close downloadhandler
+      
+      enable("download_top5")
+      enable("download_CIPRplot")
+    }
     
       
   }
@@ -1159,7 +1253,7 @@ server <- function(input, output, session) {
   observeEvent(input$rundgidb, {
     
 
-    #### NOMENCLATURE UPDATE ####
+    #### NOMENCLATURE UPDATE ###
     if(df$Species[input$availabledatasettable_rows_selected] == "Human"){
       corrected <- str_to_upper(input$druggeneinput)
     } else{

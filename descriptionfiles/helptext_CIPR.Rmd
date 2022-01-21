@@ -3,8 +3,8 @@ title: "helptext_CIPR"
 output: html_document
 ---
 
-**CIPR** provides a graphical representation of identity score of unknown or labeled cell clusters against known references.
+#### **CIPR** provides a graphical representation of identity score of unknown or labeled cell clusters against known references.
 
 This is an additional tool to help users further asset the quality of the current annotation or to further explore differential gene expressions.
 
-We acknowledge and thank [Ekiz *et al.* (2020)](https://bmcbioinformatics.biomedcentral.com/articles/10.1186/s12859-020-3538-2) for their publication and development of CIPR.
+We acknowledge and thank [Ekiz *et al.* (2020)](https://bmcbioinformatics.biomedcentral.com/articles/10.1186/s12859-020-3538-2) for their publication and development of CIPR. **For details about CIPR, definitions, and references, please see their [website](https://github.com/atakanekiz/CIPR-Package "CIPR GitHub").**
