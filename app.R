@@ -423,6 +423,81 @@ ui <- fluidPage(
                       
                       
              ), # tabPanel
+             # #### UI: MetaData   ----
+             # tabPanel(title = "Metadata Explorer", value = "panelx",
+             #          mainPanel(width = 12, # 12/12 is full panel
+             #                    fluidRow(## panel for gene input
+             #                      column(
+             #                        width = 5,
+             #                        wellPanel(
+             #                          # must add up to 12 all columns
+             #                          textInput(
+             #                            "genes.meta",
+             #                            width = '100%',
+             #                            h3("Query Gene Expression", h5("please follow HUGO conventions")),
+             #                            value = "APOE, COL1A1, FBLN1, FBLN2",
+             #                            placeholder = "try: TREM2, CYBB"
+             #                          ),
+             # 
+             #                          # choose the type of output graph
+             #                          pickerInput("selectaplot.metadata",
+             #                                      label = "Select Plot Type",
+             #                                      choices = list(
+             #                                        "Dot Plot (up to 9 genes)" = "Dot",
+             #                                        "Feature Plot (up to 4 genes)" = "Feature",
+             #                                        "Ridge Plot (single gene)" = "Ridge"),
+             #                                      width = '80%',
+             #                                      selected = "Dot Plot"),
+             # 
+             #                          pickerInput(
+             #                            inputId = "selectlabelmethodforgenequery.metadata",
+             #                            label = "Select Metadata in this Dataset",
+             #                            choices = list (
+             #                              # this is a reactive choice list based on whats available in the dataset
+             #                              "Waiting for User to Load Data"
+             #                            ),
+             #                            # selected = "nCounts",
+             #                            width = '80%' #neeed to fit this
+             #                          ),
+             # 
+             #                          # 'go' button
+             #                          actionBttn(
+             #                            inputId = "run.metadata",
+             #                            label = "Start Query",
+             #                            style = "unite",
+             #                            color = "success",
+             #                            block = T)
+             # 
+             #                        )
+             # 
+             #                      ),
+             # 
+             #                      ## panel for description
+             #                      column(
+             #                        width = 7,
+             #                        wellPanel(includeMarkdown("descriptionfiles/helptext_metadata.Rmd"))
+             #                      )
+             #                    ),
+             # 
+             # 
+             #                    #spacer
+             #                    br(),
+             # 
+             #                    ## lower panel for graphic outputs
+             #                    wellPanel(width = 12,
+             #                              fluidRow( # top split rows
+             #                              
+             #                              ), # fluidrow
+             #                      
+             #                    )# wellpanel
+             # 
+             # 
+             #          )# MAIN PANEL CLOSURE
+             # ), # TAB PANEL CLOSURE
+             # 
+             # 
+             # 
+
              #### UI: RNATraject ----
              tabPanel("Trajectory",
                       mainPanel(width = 12, # 12/12 is full panel,
@@ -1062,6 +1137,142 @@ server <- function(input, output, session) {
   
 
 
+  
+  #### SER: Metadata ####
+  observeEvent(input$loaddatabutton, {
+    updatePickerInput(session, "selectlabelmethodforgenequery.metadata",
+                      label = "Select Metadata",
+                      choices = names(plaqviewobj@meta.data),
+                      selected = names(plaqviewobj@meta.data)[1])
+  })
+  
+  #### dot plot ###
+  observeEvent(input$run.metadata,{ # observe event puts a pause until pushed
+    #### NOMENCLATURE UPDATE ###
+    if(df$Species[input$availabledatasettable_rows_selected] == "Human"){
+      corrected <- str_to_upper(input$genes.metadata)
+    } else{
+      corrected <- str_to_title(input$genes.metadata)
+    }
+    
+    updateTextInput(getDefaultReactiveDomain(),
+                    "genes.metadata", value = corrected)
+    
+    # this is for the display
+    output$Dot.metadata <- renderPlot({
+      # parse string input 
+      user_genes.metadata <- str_split(input$genes.metadata, ", ")[[1]]
+      validate(need(input$selectaplot.metadata=="Dot", message=FALSE))
+      DotPlot(plaqviewobj, 
+              group.by = input$selectlabelmethodforgenequery.metadata,
+              features = user_genes.meta) + # a trick to sep long string input
+        ggtitle("Expression Dot Plot") +
+        theme(plot.title = element_text(hjust = 1)) +
+        theme(plot.title = element_text(hjust = 0.5)) +
+        theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1))
+    })
+    
+    # this is for the download
+    output$downloaddotplot<- downloadHandler(
+      filename = function() {
+        paste("dotplot.meta.pdf", sep = "")
+      },
+      content = function(file) {
+        user_genes.metadata <- str_split(input$genes.metadata, ", ")[[1]]
+        validate(need(input$selectaplot.metadata=="Dot", message=FALSE))
+        temp <- DotPlot(plaqviewobj, 
+                group.by = input$selectlabelmethodforgenequery.metadata,
+                features = user_genes.metadata) + # a trick to sep long string input
+          ggtitle("Expression Dot Plot") +
+          theme(plot.title = element_text(hjust = 1)) +
+          theme(plot.title = element_text(hjust = 0.5)) +
+          theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1))
+        
+        plot(temp) #this is all you need
+        
+        dev.off()
+      }
+      
+    )# close downloadhandler
+    
+    #### feature plot ####
+    parsed.genes <- str_split(input$genes, ", ")[[1]]
+    output$Feature <- renderPlot({
+      user_genes <- str_split(input$genes, ", ")[[1]]
+      validate(need(input$selectaplot=="Feature", message=FALSE))
+      FeaturePlot(plaqviewobj, 
+                  features = user_genes[1:4]) + # a trick to sep long string input
+        theme(legend.position="bottom", legend.box = "vertical") + # group.by is important, use this to call metadata separation
+        theme(plot.title = element_text(hjust = 1)) +
+        theme(plot.title = element_text(hjust =  0.5)) 
+    }) 
+    
+    # this is for the download
+    output$downloadfeatureplot<- downloadHandler(
+      filename = function() {
+        paste("featureplot.pdf", sep = "")
+      },
+      content = function(file) {
+        pdf(file, paper = "default") # paper = defult is a4 size
+        user_genes <- str_split(input$genes, ", ")[[1]]
+        validate(need(input$selectaplot=="Feature", message=FALSE))
+        temp <- FeaturePlot(plaqviewobj, 
+                            features = user_genes[1:4]) + # a trick to sep long string input
+          theme(legend.position="bottom", legend.box = "vertical") + # group.by is important, use this to call metadata separation
+          theme(plot.title = element_text(hjust = 1)) +
+          theme(plot.title = element_text(hjust =  0.5)) 
+        
+        plot(temp) #this is all you need
+        
+        dev.off()
+      }
+      
+    )# close downloadhandler
+    
+    #### ridge plot ####
+    output$Ridge <- renderPlot({
+      user_genes <- str_split(input$genes, ", ")[[1]]
+      validate(need(input$selectaplot=="Ridge", message=FALSE))
+      RidgePlot(plaqviewobj,
+                cols = color_function(length(unique(plaqviewobj@meta.data[[input$selectlabelmethodforgenequery]]))),
+                group.by = input$selectlabelmethodforgenequery,
+                features =  user_genes[1:1]
+      ) + # a trick to sep long string input
+        #theme(legend.position="bottom", legend.box = "vertical") + # group.by is important, use this to call metadata separation
+        theme(plot.title = element_text(hjust =  0.5)) +
+        guides(color = guide_legend(nrow = 3))
+      
+    })
+    
+    
+    output$downloadridgeplot<- downloadHandler(
+      filename = function() {
+        paste("ridgeplot.pdf", sep = "")
+      },
+      content = function(file) {
+        pdf(file, paper = "default") # paper = defult is a4 size
+        user_genes <- str_split(input$genes, ", ")[[1]]
+        validate(need(input$selectaplot=="Ridge", message=FALSE))
+        temp <- RidgePlot(plaqviewobj,
+                          cols = color_function(length(unique(plaqviewobj@meta.data[[input$selectlabelmethodforgenequery]]))),
+                          group.by = input$selectlabelmethodforgenequery,
+                          features =  user_genes[1:1]
+        ) + # a trick to sep long string input
+          #theme(legend.position="bottom", legend.box = "vertical") + # group.by is important, use this to call metadata separation
+          theme(plot.title = element_text(hjust =  0.5)) +
+          guides(color = guide_legend(nrow = 3))
+        
+        plot(temp) #this is all you need
+        
+        dev.off()
+      }
+      
+    )# close downloadhandler
+    
+  }) # observe event closure
+  
+  
+  
   
   #### SER: RNATraject ####
   output$originaltrajectory <- 

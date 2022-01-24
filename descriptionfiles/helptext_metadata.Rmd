@@ -1,0 +1,16 @@
+---
+title: "helptext_singlegenepage.Rmd"
+author: "WeiMa"
+date: "1/2/2021"
+output: html_document
+---
+
+### ***Metadata Explorer***
+
+Use this module to **query specific gene(s) and metadata associated with the original dataset as well as PlaqView-generated metadata.**
+
+Metadata formatting has no common convention, and PlaqView may not be able to render completely. 
+
+Gene names will be converted to correct format based on species. For a **single** gene, feature and ridge plots work well. For **multiple** genes, use dot plots.
+
+Acronyms: chondrocytes (CH) common myeloid progenitor (CMP), dendritic cells (DC), endothelial cells (EC), fibroblasts (FB), granulocyte/monocyte progenitors (GMP), Macrophages (Mø), Monocytes (Mono), Natural Killer (NK), stem cells (SC), smooth muscle cells (SMC).
