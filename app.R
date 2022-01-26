@@ -274,7 +274,7 @@ ui <- fluidPage(
              
              
              #### UI: Labels/CIPR  ----  
-             tabPanel("Cell Labeling/CIPR",
+             tabPanel("Cell Labeling",
                       mainPanel(width = 12, # 12/12 is full panel,
                                 wellPanel(includeMarkdown("descriptionfiles/helptext_comparelabels.Rmd")),
                                 
@@ -575,7 +575,7 @@ ui <- fluidPage(
                                   wellPanel(id = "subset.trajectory", 
                                             fluidRow(width = 12,
                                                      column(width = 6,
-                                                            h4("Original Full Trajecotry"),
+                                                            h4("Original Full Trajectory"),
                                                             plotOutput("originaltrajectory"),
                                                      ),
                                                      column(width = 6,
