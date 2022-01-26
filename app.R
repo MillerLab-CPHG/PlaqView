@@ -162,14 +162,14 @@ ui <- fluidPage(
                                       textInput(
                                         "genes",
                                         width = '100%',
-                                        h3("Query Gene Expression", h5("please follow HUGO conventions")),
+                                        h4("Enter Gene Names Below", h5("please follow HUGO conventions")),
                                         value = "APOE, COL1A1, FBLN1, FBLN2",
                                         placeholder = "try: TREM2, CYBB"
                                       ),
                                       
                                       # choose the type of output graph 
+                                      h5("Select Plot Type"),
                                       pickerInput("selectaplot",
-                                                  label = "Select Plot Type", 
                                                   choices = list(
                                                     "Dot Plot (up to 9 genes)" = "Dot",
                                                     "Feature Plot (up to 4 genes)" = "Feature",
@@ -177,9 +177,9 @@ ui <- fluidPage(
                                                   width = '80%',
                                                   selected = "Dot Plot"),
                                       
+                                      h5("Select Cell Annotation Method"),
                                       pickerInput(
                                         inputId = "selectlabelmethodforgenequery",
-                                        label = "Select Labeling Method", 
                                         choices = list (
                                           "Seurat_Clusters",
                                           # "scCATCH_Blood",
@@ -277,7 +277,10 @@ ui <- fluidPage(
              tabPanel("Cell Labeling/CIPR",
                       mainPanel(width = 12, # 12/12 is full panel,
                                 wellPanel(includeMarkdown("descriptionfiles/helptext_comparelabels.Rmd")),
-                                wellPanel(
+                                
+                                wellPanel( 
+                                  tags$h4(tags$b("Compare Annotation Methods")),
+                                  h5("Use this block to compare Plaqview-provided annotations and Author-provided labels (when available)"),
                                   fluidRow(
                                     column(width = 6, 
                                            
@@ -317,7 +320,7 @@ ui <- fluidPage(
                                     
                                     br(), 
                                     
-                                    column(width = 6, h4("Differential Expression by Cluster"),
+                                    column(width = 6, h4("Download Differential Expression by Cluster"),
                                            downloadButton("diffbyseurat", "Numbered Only (Unlabeled)"),
                                            downloadButton("diffbyauthor", "Author Supplied (Manual)"),
                                            
@@ -325,7 +328,7 @@ ui <- fluidPage(
                                            helpText("This will download a .csv of differentially expressed genes by cluster")
                                     ), # column
                                     
-                                    column(width = 6, h4("Differential Expression by Cell Type"),
+                                    column(width = 6, h4("Download Differential Expression by Cell Type"),
                                            downloadButton("diffbysingleR", "SingleR"),
                                            downloadButton("diffbyTS", "Seurat + Tabula sapiens"),
                                            
@@ -338,8 +341,8 @@ ui <- fluidPage(
                                   fluidRow(
                                     # CIPR reference selectors
                                     column(width = 5, 
-                                           tags$h3(tags$b("CIPR: Cluster Identity Predictor")),
-                                           h5("Use this module to compare our annotation against CIPR references."),
+                                           tags$h4(tags$b("CIPR: Cluster Identity Predictor")),
+                                           h5("Use this block to compare our annotation against CIPR references."),
                                            
                                            h4("Instructions:"),
                                            tags$ol(
@@ -423,80 +426,102 @@ ui <- fluidPage(
                       
                       
              ), # tabPanel
-             # #### UI: MetaData   ----
-             # tabPanel(title = "Metadata Explorer", value = "panelx",
-             #          mainPanel(width = 12, # 12/12 is full panel
-             #                    fluidRow(## panel for gene input
-             #                      column(
-             #                        width = 5,
-             #                        wellPanel(
-             #                          # must add up to 12 all columns
-             #                          textInput(
-             #                            "genes.meta",
-             #                            width = '100%',
-             #                            h3("Query Gene Expression", h5("please follow HUGO conventions")),
-             #                            value = "APOE, COL1A1, FBLN1, FBLN2",
-             #                            placeholder = "try: TREM2, CYBB"
-             #                          ),
-             # 
-             #                          # choose the type of output graph
-             #                          pickerInput("selectaplot.metadata",
-             #                                      label = "Select Plot Type",
-             #                                      choices = list(
-             #                                        "Dot Plot (up to 9 genes)" = "Dot",
-             #                                        "Feature Plot (up to 4 genes)" = "Feature",
-             #                                        "Ridge Plot (single gene)" = "Ridge"),
-             #                                      width = '80%',
-             #                                      selected = "Dot Plot"),
-             # 
-             #                          pickerInput(
-             #                            inputId = "selectlabelmethodforgenequery.metadata",
-             #                            label = "Select Metadata in this Dataset",
-             #                            choices = list (
-             #                              # this is a reactive choice list based on whats available in the dataset
-             #                              "Waiting for User to Load Data"
-             #                            ),
-             #                            # selected = "nCounts",
-             #                            width = '80%' #neeed to fit this
-             #                          ),
-             # 
-             #                          # 'go' button
-             #                          actionBttn(
-             #                            inputId = "run.metadata",
-             #                            label = "Start Query",
-             #                            style = "unite",
-             #                            color = "success",
-             #                            block = T)
-             # 
-             #                        )
-             # 
-             #                      ),
-             # 
-             #                      ## panel for description
-             #                      column(
-             #                        width = 7,
-             #                        wellPanel(includeMarkdown("descriptionfiles/helptext_metadata.Rmd"))
-             #                      )
-             #                    ),
-             # 
-             # 
-             #                    #spacer
-             #                    br(),
-             # 
-             #                    ## lower panel for graphic outputs
-             #                    wellPanel(width = 12,
-             #                              fluidRow( # top split rows
-             #                              
-             #                              ), # fluidrow
-             #                      
-             #                    )# wellpanel
-             # 
-             # 
-             #          )# MAIN PANEL CLOSURE
-             # ), # TAB PANEL CLOSURE
-             # 
-             # 
-             # 
+             #### UI: MetaData   ----
+             tabPanel(title = "Metadata Explorer", value = "metadatapanel",
+                      mainPanel(width = 12, # 12/12 is full panel
+                                fluidRow(
+                                  ## panel for description
+                                  column(width = 12,
+                                    wellPanel(includeMarkdown("descriptionfiles/helptext_metadata.Rmd"))
+                                  ), # column
+                                  
+                                  column(width = 12,
+                                         wellPanel(
+                                           tags$h4(tags$b("Explore All Metadata Columns")),
+                                           fluidRow(
+                                             column(width = 6,
+                                                    tags$h5(tags$b("View Annotation-Type Metadata"))
+                                             ),
+                                             column(width = 6,
+                                                    tags$h5(tags$b("View Statistics-Type Metadata"))
+                                               
+                                             ),
+                                           ), # fluidrow (inside)
+                                           
+                                         )# well panel
+                                         ), # column
+                                  
+                                  
+                                  column(width = 5,
+                                    wellPanel(
+                                      # must add up to 12 all columns
+                                      tags$h4(tags$b("Explore Gene Expression by Metadata")),
+                                      h5("please follow HUGO conventions"),
+                                      textInput(
+                                        "genes.metadata",
+                                        width = '100%',
+                                        label = NULL,
+                                        value = "APOE, COL1A1, FBLN1, FBLN2",
+                                        placeholder = "try: TREM2, CYBB"
+                                      ),
+
+                                      # choose the type of output graph
+                                      pickerInput("selectaplot.metadata",
+                                                  label = "Select Plot Type",
+                                                  choices = list(
+                                                    "Dot Plot (up to 9 genes)" = "Dot",
+                                                    "Ridge Plot (single gene)" = "Ridge"),
+                                                  width = '80%',
+                                                  selected = "Dot Plot"),
+
+                                      pickerInput(
+                                        inputId = "selectlabelmethodforgenequery.metadata",
+                                        label = "Select Metadata Column in this Dataset",
+                                        choices = list (
+                                          # this is a reactive choice list based on whats available in the dataset
+                                          "Waiting for User to Load Data"
+                                        ),
+                                        # selected = "nCounts",
+                                        width = '80%' #neeed to fit this
+                                      ),
+
+                                      # 'go' button
+                                      actionBttn(
+                                        inputId = "run.metadata",
+                                        label = "Start Query",
+                                        style = "unite",
+                                        color = "success",
+                                        block = T)
+
+                                    )
+
+                                  ),
+                                ),
+
+
+                                #spacer
+                                br(),
+                                
+                                fluidRow( # top split rows
+                                  column(width = 6, align = "center", 
+                                         plotOutput("Dot.metadata", width = "auto", height = '500px'),
+                                         br(),
+                                         downloadButton("download.Dot.metadata", "Download This Plot", width = '100%')
+                                  ), # column 
+                                  column(width = 6, align = "center", 
+                                         plotOutput("dimplot.meta.left", width = "auto", height = '500px'),
+                                         br(),
+                                         downloadButton("download.dimplot.meta.left", "Download This Plot", width = '100%')
+                                  ), # column 
+                               
+                                ), # fluidrow
+
+
+                      )# MAIN PANEL CLOSURE
+             ), # TAB PANEL CLOSURE
+
+
+
 
              #### UI: RNATraject ----
              tabPanel("Trajectory",
@@ -723,9 +748,11 @@ server <- function(input, output, session) {
 
   
   #### SER: Genes ####
-  #### umap ###
-  # UMAP plot#
-  observeEvent(input$runcode,{ 
+  # UMAP 
+  observeEvent(input$runcode, {
+    validate(
+      need(input$runcode, "Please Click Run When Ready")
+    )
     output$umaps <- 
       renderPlot(
         DimPlot(
@@ -737,7 +764,7 @@ server <- function(input, output, session) {
           # repel labels
           pt.size = 1,
           cols = color_function(length(unique(plaqviewobj@meta.data[[input$selectlabelmethodforgenequery]]))),
-                        # this enables dynamic # of colors based on # of labels given, sorry about the horrible nesting
+          # this enables dynamic # of colors based on # of labels given, sorry about the horrible nesting
           group.by = input$selectlabelmethodforgenequery) + # group.by is important, use this to call metadata separation
           theme(legend.position="bottom", 
                 legend.box = "vertical") +
@@ -746,6 +773,9 @@ server <- function(input, output, session) {
           guides(color = guide_legend(nrow = 5)
           )
       ) # closes renderPlot
+  })
+  observeEvent(input$runcode,{ 
+
     
     #### NOMENCLATURE UPDATE ####
     if(df$Species[input$availabledatasettable_rows_selected] == "Human"){
@@ -1079,7 +1109,7 @@ server <- function(input, output, session) {
       }) # renderplot
       
       # table for selected groups
-      output$brushedtop5 <- renderDataTable({
+      output$brushedtop5 <- renderDataTable(server = F, {
         validate(
           need(input$brushtop5, "Select data points for detailed information")
         )
@@ -1140,10 +1170,18 @@ server <- function(input, output, session) {
   
   #### SER: Metadata ####
   observeEvent(input$loaddatabutton, {
+    
+    # pull out names of the different classes within meta.data and combine character.factors
+    plaqview.metadata.character.type <<- names(plaqviewobj@meta.data %>% select_if(is.character))
+    plaqview.metadata.factor.type <<- names(plaqviewobj@meta.data %>% select_if(is.factor))
+    plaqview.metadata.cf <<- append(plaqview.metadata.character.type, plaqview.metadata.factor.type)
+    
+    plaqview.metadata.numeric.type <<- names(plaqviewobj@meta.data %>% select_if(is.numeric))
+    
     updatePickerInput(session, "selectlabelmethodforgenequery.metadata",
                       label = "Select Metadata",
-                      choices = names(plaqviewobj@meta.data),
-                      selected = names(plaqviewobj@meta.data)[1])
+                      choices = plaqview.metadata.cf,
+                      selected = plaqview.metadata.cf[1])
   })
   
   #### dot plot ###
@@ -1165,7 +1203,7 @@ server <- function(input, output, session) {
       validate(need(input$selectaplot.metadata=="Dot", message=FALSE))
       DotPlot(plaqviewobj, 
               group.by = input$selectlabelmethodforgenequery.metadata,
-              features = user_genes.meta) + # a trick to sep long string input
+              features = user_genes.metadata) + # a trick to sep long string input
         ggtitle("Expression Dot Plot") +
         theme(plot.title = element_text(hjust = 1)) +
         theme(plot.title = element_text(hjust = 0.5)) +
@@ -1173,16 +1211,16 @@ server <- function(input, output, session) {
     })
     
     # this is for the download
-    output$downloaddotplot<- downloadHandler(
+    output$downloaddotplot.metadata<- downloadHandler(
       filename = function() {
-        paste("dotplot.meta.pdf", sep = "")
+        paste("dotplotmetadata.pdf", sep = "")
       },
       content = function(file) {
         user_genes.metadata <- str_split(input$genes.metadata, ", ")[[1]]
         validate(need(input$selectaplot.metadata=="Dot", message=FALSE))
         temp <- DotPlot(plaqviewobj, 
                 group.by = input$selectlabelmethodforgenequery.metadata,
-                features = user_genes.metadata) + # a trick to sep long string input
+                features = user_genes.meta) + # a trick to sep long string input
           ggtitle("Expression Dot Plot") +
           theme(plot.title = element_text(hjust = 1)) +
           theme(plot.title = element_text(hjust = 0.5)) +
