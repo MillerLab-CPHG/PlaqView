@@ -1065,7 +1065,7 @@ server <- function(input, output, session) {
     filename = "differential_markergenes_by_tabulus_sapien_reference.csv",
     content = function(file) {
       file.copy(paste("data/", df$DataID[input$availabledatasettable_rows_selected], "/",
-                      "diff_by_predicted.id_tabulus.sapien.csv", sep = ""), file)      
+                      "diff_by_Seurat_with_Tabula_Ref.csv", sep = ""), file)      
     }  )# close downloadhandler
   
   #### SER: CIPR ####
