@@ -592,74 +592,74 @@ ui <- fluidPage(
                       
              ), # tabPanel
              
-             #### UI: Drugs ----  
-             tabPanel("Druggable Genome",
-                      mainPanel(width = 12,
-                                fluidRow(width = 12,
-                                           column(width = 6,
-                                                  wellPanel(
-                                                    includeMarkdown("descriptionfiles/helptext_druggablegenome.Rmd"),
-                                                    textInput(
-                                                      inputId = "druggeneinput",
-                                                      label = "Gene to Drug",
-                                                      value = "EGFR"
-                                                    ),
-                                                    
-                                                    actionBttn(
-                                                      inputId = "rundgidb",
-                                                      label = "Start Query",
-                                                      style = "unite",
-                                                      color = "success",
-                                                      block = T,
-                                                      size = "lg"),
-                                                    br(),
-                                                    pickerInput("drugcelllabelmethod", 
-                                                                label = "Change Labeling Method",
-                                                                choices = list (
-                                                                  "Seurat_Clusters",
-                                                                  "Author_Provided",
-                                                                  "SingleR_calls" = "SingleR.calls",
-                                                                  "Seurat_with_Tabula_Ref"  
-                                                                ), 
-                                                                selected = "Seurat_with_Tabula_Ref"),
-                                                    pickerInput(
-                                                      inputId = "dgidbdatabase",
-                                                      label = "Choose Database(s)", 
-                                                      inline = TRUE, 
-                                                      selected = c("COSMIC", "DrugBank", "FDA"), # preselect
-                                                      choices = sourceDatabases(),
-                                                      options = list(
-                                                        `actions-box` = TRUE), 
-                                                      multiple = TRUE, width = "100%"
-                                                    ),
-                                                    
-                                                    helpText("You must restart query if you change database. PubMed ID and citations of interactions are available in full download file."),
-                                                    
-                                                  ), # wellpanel
-                                                  
-                                           ), 
-                                         column(width = 6, 
-                                                wellPanel(plotOutput("featurefordrugs",
-                                                                     height = '500px'),
-                                                          br(),
-                                                          disabled(
-                                                            downloadButton("downloadfeaturefordrugumap", 
-                                                                           label = "Download this UMAP")) #disable
-                                                )),
-                                         br(),
-                                         column(width = 12,
-                                                DT::dataTableOutput("dgidboutput", width = "100%"),
-                                                br(),
-                                                disabled(downloadButton("downloaddgidboutput", label = "Download Full Gene-Drug Interaction Table")
-                                                         ),
-                                                
-                                         )
-                                )
-                      )
-                      
-             ),
-             
-             
+             # #### UI: Drugs ----  
+             # tabPanel("Druggable Genome",
+             #          mainPanel(width = 12,
+             #                    fluidRow(width = 12,
+             #                               column(width = 6,
+             #                                      wellPanel(
+             #                                        includeMarkdown("descriptionfiles/helptext_druggablegenome.Rmd"),
+             #                                        textInput(
+             #                                          inputId = "druggeneinput",
+             #                                          label = "Gene to Drug",
+             #                                          value = "EGFR"
+             #                                        ),
+             #                                        
+             #                                        actionBttn(
+             #                                          inputId = "rundgidb",
+             #                                          label = "Start Query",
+             #                                          style = "unite",
+             #                                          color = "success",
+             #                                          block = T,
+             #                                          size = "lg"),
+             #                                        br(),
+             #                                        pickerInput("drugcelllabelmethod", 
+             #                                                    label = "Change Labeling Method",
+             #                                                    choices = list (
+             #                                                      "Seurat_Clusters",
+             #                                                      "Author_Provided",
+             #                                                      "SingleR_calls" = "SingleR.calls",
+             #                                                      "Seurat_with_Tabula_Ref"  
+             #                                                    ), 
+             #                                                    selected = "Seurat_with_Tabula_Ref"),
+             #                                        pickerInput(
+             #                                          inputId = "dgidbdatabase",
+             #                                          label = "Choose Database(s)", 
+             #                                          inline = TRUE, 
+             #                                          selected = c("COSMIC", "DrugBank", "FDA"), # preselect
+             #                                          choices = sourceDatabases(),
+             #                                          options = list(
+             #                                            `actions-box` = TRUE), 
+             #                                          multiple = TRUE, width = "100%"
+             #                                        ),
+             #                                        
+             #                                        helpText("You must restart query if you change database. PubMed ID and citations of interactions are available in full download file."),
+             #                                        
+             #                                      ), # wellpanel
+             #                                      
+             #                               ), 
+             #                             column(width = 6, 
+             #                                    wellPanel(plotOutput("featurefordrugs",
+             #                                                         height = '500px'),
+             #                                              br(),
+             #                                              disabled(
+             #                                                downloadButton("downloadfeaturefordrugumap", 
+             #                                                               label = "Download this UMAP")) #disable
+             #                                    )),
+             #                             br(),
+             #                             column(width = 12,
+             #                                    DT::dataTableOutput("dgidboutput", width = "100%"),
+             #                                    br(),
+             #                                    disabled(downloadButton("downloaddgidboutput", label = "Download Full Gene-Drug Interaction Table")
+             #                                             ),
+             #                                    
+             #                             )
+             #                    )
+             #          )
+             #          
+             # ),
+             # 
+             #### END UI #### 
              ### JS to jump to top of page on click ###
              tags$script(" $(document).ready(function () {
                          $('#jumpto1').on('click', function (e) {
@@ -750,7 +750,9 @@ server <- function(input, output, session) {
   #### SER: Genes ####
   # UMAP 
   observeEvent(input$runcode, {
-
+    validate(
+      need(input$runcode, "Please Click Run When Ready")
+    )
     output$umaps <- 
       renderPlot(
         DimPlot(
@@ -1617,4 +1619,3 @@ server <- function(input, output, session) {
 
 # Run the application 
 shinyApp(ui = ui, server = server)
-
