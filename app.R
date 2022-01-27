@@ -426,103 +426,103 @@ ui <- fluidPage(
                       
                       
              ), # tabPanel
-             #### UI: MetaData   ----
-             tabPanel(title = "Metadata Explorer", value = "metadatapanel",
-                      mainPanel(width = 12, # 12/12 is full panel
-                                fluidRow(
-                                  ## panel for description
-                                  column(width = 12,
-                                    wellPanel(includeMarkdown("descriptionfiles/helptext_metadata.Rmd"))
-                                  ), # column
-                                  
-                                  column(width = 12,
-                                         wellPanel(
-                                           tags$h4(tags$b("Explore All Metadata Columns")),
-                                           fluidRow(
-                                             column(width = 6,
-                                                    tags$h5(tags$b("View Annotation-Type Metadata"))
-                                             ),
-                                             column(width = 6,
-                                                    tags$h5(tags$b("View Statistics-Type Metadata"))
-                                               
-                                             ),
-                                           ), # fluidrow (inside)
-                                           
-                                         )# well panel
-                                         ), # column
-                                  
-                                  
-                                  column(width = 5,
-                                    wellPanel(
-                                      # must add up to 12 all columns
-                                      tags$h4(tags$b("Explore Gene Expression by Metadata")),
-                                      h5("please follow HUGO conventions"),
-                                      textInput(
-                                        "genes.metadata",
-                                        width = '100%',
-                                        label = NULL,
-                                        value = "APOE, COL1A1, FBLN1, FBLN2",
-                                        placeholder = "try: TREM2, CYBB"
-                                      ),
-
-                                      # choose the type of output graph
-                                      pickerInput("selectaplot.metadata",
-                                                  label = "Select Plot Type",
-                                                  choices = list(
-                                                    "Dot Plot (up to 9 genes)" = "Dot",
-                                                    "Ridge Plot (single gene)" = "Ridge"),
-                                                  width = '80%',
-                                                  selected = "Dot Plot"),
-
-                                      pickerInput(
-                                        inputId = "selectlabelmethodforgenequery.metadata",
-                                        label = "Select Metadata Column in this Dataset",
-                                        choices = list (
-                                          # this is a reactive choice list based on whats available in the dataset
-                                          "Waiting for User to Load Data"
-                                        ),
-                                        # selected = "nCounts",
-                                        width = '80%' #neeed to fit this
-                                      ),
-
-                                      # 'go' button
-                                      actionBttn(
-                                        inputId = "run.metadata",
-                                        label = "Start Query",
-                                        style = "unite",
-                                        color = "success",
-                                        block = T)
-
-                                    )
-
-                                  ),
-                                ),
-
-
-                                #spacer
-                                br(),
-                                
-                                fluidRow( # top split rows
-                                  column(width = 6, align = "center", 
-                                         plotOutput("Dot.metadata", width = "auto", height = '500px'),
-                                         br(),
-                                         downloadButton("download.Dot.metadata", "Download This Plot", width = '100%')
-                                  ), # column 
-                                  column(width = 6, align = "center", 
-                                         plotOutput("dimplot.meta.left", width = "auto", height = '500px'),
-                                         br(),
-                                         downloadButton("download.dimplot.meta.left", "Download This Plot", width = '100%')
-                                  ), # column 
-                               
-                                ), # fluidrow
-
-
-                      )# MAIN PANEL CLOSURE
-             ), # TAB PANEL CLOSURE
-
-
-
-
+             # #### UI: MetaData   ----
+             # tabPanel(title = "Metadata Explorer", value = "metadatapanel",
+             #          mainPanel(width = 12, # 12/12 is full panel
+             #                    fluidRow(
+             #                      ## panel for description
+             #                      column(width = 12,
+             #                        wellPanel(includeMarkdown("descriptionfiles/helptext_metadata.Rmd"))
+             #                      ), # column
+             #                      
+             #                      column(width = 12,
+             #                             wellPanel(
+             #                               tags$h4(tags$b("Explore All Metadata Columns")),
+             #                               fluidRow(
+             #                                 column(width = 6,
+             #                                        tags$h5(tags$b("View Annotation-Type Metadata"))
+             #                                 ),
+             #                                 column(width = 6,
+             #                                        tags$h5(tags$b("View Statistics-Type Metadata"))
+             #                                   
+             #                                 ),
+             #                               ), # fluidrow (inside)
+             #                               
+             #                             )# well panel
+             #                             ), # column
+             #                      
+             #                      
+             #                      column(width = 5,
+             #                        wellPanel(
+             #                          # must add up to 12 all columns
+             #                          tags$h4(tags$b("Explore Gene Expression by Metadata")),
+             #                          h5("please follow HUGO conventions"),
+             #                          textInput(
+             #                            "genes.metadata",
+             #                            width = '100%',
+             #                            label = NULL,
+             #                            value = "APOE, COL1A1, FBLN1, FBLN2",
+             #                            placeholder = "try: TREM2, CYBB"
+             #                          ),
+             # 
+             #                          # choose the type of output graph
+             #                          pickerInput("selectaplot.metadata",
+             #                                      label = "Select Plot Type",
+             #                                      choices = list(
+             #                                        "Dot Plot (up to 9 genes)" = "Dot",
+             #                                        "Ridge Plot (single gene)" = "Ridge"),
+             #                                      width = '80%',
+             #                                      selected = "Dot Plot"),
+             # 
+             #                          pickerInput(
+             #                            inputId = "selectlabelmethodforgenequery.metadata",
+             #                            label = "Select Metadata Column in this Dataset",
+             #                            choices = list (
+             #                              # this is a reactive choice list based on whats available in the dataset
+             #                              "Waiting for User to Load Data"
+             #                            ),
+             #                            # selected = "nCounts",
+             #                            width = '80%' #neeed to fit this
+             #                          ),
+             # 
+             #                          # 'go' button
+             #                          actionBttn(
+             #                            inputId = "run.metadata",
+             #                            label = "Start Query",
+             #                            style = "unite",
+             #                            color = "success",
+             #                            block = T)
+             # 
+             #                        )
+             # 
+             #                      ),
+             #                    ),
+             # 
+             # 
+             #                    #spacer
+             #                    br(),
+             #                    
+             #                    fluidRow( # top split rows
+             #                      column(width = 6, align = "center", 
+             #                             plotOutput("Dot.metadata", width = "auto", height = '500px'),
+             #                             br(),
+             #                             downloadButton("download.Dot.metadata", "Download This Plot", width = '100%')
+             #                      ), # column 
+             #                      column(width = 6, align = "center", 
+             #                             plotOutput("dimplot.meta.left", width = "auto", height = '500px'),
+             #                             br(),
+             #                             downloadButton("download.dimplot.meta.left", "Download This Plot", width = '100%')
+             #                      ), # column 
+             #                   
+             #                    ), # fluidrow
+             # 
+             # 
+             #          )# MAIN PANEL CLOSURE
+             # ), # TAB PANEL CLOSURE
+             # 
+             # 
+             # 
+             # 
              #### UI: RNATraject ----
              tabPanel("Trajectory",
                       mainPanel(width = 12, # 12/12 is full panel,
@@ -750,9 +750,7 @@ server <- function(input, output, session) {
   #### SER: Genes ####
   # UMAP 
   observeEvent(input$runcode, {
-    validate(
-      need(input$runcode, "Please Click Run When Ready")
-    )
+
     output$umaps <- 
       renderPlot(
         DimPlot(
