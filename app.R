@@ -859,6 +859,8 @@ server <- function(input, output, session) {
       user_genes <- str_split(input$genes, ", ")[[1]]
       validate(need(input$selectaplot=="Feature", message=FALSE))
       FeaturePlot(plaqviewobj, 
+                  order = T,
+                  pt.size = 1,
                   features = user_genes[1:4]) + # a trick to sep long string input
         theme(legend.position="bottom", legend.box = "vertical") + # group.by is important, use this to call metadata separation
         theme(plot.title = element_text(hjust = 1)) +
@@ -875,6 +877,8 @@ server <- function(input, output, session) {
         user_genes <- str_split(input$genes, ", ")[[1]]
         validate(need(input$selectaplot=="Feature", message=FALSE))
         temp <- FeaturePlot(plaqviewobj, 
+                            order = T,
+                            pt.size = 1,
                             features = user_genes[1:4]) + # a trick to sep long string input
           theme(legend.position="bottom", legend.box = "vertical") + # group.by is important, use this to call metadata separation
           theme(plot.title = element_text(hjust = 1)) +
@@ -1230,6 +1234,8 @@ server <- function(input, output, session) {
       user_genes <- str_split(input$genes, ", ")[[1]]
       validate(need(input$selectaplot=="Feature", message=FALSE))
       FeaturePlot(plaqviewobj, 
+                  order = T,
+                  pt.size = 1,
                   features = user_genes[1:4]) + # a trick to sep long string input
         theme(legend.position="bottom", legend.box = "vertical") + # group.by is important, use this to call metadata separation
         theme(plot.title = element_text(hjust = 1)) +
@@ -1415,7 +1421,6 @@ server <- function(input, output, session) {
     
     subsetted <- plaqviewobj.cds[,cds_subsetIDs]
     
-    
     subsetted <- preprocess_cds(subsetted, num_dim = 25) # we used 30 in earlier seurat scripts
     
     
@@ -1569,6 +1574,8 @@ server <- function(input, output, session) {
         pdf(file, paper = "default") # paper = defult is a4 size
         
         temp <- FeaturePlot(plaqviewobj,
+                            order = T,
+                            pt.size = 1,
                             features = user_genes, label = T, repel = T) + # a trick to sep long string input
           theme(legend.position="bottom", legend.box = "vertical") + # group.by is important, use this to call metadata separation
           theme(plot.title = element_text(hjust = 1)) +
