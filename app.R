@@ -66,6 +66,14 @@ library(monocle3)
 library(ggpubr)
 library(gtools)
 library(CIPR)
+library(reactlog)
+library(future)
+
+# tell shiny to log all reactivity
+reactlog_enable()
+
+# tell shiny to try to paralle compute
+future::plan("multisession")
 
 #### UI ####
 # Define UI for application that draws a histogram
@@ -78,7 +86,7 @@ ui <- fluidPage(
   waiter_show_on_load(html = spin_rotate()),
   useShinyjs(),
   div(DT::dataTableOutput("table"), style = "font-size: 75%; width: 75%"), # DT font sinzes
-
+  
   # Pages ####
   navbarPage("PlaqView", id = "inTabset",
              
@@ -122,37 +130,37 @@ ui <- fluidPage(
                                                     ),
                                                     
                                              ),
-                                             
-                                             
+                                           
+                                                    
                                              
                                            ),
-                                         )
+                                           )
                                   ),
                                   column(width = 7,
                                          wellPanel(
                                            includeMarkdown("descriptionfiles/helptext_welcome.Rmd"),
                                            img(src = "abstract.png", width = '100%'),
                                          )
-                                  ), # column
+                                         ), # column
                                   
-                                  
+                                 
                                   
                                 ) # fluid row 
-                      ), # mainpanel
+                                ), # mainpanel
                       mainPanel(width = 12,
                                 wellPanel(
                                   h3("Click to Select a Single-Cell Dataset"),
                                   br(),
                                   DT::dataTableOutput('availabledatasettable'),
-                                  br(),
-                                  
-                                ),
-                                
+                                          br(),
+
+                                          ),
+                              
                       )
              ),
              
              #### UI: Genes   ----
-             tabPanel(title = "Gene Lookup", value = "gene-panel",
+             tabPanel(title = "Gene Lookup", value = "panel1",
                       mainPanel(width = 12, # 12/12 is full panel
                                 fluidRow(## panel for gene input
                                   column(
@@ -162,14 +170,14 @@ ui <- fluidPage(
                                       textInput(
                                         "genes",
                                         width = '100%',
-                                        h4("Enter Gene Names Below", h5("please follow HUGO conventions")),
+                                        h3("Query Gene Expression", h5("please follow HUGO conventions")),
                                         value = "APOE, COL1A1, FBLN1, FBLN2",
                                         placeholder = "try: TREM2, CYBB"
                                       ),
                                       
                                       # choose the type of output graph 
-                                      h5("Select Plot Type"),
                                       pickerInput("selectaplot",
+                                                  label = "Select Plot Type", 
                                                   choices = list(
                                                     "Dot Plot (up to 9 genes)" = "Dot",
                                                     "Feature Plot (up to 4 genes)" = "Feature",
@@ -177,9 +185,9 @@ ui <- fluidPage(
                                                   width = '80%',
                                                   selected = "Dot Plot"),
                                       
-                                      h5("Select Cell Annotation Method"),
                                       pickerInput(
                                         inputId = "selectlabelmethodforgenequery",
+                                        label = "Select Labeling Method", 
                                         choices = list (
                                           "Seurat_Clusters",
                                           # "scCATCH_Blood",
@@ -200,8 +208,8 @@ ui <- fluidPage(
                                         style = "unite",
                                         color = "success",
                                         block = T)
-                                      
-                                    )
+                                    
+                                      )
                                     
                                   ),
                                   
@@ -274,13 +282,10 @@ ui <- fluidPage(
              
              
              #### UI: Labels/CIPR  ----  
-             tabPanel("Cell Labeling", "labels-panel",
+             tabPanel("Cell Labeling/CIPR",
                       mainPanel(width = 12, # 12/12 is full panel,
                                 wellPanel(includeMarkdown("descriptionfiles/helptext_comparelabels.Rmd")),
-                                
-                                wellPanel( 
-                                  tags$h4(tags$b("Compare Annotation Methods")),
-                                  h5("Use this block to compare Plaqview-provided annotations and Author-provided labels (when available)"),
+                                wellPanel(
                                   fluidRow(
                                     column(width = 6, 
                                            
@@ -296,7 +301,7 @@ ui <- fluidPage(
                                                          "Seurat_with_Tabula_Ref"  
                                                        ), 
                                                        selected = "Seurat_with_Tabula_Ref"),
-                                           
+                                                       
                                            plotOutput("leftlabelplot",
                                                       height = '500px')),
                                     
@@ -313,14 +318,14 @@ ui <- fluidPage(
                                                          "Seurat_with_Tabula_Ref"  
                                                        ), 
                                                        selected = "SingleR_calls"),
-                                           
+                                                       
                                            plotOutput("rightlabelplot",
                                                       height = '500px')
                                     ),# column
                                     
                                     br(), 
                                     
-                                    column(width = 6, h4("Download Differential Expression by Cluster"),
+                                    column(width = 6, h4("Differential Expression by Cluster"),
                                            downloadButton("diffbyseurat", "Numbered Only (Unlabeled)"),
                                            downloadButton("diffbyauthor", "Author Supplied (Manual)"),
                                            
@@ -328,7 +333,7 @@ ui <- fluidPage(
                                            helpText("This will download a .csv of differentially expressed genes by cluster")
                                     ), # column
                                     
-                                    column(width = 6, h4("Download Differential Expression by Cell Type"),
+                                    column(width = 6, h4("Differential Expression by Cell Type"),
                                            downloadButton("diffbysingleR", "SingleR"),
                                            downloadButton("diffbyTS", "Seurat + Tabula sapiens"),
                                            
@@ -341,8 +346,8 @@ ui <- fluidPage(
                                   fluidRow(
                                     # CIPR reference selectors
                                     column(width = 5, 
-                                           tags$h4(tags$b("CIPR: Cluster Identity Predictor")),
-                                           h5("Use this block to compare our annotation against CIPR references."),
+                                           tags$h3(tags$b("CIPR: Cluster Identity Predictor")),
+                                           h5("Use this module to compare our annotation against CIPR references."),
                                            
                                            h4("Instructions:"),
                                            tags$ol(
@@ -365,12 +370,12 @@ ui <- fluidPage(
                                            pickerInput("CIPRreference", 
                                                        label = "Select CIPR Reference", 
                                                        choices = list("ImmGen (mouse)" = "immgen",
-                                                                      "Presorted RNAseq (mouse)" = "mmrnaseq",
-                                                                      "Blueprint-Encode (human)" = "blueprint",
-                                                                      "Primary Cell Atlas (human)" = "hpca",
-                                                                      "DICE (human)" = "dice",
-                                                                      "Hematopoietic diff (human)" = "hema",
-                                                                      "Presorted RNAseq (human)" = "hsrnaseq"), 
+                                                                   "Presorted RNAseq (mouse)" = "mmrnaseq",
+                                                                   "Blueprint-Encode (human)" = "blueprint",
+                                                                   "Primary Cell Atlas (human)" = "hpca",
+                                                                   "DICE (human)" = "dice",
+                                                                   "Hematopoietic diff (human)" = "hema",
+                                                                   "Presorted RNAseq (human)" = "hsrnaseq"), 
                                                        selected = "Primary Cell Atlas (human)"), 
                                            
                                            # pickerInput("CIPRmethod", 
@@ -384,7 +389,7 @@ ui <- fluidPage(
                                            #              selected = "logFC Dot Product"), 
                                            br(),
                                            actionBttn(inputId = "runCIPR", label="Run CIPR", style = "unite", size = 'lg', color = "success"),
-                                           
+                                       
                                            
                                     ), # column
                                     
@@ -401,7 +406,7 @@ ui <- fluidPage(
                                              tags$li("Description: Additional details about this cell type."),
                                              tags$li("Identity.Score: Identity score for the given reference cell type calculated via logFC dot product or correlation methods (see CIPR documents for more details)."),
                                              tags$li("Percent.Pos.Cor.: The percentage of the differentially expressed genes in PlaqView clusters is also differentially expressed in a similar fashion in the reference cell subsets (e.g. both upregulated and downregulated)."),
-                                             
+
                                            ),
                                     ), # column
                                     
@@ -416,7 +421,7 @@ ui <- fluidPage(
                                            br(),
                                            DT::dataTableOutput("brushedtop5"),
                                            br(), br(), 
-                                           
+                                        
                                            
                                     ),
                                   ) # fluid row
@@ -427,155 +432,144 @@ ui <- fluidPage(
                       
              ), # tabPanel
              #### UI: MetaData   ----
-             tabPanel(title = "Metadata Explorer", value = "metadata-panel",
+             tabPanel(title = "Metadata Explorer", value = "panelx",
                       mainPanel(width = 12, # 12/12 is full panel
                                 fluidRow(
                                   ## panel for description
                                   column(width = 12,
-                                         wellPanel(includeMarkdown("descriptionfiles/helptext_metadata.Rmd"))
+                                    wellPanel(includeMarkdown("descriptionfiles/helptext_metadata.Rmd"))
                                   ), # column
                                   
                                   column(width = 12,
                                          wellPanel(
-                                           tags$h4(tags$b("Explore All Metadata Columns")),
-                                           fluidRow(
-                                             column(width = 6,
-                                                    tags$h5(tags$b("View Annotation-Type Metadata"))
-                                             ),
-                                             column(width = 6,
-                                                    tags$h5(tags$b("View Statistics-Type Metadata"))
-                                                    
-                                             ),
-                                           ), # fluidrow (inside)
+                                           h3("Explore All Metadata Columns")
                                            
                                          )# well panel
-                                  ), # column
+                                         ), # column
                                   
                                   
                                   column(width = 5,
-                                         wellPanel(
-                                           # must add up to 12 all columns
-                                           tags$h4(tags$b("Explore Gene Expression by Metadata")),
-                                           h5("please follow HUGO conventions"),
-                                           textInput(
-                                             "genes.metadata",
-                                             width = '100%',
-                                             label = NULL,
-                                             value = "APOE, COL1A1, FBLN1, FBLN2",
-                                             placeholder = "try: TREM2, CYBB"
-                                           ),
-                                           
-                                           # choose the type of output graph
-                                           pickerInput("selectaplot.metadata",
-                                                       label = "Select Plot Type",
-                                                       choices = list(
-                                                         "Dot Plot (up to 9 genes)" = "Dot",
-                                                         "Ridge Plot (single gene)" = "Ridge"),
-                                                       width = '80%',
-                                                       selected = "Dot Plot"),
-                                           
-                                           pickerInput(
-                                             inputId = "selectlabelmethodforgenequery.metadata",
-                                             label = "Select Metadata Column in this Dataset",
-                                             choices = list (
-                                               # this is a reactive choice list based on whats available in the dataset
-                                               "Waiting for User to Load Data"
-                                             ),
-                                             # selected = "nCounts",
-                                             width = '80%' #neeed to fit this
-                                           ),
-                                           
-                                           # 'go' button
-                                           actionBttn(
-                                             inputId = "run.metadata",
-                                             label = "Start Query",
-                                             style = "unite",
-                                             color = "success",
-                                             block = T)
-                                           
-                                         )
-                                         
+                                    wellPanel(
+                                      # must add up to 12 all columns
+                                      textInput(
+                                        "genes.metadata",
+                                        width = '100%',
+                                        h3("Query Gene Expression Split by Metadata", h5("please follow HUGO conventions")),
+                                        value = "APOE, COL1A1, FBLN1, FBLN2",
+                                        placeholder = "try: TREM2, CYBB"
+                                      ),
+
+                                      # choose the type of output graph
+                                      pickerInput("selectaplot.metadata",
+                                                  label = "Select Plot Type",
+                                                  choices = list(
+                                                    "Dot Plot (up to 9 genes)" = "Dot",
+                                                    "Ridge Plot (single gene)" = "Ridge"),
+                                                  width = '80%',
+                                                  selected = "Dot Plot"),
+
+                                      pickerInput(
+                                        inputId = "selectlabelmethodforgenequery.metadata",
+                                        label = "Select Metadata Column in this Dataset",
+                                        choices = list (
+                                          # this is a reactive choice list based on whats available in the dataset
+                                          "Waiting for User to Load Data"
+                                        ),
+                                        # selected = "nCounts",
+                                        width = '80%' #neeed to fit this
+                                      ),
+
+                                      # 'go' button
+                                      actionBttn(
+                                        inputId = "run.metadata",
+                                        label = "Start Query",
+                                        style = "unite",
+                                        color = "success",
+                                        block = T)
+
+                                    )
+
                                   ),
                                 ),
-                                
-                                
+
+
                                 #spacer
                                 br(),
                                 
                                 fluidRow( # top split rows
-                                  column(width = 6, align = "center",
+                                  column(width = 6, align = "center", 
                                          plotOutput("Dot.metadata", width = "auto", height = '500px'),
                                          br(),
                                          downloadButton("download.Dot.metadata", "Download This Plot", width = '100%')
-                                  ), # column
-                                  column(width = 6, align = "center",
-                                         plotOutput("dimplot.meta.left", width = "auto", height = '500px'),
+                                  ), # column 
+                                  column(width = 6, align = "center", 
+                                         plotOutput("dimplot.meta.left", width = "auto", height = '750px'),
                                          br(),
                                          downloadButton("download.dimplot.meta.left", "Download This Plot", width = '100%')
-                                  ), # column
-                                  
+                                  ), # column 
+                               
                                 ), # fluidrow
-                                
-                                
+
+
                       )# MAIN PANEL CLOSURE
              ), # TAB PANEL CLOSURE
-             
-             
-             
-             
+
+
+
+
              #### UI: RNATraject ----
-             tabPanel("Trajectory", "RNA-panel",
+             tabPanel("Trajectory",
                       mainPanel(width = 12, # 12/12 is full panel,
                                 ### top panel
                                 wellPanel(
                                   fluidRow(
-                                    column(width = 6,
-                                           includeMarkdown("descriptionfiles/helptext_comparetrajectories.Rmd"),
-                                           # choose button
-                                           actionBttn("choose_toggle", "Select", style = "unite", color = "primary", block = F, size = "sm"),
-                                           # clear button
-                                           (actionBttn("reset", "Clear", style = "unite", color = "primary", block = F, size = "sm")),
-                                           # recal button
-                                           (actionBttn("redomonocle3", "Calculate", style = "unite", color = "success", block = F, size = "sm")),
-                                           h4("Instructions:"),
-                                           tags$ol(
-                                             tags$li("Highlight points by clicking and dragging."),
-                                             tags$li("Click the 'Select' button."), # change server code to toggle
-                                             tags$li("Repeat until all of the desired cells are black."),
-                                             tags$li("Click 'Calculate'.")
+                                  column(width = 6,
+                                         includeMarkdown("descriptionfiles/helptext_comparetrajectories.Rmd"),
+                                         # choose button
+                                         actionBttn("choose_toggle", "Select", style = "unite", color = "primary", block = F, size = "sm"),
+                                         # clear button
+                                         (actionBttn("reset", "Clear", style = "unite", color = "primary", block = F, size = "sm")),
+                                         # recal button
+                                         (actionBttn("redomonocle3", "Calculate", style = "unite", color = "success", block = F, size = "sm")),
+                                         h4("Instructions:"),
+                                         tags$ol(
+                                           tags$li("Highlight points by clicking and dragging."),
+                                           tags$li("Click the 'Select' button."), # change server code to toggle
+                                           tags$li("Repeat until all of the desired cells are black."),
+                                           tags$li("Click 'Calculate'.")
+                                                ),
+                                         h4("Details:"),
+                                         tags$ul(
+                                           tags$li("To start over, click 'Clear'"),
+                                           tags$li(paste("You can also choose/unchoose specific cells",
+                                                         "by clicking on them directly.")),
+                                           tags$li(paste("You can un-select a cluster of cells",
+                                                         "by clicking 'Choose' again.")),
                                            ),
-                                           h4("Details:"),
-                                           tags$ul(
-                                             tags$li("To start over, click 'Clear'"),
-                                             tags$li(paste("You can also choose/unchoose specific cells",
-                                                           "by clicking on them directly.")),
-                                             tags$li(paste("You can un-select a cluster of cells",
-                                                           "by clicking 'Choose' again.")),
-                                           ),
-                                           h5("Calculation may take up to 10mins. Results will appear below."),
-                                           
-                                    ), # column
-                                    column(width = 6, 
-                                           plotOutput("plot1", click = "plot1_click", 
-                                                      brush = brushOpts(id = "plot1_brush")),
-                                           br(),
-                                           downloadButton("downloadoriginaltrajectory", 
-                                                          label = "Original Trajectory", 
-                                                          width = '50%'),
-                                           disabled(downloadButton("downloadsubsettrajectory", 
-                                                                   label = "Subset Trajectory",
-                                                                   width = '50%')),
-                                           
-                                    ), # column
-                                  ), # fluidrow
+                                         h5("Calculation may take up to 10mins. Results will appear below."),
+                                         
+                                         ), # column
+                                       column(width = 6, 
+                                              plotOutput("plot1", click = "plot1_click", 
+                                                         brush = brushOpts(id = "plot1_brush")),
+                                              br(),
+                                              downloadButton("downloadoriginaltrajectory", 
+                                                             label = "Original Trajectory", 
+                                                             width = '50%'),
+                                              disabled(downloadButton("downloadsubsettrajectory", 
+                                                                      label = "Subset Trajectory",
+                                                                      width = '50%')),
+
+                                       ), # column
+                                ), # fluidrow
                                 ), # wellpanel
-                                
+             
                                 ### bottom panel
                                 hidden(
                                   wellPanel(id = "subset.trajectory", 
                                             fluidRow(width = 12,
                                                      column(width = 6,
-                                                            h4("Original Full Trajectory"),
+                                                            h4("Original Full Trajecotry"),
                                                             plotOutput("originaltrajectory"),
                                                      ),
                                                      column(width = 6,
@@ -587,63 +581,63 @@ ui <- fluidPage(
                                             ) # fluidrow
                                   ) # wellpanel
                                 ),# hidden
-                                
+                           
                       ), # mainPanel monocle3
                       
              ), # tabPanel
              
-             #### UI: Drugs ----
-             tabPanel("Druggable Genome", "drug-panel",
+             #### UI: Drugs ----  
+             tabPanel("Druggable Genome",
                       mainPanel(width = 12,
                                 fluidRow(width = 12,
-                                         column(width = 6,
-                                                wellPanel(
-                                                  includeMarkdown("descriptionfiles/helptext_druggablegenome.Rmd"),
-                                                  textInput(
-                                                    inputId = "druggeneinput",
-                                                    label = "Gene to Drug",
-                                                    value = "EGFR"
-                                                  ),
+                                           column(width = 6,
+                                                  wellPanel(
+                                                    includeMarkdown("descriptionfiles/helptext_druggablegenome.Rmd"),
+                                                    textInput(
+                                                      inputId = "druggeneinput",
+                                                      label = "Gene to Drug",
+                                                      value = "EGFR"
+                                                    ),
+                                                    
+                                                    actionBttn(
+                                                      inputId = "rundgidb",
+                                                      label = "Start Query",
+                                                      style = "unite",
+                                                      color = "success",
+                                                      block = T,
+                                                      size = "lg"),
+                                                    br(),
+                                                    pickerInput("drugcelllabelmethod", 
+                                                                label = "Change Labeling Method",
+                                                                choices = list (
+                                                                  "Seurat_Clusters",
+                                                                  "Author_Provided",
+                                                                  "SingleR_calls" = "SingleR.calls",
+                                                                  "Seurat_with_Tabula_Ref"  
+                                                                ), 
+                                                                selected = "Seurat_with_Tabula_Ref"),
+                                                    pickerInput(
+                                                      inputId = "dgidbdatabase",
+                                                      label = "Choose Database(s)", 
+                                                      inline = TRUE, 
+                                                      selected = c("COSMIC", "DrugBank", "FDA"), # preselect
+                                                      choices = sourceDatabases(),
+                                                      options = list(
+                                                        `actions-box` = TRUE), 
+                                                      multiple = TRUE, width = "100%"
+                                                    ),
+                                                    
+                                                    helpText("You must restart query if you change database. PubMed ID and citations of interactions are available in full download file."),
+                                                    
+                                                  ), # wellpanel
                                                   
-                                                  actionBttn(
-                                                    inputId = "rundgidb",
-                                                    label = "Start Query",
-                                                    style = "unite",
-                                                    color = "success",
-                                                    block = T,
-                                                    size = "lg"),
-                                                  br(),
-                                                  pickerInput("drugcelllabelmethod",
-                                                              label = "Change Labeling Method",
-                                                              choices = list (
-                                                                "Seurat_Clusters",
-                                                                "Author_Provided",
-                                                                "SingleR_calls" = "SingleR.calls",
-                                                                "Seurat_with_Tabula_Ref"
-                                                              ),
-                                                              selected = "Seurat_with_Tabula_Ref"),
-                                                  pickerInput(
-                                                    inputId = "dgidbdatabase",
-                                                    label = "Choose Database(s)",
-                                                    inline = TRUE,
-                                                    selected = c("COSMIC", "DrugBank", "FDA"), # preselect
-                                                    choices = sourceDatabases(),
-                                                    options = list(
-                                                      `actions-box` = TRUE),
-                                                    multiple = TRUE, width = "100%"
-                                                  ),
-                                                  
-                                                  helpText("You must restart query if you change database. PubMed ID and citations of interactions are available in full download file."),
-                                                  
-                                                ), # wellpanel
-                                                
-                                         ),
-                                         column(width = 6,
+                                           ), 
+                                         column(width = 6, 
                                                 wellPanel(plotOutput("featurefordrugs",
                                                                      height = '500px'),
                                                           br(),
                                                           disabled(
-                                                            downloadButton("downloadfeaturefordrugumap",
+                                                            downloadButton("downloadfeaturefordrugumap", 
                                                                            label = "Download this UMAP")) #disable
                                                 )),
                                          br(),
@@ -651,7 +645,7 @@ ui <- fluidPage(
                                                 DT::dataTableOutput("dgidboutput", width = "100%"),
                                                 br(),
                                                 disabled(downloadButton("downloaddgidboutput", label = "Download Full Gene-Drug Interaction Table")
-                                                ),
+                                                         ),
                                                 
                                          )
                                 )
@@ -659,7 +653,7 @@ ui <- fluidPage(
                       
              ),
              
-             #### END UI #### 
+             
              ### JS to jump to top of page on click ###
              tags$script(" $(document).ready(function () {
                          $('#jumpto1').on('click', function (e) {
@@ -680,6 +674,10 @@ ui <- fluidPage(
 # Define server logic required to draw a histogram
 server <- function(input, output, session) {
   #### SER: Data ####
+  # we used to read data as an excel but migrated to google doc
+  # df <- read_excel("Available_datasets.xlsx")
+  # df$DOI <- paste("<a href=",  df$DOI,">", "Link", "</a>") # this converts to clickable format
+  # # df <- column_to_rownames(df, var = "DataID")
   
   googlesheets4::gs4_deauth() # this tells google sheet to read-only
   df <- googlesheets4::read_sheet("https://docs.google.com/spreadsheets/d/1hLyjPFA2ZRpBLHnTgUnmDz7kimMZWFbz_ZGTml3-hRA/edit#gid=0")
@@ -699,15 +697,15 @@ server <- function(input, output, session) {
                         escape = FALSE) # this escapes rendering html (link) literally and makes link clickable
   
   
-  observeEvent(input$loaddatabutton, {
+   observeEvent(input$loaddatabutton, {
     # create path for loading data
     path <- file.path(paste("data/", df$DataID[input$availabledatasettable_rows_selected], "/",
                             df$DataID[input$availabledatasettable_rows_selected],
                             ".rds", sep=""))
     pathcds <- file.path(paste("data/", df$DataID[input$availabledatasettable_rows_selected], "/",
-                               df$DataID[input$availabledatasettable_rows_selected],
-                               "_cds.rds", sep=""))
-    
+                            df$DataID[input$availabledatasettable_rows_selected],
+                            "_cds.rds", sep=""))
+  
     plaqviewobj <<- readRDS(file = path)
     plaqviewobj.cds <<- readRDS(file = pathcds)
     
@@ -725,10 +723,10 @@ server <- function(input, output, session) {
     output$selecteddatasetID3 <- renderText({
       paste0("Current dataset: ", df$DataID[input$availabledatasettable_rows_selected])
     }) 
-    
-    
+   
+
   })
-  
+
   # server code to show jumpto1
   observeEvent(input$loaddatabutton, {
     
@@ -741,20 +739,13 @@ server <- function(input, output, session) {
                       selected = "panel1") # this is to switch to tab1
     
   })
-  
+
   
   #### SER: Genes ####
   # UMAP 
   observeEvent(input$runcode, {
-    
     output$umaps <- 
-      renderPlot({
-        
-        # throw error if no data is loaded
-        validate(
-          need(exists("plaqviewobj") == TRUE, "Looks like you forgot to load a dataset! Try Again")
-        )
-        
+      renderPlot(
         DimPlot(
           plaqviewobj,
           reduction = "umap",
@@ -772,13 +763,10 @@ server <- function(input, output, session) {
           theme(plot.title = element_text(hjust =  0.5)) +
           guides(color = guide_legend(nrow = 5)
           )
-      }
-      
-      
       ) # closes renderPlot
   })
   observeEvent(input$runcode,{ 
-    
+
     
     #### NOMENCLATURE UPDATE ####
     if(df$Species[input$availabledatasettable_rows_selected] == "Human"){
@@ -800,14 +788,8 @@ server <- function(input, output, session) {
     content = function(file) {
       pdf(file, paper = "default") # paper = defult is a4 size
       user_genes <<- str_split(input$genes, ", ")[[1]]
-      
+
       validate(need(input$selectaplot=="Dot", message=FALSE))
-      
-      # throw error if no data is loaded
-      validate(
-        need(exists("plaqviewobj") == TRUE, "Looks like you forgot to load a dataset! Try Again")
-      )
-      
       temp <- DimPlot(
         plaqviewobj,
         reduction = "umap",
@@ -823,7 +805,6 @@ server <- function(input, output, session) {
         ggtitle("UMAP by Cell Type") +
         theme(plot.title = element_text(hjust =  0.5)) +
         guides(color = guide_legend(nrow = 5))
-    
       
       plot(temp) #this is all you need
       
@@ -840,26 +821,13 @@ server <- function(input, output, session) {
       # parse string input 
       user_genes <- str_split(input$genes, ", ")[[1]]
       validate(need(input$selectaplot=="Dot", message=FALSE))
-      
-      # throw error if no data is loaded
-      validate(
-        need(exists("plaqviewobj") == TRUE, "Looks like you forgot to load a dataset! Try Again")
-      )
-      
-      
-      temp <- DotPlot(plaqviewobj, 
+      DotPlot(plaqviewobj, 
               group.by = input$selectlabelmethodforgenequery,
               features = user_genes) + # a trick to sep long string input
         ggtitle("Expression Dot Plot") +
         theme(plot.title = element_text(hjust = 1)) +
         theme(plot.title = element_text(hjust = 0.5)) +
         theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1))
-      
-      validate(
-        need(exists("temp") == TRUE, "Looks like some data is missing for this dataset! Try Again with another parameter.")
-      )
-      
-      plot(temp)
     })
     
     # this is for the download
@@ -889,16 +857,7 @@ server <- function(input, output, session) {
     parsed.genes <- str_split(input$genes, ", ")[[1]]
     output$Feature <- renderPlot({
       user_genes <- str_split(input$genes, ", ")[[1]]
-      
-      
       validate(need(input$selectaplot=="Feature", message=FALSE))
-      
-      # throw error if no data is loaded
-      validate(
-        need(exists("plaqviewobj") == TRUE, "Looks like you forgot to load a dataset! Try Again")
-      )
-      
-      
       FeaturePlot(plaqviewobj, 
                   features = user_genes[1:4]) + # a trick to sep long string input
         theme(legend.position="bottom", legend.box = "vertical") + # group.by is important, use this to call metadata separation
@@ -998,30 +957,30 @@ server <- function(input, output, session) {
     
     ### GSEA #####
     
-    parsed.genes <- str_split(input$genes, ", ")[[1]]
-    enriched <- enrichr(genes = parsed.genes, 
-                        database = enrichRdb) # this queries all of them
-    cleanedenrichedtable <- select(enriched[[input$selectedenrichRdb]], -Old.Adjusted.P.value, -Old.P.value,)
-    cleanedenrichedtable <- top_n(cleanedenrichedtable, 100) # top 100 will be rendered
-    
-    #select columns to display
-    cleanedenrichedtable <- cleanedenrichedtable %>% select(Term, Overlap, Adjusted.P.value, Combined.Score, Genes)
-    
-    # force as.numeric to remove a bug in DT pkg
-    #cleanedenrichedtable$Adjusted.P.value <- as.numeric(cleanedenrichedtable$Adjusted.P.value)
-    #cleanedenrichedtable$Adjusted.P.value <- as.numeric(cleanedenrichedtable$Combined.Score)
-    
-    output$enrichtable <- DT::renderDataTable(cleanedenrichedtable, server = F)
-    
-    # Downloadable csv of selected dataset
-    output$downloadenrichRdata <- downloadHandler(
-      filename = function() {
-        paste(input$genes, "_pathwayenrichment.csv", sep = "")
-      },
-      content = function(file) {
-        write.csv(enriched[[input$selectedenrichRdb]], file, row.names = FALSE)
-      } 
-    )# close downloadhandler
+      parsed.genes <- str_split(input$genes, ", ")[[1]]
+      enriched <- enrichr(genes = parsed.genes, 
+                          database = enrichRdb) # this queries all of them
+      cleanedenrichedtable <- select(enriched[[input$selectedenrichRdb]], -Old.Adjusted.P.value, -Old.P.value,)
+      cleanedenrichedtable <- top_n(cleanedenrichedtable, 100) # top 100 will be rendered
+      
+      #select columns to display
+      cleanedenrichedtable <- cleanedenrichedtable %>% select(Term, Overlap, Adjusted.P.value, Combined.Score, Genes)
+      
+      # force as.numeric to remove a bug in DT pkg
+      #cleanedenrichedtable$Adjusted.P.value <- as.numeric(cleanedenrichedtable$Adjusted.P.value)
+      #cleanedenrichedtable$Adjusted.P.value <- as.numeric(cleanedenrichedtable$Combined.Score)
+      
+      output$enrichtable <- DT::renderDataTable(cleanedenrichedtable, server = F)
+      
+      # Downloadable csv of selected dataset
+      output$downloadenrichRdata <- downloadHandler(
+        filename = function() {
+          paste(input$genes, "_pathwayenrichment.csv", sep = "")
+        },
+        content = function(file) {
+          write.csv(enriched[[input$selectedenrichRdb]], file, row.names = FALSE)
+        } 
+      )# close downloadhandler
     
     
     
@@ -1031,11 +990,7 @@ server <- function(input, output, session) {
   
   #### SER: Labels ####
   output$leftlabelplot <-
-    renderPlot( {
-      validate(
-        need(exists("plaqviewobj") == TRUE, "Looks like you forgot to load a dataset! Try Again")
-      )
-      
+    renderPlot(
       DimPlot(
         plaqviewobj,
         reduction = "umap",
@@ -1051,16 +1006,10 @@ server <- function(input, output, session) {
         ggtitle("UMAP by Cell Type") +
         theme(plot.title = element_text(hjust =  0.5)) +
         guides(color = guide_legend(nrow = 5))
-    }
-
     )# render plot
   
   output$rightlabelplot <- 
-    renderPlot({
-      validate(
-        need(exists("plaqviewobj") == TRUE, "Looks like you forgot to load a dataset! Try Again")
-      )
-      
+    renderPlot(
       DimPlot(
         plaqviewobj,
         reduction = "umap",
@@ -1076,11 +1025,7 @@ server <- function(input, output, session) {
         ggtitle("UMAP by Cell Type") +
         theme(plot.title = element_text(hjust =  0.5)) +
         guides(color = guide_legend(nrow = 5))
-    }
     )# render plot
-  
-    
-      
   
   ## download diffex
   output$diffbyseurat <- downloadHandler(
@@ -1155,7 +1100,7 @@ server <- function(input, output, session) {
       }) # renderplot
       
       # table for selected groups
-      output$brushedtop5 <- renderDataTable(server = F, {
+      output$brushedtop5 <- renderDataTable({
         validate(
           need(input$brushtop5, "Select data points for detailed information")
         )
@@ -1207,12 +1152,12 @@ server <- function(input, output, session) {
       enable("download_CIPRplot")
     }
     
-    
+      
   }
   ) # obsevent runcipr
   
-  
-  
+
+
   
   #### SER: Metadata ####
   observeEvent(input$loaddatabutton, {
@@ -1265,8 +1210,8 @@ server <- function(input, output, session) {
         user_genes.metadata <- str_split(input$genes.metadata, ", ")[[1]]
         validate(need(input$selectaplot.metadata=="Dot", message=FALSE))
         temp <- DotPlot(plaqviewobj, 
-                        group.by = input$selectlabelmethodforgenequery.metadata,
-                        features = user_genes.meta) + # a trick to sep long string input
+                group.by = input$selectlabelmethodforgenequery.metadata,
+                features = user_genes.meta) + # a trick to sep long string input
           ggtitle("Expression Dot Plot") +
           theme(plot.title = element_text(hjust = 1)) +
           theme(plot.title = element_text(hjust = 0.5)) +
@@ -1369,7 +1314,7 @@ server <- function(input, output, session) {
                  graph_label_size = 1, # size of # in circle
                  group_label_size = 4)
       
-    ) # renderplot
+      ) # renderplot
   
   # this is for the download
   output$downloadoriginaltrajectory<- downloadHandler(
@@ -1378,14 +1323,14 @@ server <- function(input, output, session) {
     },
     content = function(file) {
       pdf(file, paper = "default") # paper = defult is a4 size
-      
+    
       temp <- plot_cells(plaqviewobj.cds,
-                         color_cells_by = "assigned_cell_type",
-                         label_groups_by_cluster=F,
-                         show_trajectory_graph = T,
-                         trajectory_graph_segment_size = 1,
-                         graph_label_size = 1, # size of # in circle
-                         group_label_size = 4)
+                 color_cells_by = "assigned_cell_type",
+                 label_groups_by_cluster=F,
+                 show_trajectory_graph = T,
+                 trajectory_graph_segment_size = 1,
+                 graph_label_size = 1, # size of # in circle
+                 group_label_size = 4)
       plot(temp)
       dev.off()
     }
@@ -1395,7 +1340,7 @@ server <- function(input, output, session) {
   
   #### subset plot
   reduction_method <- "UMAP"
-  
+
   observeEvent(input$loaddatabutton, {
     vals <<- reactiveValues(
       keeprows = rep(FALSE, nrow(colData(plaqviewobj.cds)))
@@ -1408,7 +1353,7 @@ server <- function(input, output, session) {
       keeprows = rep(FALSE, nrow(colData(plaqviewobj.cds)))
     )
     
-    
+
     output$plot1 <<- renderPlot({
       # Plot the kept and excluded points as two separate data sets
       colData(plaqviewobj.cds)$keep <- vals$keeprows
@@ -1465,10 +1410,11 @@ server <- function(input, output, session) {
     genemd <- data.frame(gene_short_name = row.names(expressiondata), 
                          row.names = row.names(expressiondata))
     plaqviewobj.cds_NEW <- new_cell_data_set(expression_data = expressiondata,
-                                             cell_metadata = cellmd,
-                                             gene_metadata = genemd)
+                                         cell_metadata = cellmd,
+                                         gene_metadata = genemd)
     
     subsetted <- plaqviewobj.cds[,cds_subsetIDs]
+    
     
     subsetted <- preprocess_cds(subsetted, num_dim = 25) # we used 30 in earlier seurat scripts
     
@@ -1494,7 +1440,7 @@ server <- function(input, output, session) {
     }
     
     subsetted <<- order_cells(subsetted, root_pr_nodes=get_earliest_principal_node(subsetted),
-                              reduction_method = "UMAP")
+                                   reduction_method = "UMAP")
     # plot subset plots 
     output$subsettrajectory <-
       renderPlot(
@@ -1508,7 +1454,7 @@ server <- function(input, output, session) {
                    cell_size = 1,
                    alpha = 0.7,
                    scale_to_range = T)       ) # renderplot
-  }) # observe event
+    }) # observe event
   
   output$downloadsubsettrajectory<- downloadHandler(
     filename = function() {
@@ -1535,17 +1481,17 @@ server <- function(input, output, session) {
   
   
   #### show subset.trajectory 
-  observeEvent(input$redomonocle3, {
-    shinyjs::showElement(id= "subset.trajectory")
-  })
-  observeEvent(input$redomonocle3, {
-    enable("downloadsubsettrajectory")
-  })
-  
+    observeEvent(input$redomonocle3, {
+      shinyjs::showElement(id= "subset.trajectory")
+    })
+    observeEvent(input$redomonocle3, {
+      enable("downloadsubsettrajectory")
+    })
+
   #### SER: Drugs ####
   observeEvent(input$rundgidb, {
     
-    
+
     #### NOMENCLATURE UPDATE ###
     if(df$Species[input$availabledatasettable_rows_selected] == "Human"){
       corrected <- str_to_upper(input$druggeneinput)
@@ -1564,7 +1510,7 @@ server <- function(input, output, session) {
     
     # set active. identity
     Idents(plaqviewobj) <- input$drugcelllabelmethod
-    
+  
     
     result <- queryDGIdb(updated_druggeneinput,
                          sourceDatabases = input$dgidbdatabase)
@@ -1644,7 +1590,7 @@ server <- function(input, output, session) {
       } 
     )# close downloadhandler
     
-    
+  
   })# observer event
   
   #### SER: About Functions #### 
@@ -1659,9 +1605,10 @@ server <- function(input, output, session) {
   waiter_hide()
   
   
-  
+
   
 } # ends server function
 
 # Run the application 
 shinyApp(ui = ui, server = server)
+
