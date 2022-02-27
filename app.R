@@ -182,7 +182,7 @@ ui <- fluidPage(
                                                     "Dot Plot (up to 9 genes)" = "Dot",
                                                     "Feature Plot (up to 4 genes)" = "Feature",
                                                     "Ridge Plot (single gene)" = "Ridge"),
-                                                  width = '80%',
+                                                  width = '95%',
                                                   selected = "Dot Plot"),
                                       
                                       pickerInput(
@@ -198,7 +198,7 @@ ui <- fluidPage(
                                           "Seurat_with_Tabula_Ref"  
                                         ), 
                                         selected = "Seurat_with_Tabula_Ref",
-                                        width = '80%' #neeed to fit this
+                                        width = '95%' #neeed to fit this
                                       ),
                                       
                                       # 'go' button
@@ -442,7 +442,13 @@ ui <- fluidPage(
                                   
                                   column(width = 12,
                                          wellPanel(
-                                           h3("Explore All Metadata Columns")
+                                           fluidRow(
+                                             column(width = 6,
+                                                    h4("Explore Factor Variables")),
+                                             column(width = 6,
+                                                    h4("Explore Continuous Variables"))
+                                             
+                                           ), # fluidrow
                                            
                                          )# well panel
                                          ), # column
@@ -465,7 +471,7 @@ ui <- fluidPage(
                                                   choices = list(
                                                     "Dot Plot (up to 9 genes)" = "Dot",
                                                     "Ridge Plot (single gene)" = "Ridge"),
-                                                  width = '80%',
+                                                  width = '95%',
                                                   selected = "Dot Plot"),
 
                                       pickerInput(
@@ -476,7 +482,7 @@ ui <- fluidPage(
                                           "Waiting for User to Load Data"
                                         ),
                                         # selected = "nCounts",
-                                        width = '80%' #neeed to fit this
+                                        width = '95%' #neeed to fit this
                                       ),
 
                                       # 'go' button
