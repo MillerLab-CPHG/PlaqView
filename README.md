@@ -2,7 +2,7 @@
 
 Our publication introducing PlaqView has been accepted at Atherosclerosis (link coming soon!)
 
-PlaqView for scATAC-seq is coming Jan 2022!
+PlaqView for scATAC-seq is coming in 2022!
 
 ## About *PlaqView*
 *PlaqView* is a standalone, interactive, and reproducible Shiny and R-based tool to explore atherosclerosis-related single-cell RNA-sequencing data. Our goal is to make these valuable data analytic tools publicly available to non-bioinformaticians. This is an open-sourced tool that is freely available and can be modified for other scRNA-seq data. Our preprint is available [HERE](https://www.biorxiv.org/content/10.1101/2020.10.27.357715v2). 
