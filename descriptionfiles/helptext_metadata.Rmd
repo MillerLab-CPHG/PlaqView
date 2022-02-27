@@ -9,6 +9,8 @@ output: html_document
 
 Use this module to **query specific gene(s) in the context of the raw metadata associated with the original dataset.** Please note: scRNA-seq metadata formatting has no common convention, and PlaqView may not be able to render completely. Furthermore, some datasets may not have sufficient metadata for graphing, and will generate errors.
 
+When available, Factor-Type metadata are generally categories like gender, sex, etc., whereas Continuous-Type metadata are generally quality control (QC) metrics. You can change how the QC metrics are displayed in relation to the Factor-Type metadata.
+
 Acronyms: chondrocytes (CH) common myeloid progenitor (CMP), dendritic cells (DC), endothelial cells (EC), fibroblasts (FB), granulocyte/monocyte progenitors (GMP), Macrophages (Mø), Monocytes (Mono), Natural Killer (NK), stem cells (SC), smooth muscle cells (SMC).
 
 Common Metadata Annotations: nCount/nFeatures- [Seurat's internal metric](https://satijalab.org/seurat/articles/pbmc3k_tutorial.html) for QC control. Prediction.scores- [SingleR's metric](https://www.bioconductor.org/packages/release/bioc/vignettes/SingleR/inst/doc/SingleR.html) for QC. For other abbreviations not listed, please refer to the original publication of the respective dataset for explanations.

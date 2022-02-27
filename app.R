@@ -735,10 +735,16 @@ server <- function(input, output, session) {
   
   output$availabledatasettable <-
     DT::renderDataTable(df, server = F, # server is for speed/loading
-                        selection = list(mode = 'single', selected = c(1)),
+                        selection = list(mode = 'single'),
                         options=list(columnDefs = list(list(visible=FALSE, targets=c(10)))), # this hides the #8 col (datasetID)
                         escape = FALSE) # this escapes rendering html (link) literally and makes link clickable
   
+  disable("loaddatabutton")
+  disable("Cell Labeling/CIPR")
+  
+  observeEvent(input$availabledatasettable_rows_selected,{
+    enable("loaddatabutton")
+  })
   
    observeEvent(input$loaddatabutton, {
     # create path for loading data
