@@ -66,14 +66,14 @@ library(monocle3)
 library(ggpubr)
 library(gtools)
 library(CIPR)
-library(reactlog)
-library(future)
-
-# tell shiny to log all reactivity
-reactlog_enable()
-
-# tell shiny to try to paralle compute
-future::plan("multisession")
+# library(reactlog)
+# library(future)
+# 
+# # tell shiny to log all reactivity
+# reactlog_enable()
+# 
+# # tell shiny to try to paralle compute
+# future::plan("multisession")
 
 #### UI ####
 # Define UI for application that draws a histogram
