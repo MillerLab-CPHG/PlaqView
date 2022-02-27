@@ -69,11 +69,11 @@ library(CIPR)
 library(reactlog)
 library(future)
 
-# tell shiny to log all reactivity
-reactlog_enable()
-
-# tell shiny to try to paralle compute
-future::plan("multisession")
+# # tell shiny to log all reactivity
+# reactlog_enable()
+# 
+# # tell shiny to try to paralle compute
+# future::plan("multisession")
 
 #### UI ####
 # Define UI for application that draws a histogram
@@ -454,69 +454,72 @@ ui <- fluidPage(
                                          ), # column
                                   
                                   
-                                  column(width = 5,
+                                  column(width = 12,
                                     wellPanel(
                                       # must add up to 12 all columns
-                                      textInput(
-                                        "genes.metadata",
-                                        width = '100%',
-                                        h3("Query Gene Expression Split by Metadata", h5("please follow HUGO conventions")),
-                                        value = "APOE, COL1A1, FBLN1, FBLN2",
-                                        placeholder = "try: TREM2, CYBB"
-                                      ),
-
-                                      # choose the type of output graph
-                                      pickerInput("selectaplot.metadata",
-                                                  label = "Select Plot Type",
-                                                  choices = list(
-                                                    "Dot Plot (up to 9 genes)" = "Dot",
-                                                    "Ridge Plot (single gene)" = "Ridge"),
-                                                  width = '95%',
-                                                  selected = "Dot Plot"),
-
-                                      pickerInput(
-                                        inputId = "selectlabelmethodforgenequery.metadata",
-                                        label = "Select Metadata Column in this Dataset",
-                                        choices = list (
-                                          # this is a reactive choice list based on whats available in the dataset
-                                          "Waiting for User to Load Data"
-                                        ),
-                                        # selected = "nCounts",
-                                        width = '95%' #neeed to fit this
-                                      ),
-
-                                      # 'go' button
-                                      actionBttn(
-                                        inputId = "run.metadata",
-                                        label = "Start Query",
-                                        style = "unite",
-                                        color = "success",
-                                        block = T)
-
-                                    )
-
-                                  ),
-                                ),
-
-
-                                #spacer
-                                br(),
-                                
-                                fluidRow( # top split rows
-                                  column(width = 6, align = "center", 
-                                         plotOutput("Dot.metadata", width = "auto", height = '500px'),
-                                         br(),
-                                         downloadButton("download.Dot.metadata", "Download This Plot", width = '100%')
-                                  ), # column 
-                                  column(width = 6, align = "center", 
-                                         plotOutput("dimplot.meta.left", width = "auto", height = '750px'),
-                                         br(),
-                                         downloadButton("download.dimplot.meta.left", "Download This Plot", width = '100%')
-                                  ), # column 
-                               
-                                ), # fluidrow
-
-
+                                      fluidRow(
+                                        column(width = 5,
+                                               textInput(
+                                                 "genes.metadata",
+                                                 width = '100%',
+                                                 h3("Query Gene Expression Split by Metadata", h5("please follow HUGO conventions")),
+                                                 value = "APOE, COL1A1, FBLN1, FBLN2",
+                                                 placeholder = "try: TREM2, CYBB"
+                                               ),
+                                               
+                                               # choose the type of output graph
+                                               pickerInput("selectaplot.metadata",
+                                                           label = "Select Plot Type",
+                                                           choices = list(
+                                                             "Dot Plot (up to 9 genes)" = "Dot",
+                                                             "Ridge Plot (single gene)" = "Ridge"),
+                                                           width = '95%',
+                                                           selected = "Dot Plot"),
+                                               
+                                               pickerInput(
+                                                 inputId = "selectlabelmethodforgenequery.metadata",
+                                                 label = "Select Metadata Column (may be limited depending on dataset)",
+                                                 choices = list (
+                                                   # this is a reactive choice list based on whats available in the dataset
+                                                   "Waiting for User to Load Data"
+                                                 ),
+                                                 # selected = "nCounts",
+                                                 width = '95%' #neeed to fit this
+                                               ),
+                                               
+                                               # 'go' button
+                                               actionBttn(
+                                                 inputId = "run.metadata",
+                                                 label = "Start Query",
+                                                 style = "unite",
+                                                 color = "success",
+                                                 block = T)
+                                        ), # column (5)
+                                        
+                                        column(width = 7, align="center", 
+                                               conditionalPanel('input.selectaplot.metadata=="Ridge"', 
+                                                                plotOutput("Ridge.metadata", width = "auto", height = '500px'),
+                                                                br(),
+                                                                downloadButton("download.Ridge.metadata", "Download Ridge Plot", width = '100%')
+                                               ),
+                                               
+                                               conditionalPanel('input.selectaplot.metadata=="Dot"', 
+                                                                plotOutput("Dot.metadata", width = "auto", height = '500px'),
+                                                                br(),
+                                                                downloadButton("download.Dot.metadata", "Download Dot Plot", width = '100%')
+                                               ), # conditional panels renders only if conditions are met
+                                               
+                                               conditionalPanel('input.selectaplot.metadata=="Feature"', 
+                                                                plotOutput("Feature", width = "auto", height = '500px'),
+                                                                br(),
+                                                                downloadButton("download.Feature.metadata", "Download Feature Plot", width = '100%')
+                                                                
+                                               )
+                                        ), # column
+                                      ) # fluid row
+                                    ) # wellpanel
+                                  ), # column (12)
+                                ), # fluid row
                       )# MAIN PANEL CLOSURE
              ), # TAB PANEL CLOSURE
 
@@ -1180,12 +1183,12 @@ server <- function(input, output, session) {
     plaqview.metadata.numeric.type <<- names(plaqviewobj@meta.data %>% select_if(is.numeric))
     
     updatePickerInput(session, "selectlabelmethodforgenequery.metadata",
-                      label = "Select Metadata",
+                      label = "Select Metadata Column (may be limited depending on dataset)",
                       choices = plaqview.metadata.cf,
                       selected = plaqview.metadata.cf[1])
   })
   
-  #### dot plot ###
+  #### dot plot metadata ####
   observeEvent(input$run.metadata,{ # observe event puts a pause until pushed
     #### NOMENCLATURE UPDATE ###
     if(df$Species[input$availabledatasettable_rows_selected] == "Human"){
@@ -1234,74 +1237,53 @@ server <- function(input, output, session) {
       
     )# close downloadhandler
     
-    #### feature plot ####
-    parsed.genes <- str_split(input$genes, ", ")[[1]]
-    output$Feature <- renderPlot({
-      user_genes <- str_split(input$genes, ", ")[[1]]
-      validate(need(input$selectaplot=="Feature", message=FALSE))
-      FeaturePlot(plaqviewobj, 
-                  order = T,
-                  pt.size = 1,
-                  features = user_genes[1:4]) + # a trick to sep long string input
-        theme(legend.position="bottom", legend.box = "vertical") + # group.by is important, use this to call metadata separation
+
+  }) # observe event closure
+  
+  
+  
+  
+  #### ridge plot metadata ####
+  observeEvent(input$run.metadata,{ # observe event puts a pause until pushed
+    #### NOMENCLATURE UPDATE ###
+    if(df$Species[input$availabledatasettable_rows_selected] == "Human"){
+      corrected <- str_to_upper(input$genes.metadata)
+    } else{
+      corrected <- str_to_title(input$genes.metadata)
+    }
+    
+    updateTextInput(getDefaultReactiveDomain(),
+                    "genes.metadata", value = corrected)
+    
+    # this is for the display
+    output$Ridge.metadata <- renderPlot({
+      # parse string input 
+      user_genes.metadata <- str_split(input$genes.metadata, ", ")[[1]]
+      validate(need(input$selectaplot.metadata=="Ridge", message=FALSE))
+      RidgePlot(plaqviewobj, 
+              group.by = input$selectlabelmethodforgenequery.metadata,
+              features = user_genes.metadata) + # a trick to sep long string input
+        ggtitle("Expression Ridge Plot") +
         theme(plot.title = element_text(hjust = 1)) +
-        theme(plot.title = element_text(hjust =  0.5)) 
-    }) 
-    
-    # this is for the download
-    output$downloadfeatureplot<- downloadHandler(
-      filename = function() {
-        paste("featureplot.pdf", sep = "")
-      },
-      content = function(file) {
-        pdf(file, paper = "default") # paper = defult is a4 size
-        user_genes <- str_split(input$genes, ", ")[[1]]
-        validate(need(input$selectaplot=="Feature", message=FALSE))
-        temp <- FeaturePlot(plaqviewobj, 
-                            features = user_genes[1:4]) + # a trick to sep long string input
-          theme(legend.position="bottom", legend.box = "vertical") + # group.by is important, use this to call metadata separation
-          theme(plot.title = element_text(hjust = 1)) +
-          theme(plot.title = element_text(hjust =  0.5)) 
-        
-        plot(temp) #this is all you need
-        
-        dev.off()
-      }
-      
-    )# close downloadhandler
-    
-    #### ridge plot ####
-    output$Ridge <- renderPlot({
-      user_genes <- str_split(input$genes, ", ")[[1]]
-      validate(need(input$selectaplot=="Ridge", message=FALSE))
-      RidgePlot(plaqviewobj,
-                cols = color_function(length(unique(plaqviewobj@meta.data[[input$selectlabelmethodforgenequery]]))),
-                group.by = input$selectlabelmethodforgenequery,
-                features =  user_genes[1:1]
-      ) + # a trick to sep long string input
-        #theme(legend.position="bottom", legend.box = "vertical") + # group.by is important, use this to call metadata separation
-        theme(plot.title = element_text(hjust =  0.5)) +
-        guides(color = guide_legend(nrow = 3))
-      
+        theme(plot.title = element_text(hjust = 0.5)) +
+        theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1))
     })
     
-    
-    output$downloadridgeplot<- downloadHandler(
+    # this is for the download
+    output$downloaddotplot.metadata<- downloadHandler(
       filename = function() {
-        paste("ridgeplot.pdf", sep = "")
+        paste("ridgeplotmetadata.pdf", sep = "")
       },
       content = function(file) {
-        pdf(file, paper = "default") # paper = defult is a4 size
-        user_genes <- str_split(input$genes, ", ")[[1]]
-        validate(need(input$selectaplot=="Ridge", message=FALSE))
-        temp <- RidgePlot(plaqviewobj,
-                          cols = color_function(length(unique(plaqviewobj@meta.data[[input$selectlabelmethodforgenequery]]))),
-                          group.by = input$selectlabelmethodforgenequery,
-                          features =  user_genes[1:1]
-        ) + # a trick to sep long string input
-          #theme(legend.position="bottom", legend.box = "vertical") + # group.by is important, use this to call metadata separation
-          theme(plot.title = element_text(hjust =  0.5)) +
-          guides(color = guide_legend(nrow = 3))
+        user_genes.metadata <- str_split(input$genes.metadata, ", ")[[1]]
+        validate(need(input$selectaplot.metadata=="Ridge", message=FALSE))
+        temp <- RidgePlot(plaqviewobj, 
+                        group.by = input$selectlabelmethodforgenequery.metadata,
+                        features = user_genes.meta) + # a trick to sep long string input
+          ggtitle("Expression Ridge Plot") +
+          theme(plot.title = element_text(hjust = 1)) +
+          theme(plot.title = element_text(hjust = 0.5)) +
+          theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1))
         
         plot(temp) #this is all you need
         
@@ -1310,7 +1292,64 @@ server <- function(input, output, session) {
       
     )# close downloadhandler
     
+    
   }) # observe event closure
+  
+  
+  
+  
+  #### feature plot metadata ####
+  observeEvent(input$run.metadata,{ # observe event puts a pause until pushed
+    #### NOMENCLATURE UPDATE ###
+    if(df$Species[input$availabledatasettable_rows_selected] == "Human"){
+      corrected <- str_to_upper(input$genes.metadata)
+    } else{
+      corrected <- str_to_title(input$genes.metadata)
+    }
+    
+    updateTextInput(getDefaultReactiveDomain(),
+                    "genes.metadata", value = corrected)
+    
+    # this is for the display
+    output$Dot.metadata <- renderPlot({
+      # parse string input 
+      user_genes.metadata <- str_split(input$genes.metadata, ", ")[[1]]
+      validate(need(input$selectaplot.metadata=="Dot", message=FALSE))
+      DotPlot(plaqviewobj, 
+              group.by = input$selectlabelmethodforgenequery.metadata,
+              features = user_genes.metadata) + # a trick to sep long string input
+        ggtitle("Expression Dot Plot") +
+        theme(plot.title = element_text(hjust = 1)) +
+        theme(plot.title = element_text(hjust = 0.5)) +
+        theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1))
+    })
+    
+    # this is for the download
+    output$downloaddotplot.metadata<- downloadHandler(
+      filename = function() {
+        paste("dotplotmetadata.pdf", sep = "")
+      },
+      content = function(file) {
+        user_genes.metadata <- str_split(input$genes.metadata, ", ")[[1]]
+        validate(need(input$selectaplot.metadata=="Dot", message=FALSE))
+        temp <- DotPlot(plaqviewobj, 
+                        group.by = input$selectlabelmethodforgenequery.metadata,
+                        features = user_genes.meta) + # a trick to sep long string input
+          ggtitle("Expression Dot Plot") +
+          theme(plot.title = element_text(hjust = 1)) +
+          theme(plot.title = element_text(hjust = 0.5)) +
+          theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1))
+        
+        plot(temp) #this is all you need
+        
+        dev.off()
+      }
+      
+    )# close downloadhandler
+    
+    
+  }) # observe event closure
+  
   
   
   
