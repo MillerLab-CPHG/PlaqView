@@ -720,17 +720,17 @@ server <- function(input, output, session) {
   # df$DOI <- paste("<a href=",  df$DOI,">", "Link", "</a>") # this converts to clickable format
   # # df <- column_to_rownames(df, var = "DataID")
   
-  googlesheets4::gs4_deauth() # this tells google sheet to read-only
-  df <- googlesheets4::read_sheet("https://docs.google.com/spreadsheets/d/1hLyjPFA2ZRpBLHnTgUnmDz7kimMZWFbz_ZGTml3-hRA/edit#gid=0")
+  # googlesheets4::gs4_deauth() # this tells google sheet to read-only
+  # df <- googlesheets4::read_sheet("https://docs.google.com/spreadsheets/d/1hLyjPFA2ZRpBLHnTgUnmDz7kimMZWFbz_ZGTml3-hRA/edit#gid=0")
 
-  
+  df <- read.csv("https://docs.google.com/spreadsheets/d/e/2PACX-1vTF5Gw4Dbshlh3wVB8UAMswUEiOn4NEzXaEp8x73NtbWY3n4oIrWEVNMIwNYyInJM7k70G1lUcr7x9g/pub?output=csv")
   df$DOI <- paste("<a href=",  df$DOI,">", "Link", "</a>") # this converts to clickable format
   
   # subset data rows that are marked 'deployed = Yes"
   df <- filter(df, `Deployed` == "Yes")
   df <- df %>% 
-    select(Authors, Year, Journal, DOI, Species, Tissue, Notes, Population, 'Cell#', 'DataID', `Article Title` ) 
-  df$`Article Title` <- str_to_title(df$`Article Title`) # autocaps
+    select(Authors, Year, Journal, DOI, Species, Tissue, Notes, Population, Cell.Number, 'DataID', `Article.Title` ) 
+  df$`Article.Title` <- str_to_title(df$`Article.Title`) # autocaps
   
   output$availabledatasettable <-
     DT::renderDataTable(df, server = F, # server is for speed/loading
