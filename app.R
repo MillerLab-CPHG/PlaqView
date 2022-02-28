@@ -97,10 +97,10 @@ ui <- fluidPage(
                                   column(width = 5,
                                          wellPanel(
                                            img(src = "logo.png", width = '100%'),
-                                           h4("Instructions:"),
+                                           h3("Instructions:"),
                                            tags$ol(
                                              tags$li("Start by clicking on desired dataset."),
-                                             tags$li("Click the blue 'Load Dataset' button"), # change server code to toggle
+                                             tags$li("Click the blue 'Load Dataset' button. (This button is disabled until you click on a dataset!)"), # change server code to toggle
                                              tags$li("The 'Start Exploring' button will appear when data is loaded."),
                                              tags$li("(Optional) come back to this page to load another dataset.")
                                              
@@ -739,9 +739,8 @@ server <- function(input, output, session) {
                         options=list(columnDefs = list(list(visible=FALSE, targets=c(10)))), # this hides the #8 col (datasetID)
                         escape = FALSE) # this escapes rendering html (link) literally and makes link clickable
   
+  # start the page with load data disabled until dataset is clicked
   disable("loaddatabutton")
-  disable("Cell Labeling/CIPR")
-  
   observeEvent(input$availabledatasettable_rows_selected,{
     enable("loaddatabutton")
   })
