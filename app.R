@@ -78,7 +78,6 @@ library(CIPR)
 #### READ GOOGLE SHEET ####
 googlesheets4::gs4_deauth() # this tells google sheet to read-only
 df <- googlesheets4::read_sheet("https://docs.google.com/spreadsheets/d/1hLyjPFA2ZRpBLHnTgUnmDz7kimMZWFbz_ZGTml3-hRA/edit#gid=0")
-
 # df <- read.csv("https://docs.google.com/spreadsheets/d/e/2PACX-1vTF5Gw4Dbshlh3wVB8UAMswUEiOn4NEzXaEp8x73NtbWY3n4oIrWEVNMIwNYyInJM7k70G1lUcr7x9g/pub?output=csv")
 
 df$DOI <- paste("<a href=",  df$DOI,">", "Link", "</a>") # this converts to clickable format
@@ -97,7 +96,7 @@ ui <- fluidPage(
   theme = shinytheme("flatly"),
   add_busy_bar(color = "#ff9142", height = "100px"), # THIS IS THE BUSY BAR
   use_waiter(), 
-  waiter_show_on_load(html = spin_rotate()),
+  # waiter_show_on_load(html = spin_rotate()),
   useShinyjs(),
   div(DT::dataTableOutput("table"), style = "font-size: 75%; width: 75%"), # DT font sinzes
   
@@ -1342,7 +1341,6 @@ server <- function(input, output, session) {
     
     # this is for the display
     output$Ridge.metadata <- renderPlot({
-      
       # parse string input 
       user_genes.metadata <- str_split(input$genes.metadata, ", ")[[1]]
       validate(need(input$selectaplot_metadata=="Ridge", message=FALSE))
