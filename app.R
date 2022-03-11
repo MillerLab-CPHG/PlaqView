@@ -1630,7 +1630,7 @@ server <- function(input, output, session) {
       # these need to be run to 'flatten' the list-type columns
       fulltable <- fulltable %>% mutate(interactionTypes = map_chr(interactionTypes, toString))
       fulltable <- fulltable %>% mutate(sources = map_chr(sources, toString))
-      fulltable <- fulltable %>% mutate(pmids = map_chr(pmids, toString))
+      fulltable <<- fulltable %>% mutate(pmids = map_chr(pmids, toString))
     }
     
     # plots
