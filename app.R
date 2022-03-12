@@ -728,9 +728,7 @@ ui <- fluidPage(
 # Define server logic required to draw a histogram
 server <- function(input, output, session) {
   #### SER: Data ####
-  
- 
-  
+
   output$availabledatasettable <-
     DT::renderDataTable(df, server = F, # server is for speed/loading
                         selection = list(mode = 'single'),
@@ -742,6 +740,8 @@ server <- function(input, output, session) {
   observeEvent(input$availabledatasettable_rows_selected,{
     enable("loaddatabutton")
   })
+  
+
   
    observeEvent(input$loaddatabutton, {
     # create path for loading data
