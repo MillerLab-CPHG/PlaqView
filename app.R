@@ -98,7 +98,7 @@ ui <- fluidPage(
   use_waiter(), 
   # waiter_show_on_load(html = spin_rotate()),
   useShinyjs(),
-  div(DT::dataTableOutput("table"), style = "font-size: 75%; width: 75%"), # DT font sinzes
+  # div(DT::dataTableOutput("table"), style = "font-size: 75%; width: 75%"), # DT font sinzes
   
   # Pages ####
   navbarPage("PlaqView", id = "inTabset",
