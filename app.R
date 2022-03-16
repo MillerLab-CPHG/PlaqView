@@ -128,10 +128,10 @@ ui <- fluidPage(
                                                       #label = "Select a Dataset", 
                                                       choices = df$DataID,
                                                       choicesOpt = list(
-                                                        subtext = paste(df$Species,
+                                                        subtext = paste(df$Species, ":",
                                                                         df$Cells,
                                                                         "Cells",
-                                                                        sep = ": ")),
+                                                                        sep = "")),
                                                       options = list(
                                                         style = "btn-danger")
                                                     ),
