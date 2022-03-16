@@ -1687,10 +1687,10 @@ server <- function(input, output, session) {
     output$dgidboutput <- DT::renderDataTable(isolatedtable,  server = F)
     output$downloaddgidboutput <- downloadHandler(
       filename = function() {
-        paste("complete_drug-gene_interactions.tsv", sep = "")
+        paste("complete_drug-gene_interactions.csv", sep = "")
       },
       content = function(file) {
-        write_delim(fulltable, file)
+        write.csv(fulltable, file)
       } 
     )# close downloadhandler
     
