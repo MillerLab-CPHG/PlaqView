@@ -128,7 +128,7 @@ ui <- fluidPage(
                                                       #label = "Select a Dataset", 
                                                       choices = df$DataID,
                                                       choicesOpt = list(
-                                                        subtext = paste(df$Species, " : ",
+                                                        subtext = paste(df$Species, ": ",
                                                                         df$Cells,
                                                                         " Cells",
                                                                         sep = "")),
@@ -752,9 +752,12 @@ server <- function(input, output, session) {
                         #     "  $(thead).css('font-size', '0.9em');",
                         #     "}"
                         #   )
-                        # ), 
+                        # ),
                         escape = FALSE) # this escapes rendering html (link) literally and makes link clickable
 
+  # output$availabledatasettable <-
+  #   rhandsontable::rhandsontable(df, readOnly = TRUE)
+  
   # start the page with load data disabled until dataset is clicked
   # disable("loaddatabutton")
   # observeEvent(input$availabledatasettable_rows_selected,{
