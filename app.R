@@ -130,7 +130,7 @@ ui <- fluidPage(
                                                       choicesOpt = list(
                                                         subtext = paste(df$Species,
                                                                         df$Cells,
-                                                                        "Cells"
+                                                                        "Cells",
                                                                         sep = ": ")),
                                                       options = list(
                                                         style = "btn-danger")
