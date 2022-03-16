@@ -85,7 +85,7 @@ df$DOI <- paste("<a href=",  df$DOI,">", "Link", "</a>") # this converts to clic
 # subset data rows that are marked 'deployed = Yes"
 df <- filter(df, `Deployed` == "Yes")
 df <- df %>% 
-  select(Authors, Year, Journal, DOI, Species, Tissue, Notes, Population, Cell.Number, 'DataID', `Article.Title` ) 
+  select('DataID', Year, Journal, DOI, Species, Tissue, Notes, Population, Cells = Cell.Number, `Article.Title` ) 
 df$`Article.Title` <- str_to_title(df$`Article.Title`) # autocaps
 
 #### UI ####
@@ -112,8 +112,8 @@ ui <- fluidPage(
                                            img(src = "logo.png", width = '100%'),
                                            h3("Instructions:"),
                                            tags$ol(
-                                             tags$li("Start by clicking on desired dataset."),
-                                             tags$li("Click the blue 'Load Dataset' button. (This button is disabled until you click on a dataset!)"), # change server code to toggle
+                                             tags$li("Select a dataset from the BLUE drop-down Menu."),
+                                             tags$li("Click the blue 'Load Dataset' button."), # change server code to toggle
                                              tags$li("The 'Start Exploring' button will appear when data is loaded."),
                                              tags$li("(Optional) come back to this page to load another dataset.")
                                              
@@ -122,6 +122,15 @@ ui <- fluidPage(
                                            fluidRow(
                                              column(width = 12,
                                                     # load data button
+                                                    h4("Select a Dataset"),
+                                                    pickerInput(
+                                                      inputId = "dataselector",
+                                                      #label = "Select a Dataset", 
+                                                      choices = df$DataID,
+                                                      options = list(
+                                                        style = "btn-primary")
+                                                    ),
+                                                    
                                                     actionBttn(
                                                       inputId = "loaddatabutton",
                                                       label = "Load Dataset",
@@ -162,11 +171,10 @@ ui <- fluidPage(
                                 ), # mainpanel
                       mainPanel(width = 12,
                                 wellPanel(
-                                  h3("Click to Select a Single-Cell Dataset"),
-                                  br(),
+                                  h4("Details of Single- Cell Dataset and IDs"),
                                   DT::dataTableOutput('availabledatasettable'),
-                                          br(),
-
+                                  br(),
+                                  inlineCSS(list("table" = "font-size: 12px")),
                                           ),
                               
                       )
@@ -732,42 +740,49 @@ server <- function(input, output, session) {
   output$availabledatasettable <-
     DT::renderDataTable(df, server = F, # server is for speed/loading
                         selection = list(mode = 'single'),
-                        options=list(columnDefs = list(list(visible=FALSE, targets=c(10)))), # this hides the #8 col (datasetID)
+                        # options=list(columnDefs = list(list(visible=FALSE, targets=c(10)))), # this hides the #8 col (datasetID)
+                        # options = list(
+                        #   headerCallback = DT::JS(
+                        #     "function(thead) {",
+                        #     "  $(thead).css('font-size', '0.9em');",
+                        #     "}"
+                        #   )
+                        # ), 
                         escape = FALSE) # this escapes rendering html (link) literally and makes link clickable
-  
+
   # start the page with load data disabled until dataset is clicked
-  disable("loaddatabutton")
-  observeEvent(input$availabledatasettable_rows_selected,{
-    enable("loaddatabutton")
-  })
+  # disable("loaddatabutton")
+  # observeEvent(input$availabledatasettable_rows_selected,{
+  #   enable("loaddatabutton")
+  # })
   
 
   
    observeEvent(input$loaddatabutton, {
     # create path for loading data
-    path <- file.path(paste("data/", df$DataID[input$availabledatasettable_rows_selected], "/",
-                            df$DataID[input$availabledatasettable_rows_selected],
+    path <- file.path(paste("data/", input$dataselector, "/",
+                            input$dataselector,
                             ".rds", sep=""))
-    pathcds <- file.path(paste("data/", df$DataID[input$availabledatasettable_rows_selected], "/",
-                            df$DataID[input$availabledatasettable_rows_selected],
+    pathcds <- file.path(paste("data/", input$dataselector, "/",
+                               input$dataselector,
                             "_cds.rds", sep=""))
   
     plaqviewobj <<- readRDS(file = path)
     plaqviewobj.cds <<- readRDS(file = pathcds)
     
     # show which data is read
-    loadeddatasetID <<- paste("Loaded Dataset: ", print(df$DataID[input$availabledatasettable_rows_selected]))
+    loadeddatasetID <<- paste("Dataset Loaded Sucessfully: ", print(input$dataselector))
     output$loadeddatasetID <- renderText(loadeddatasetID)
     
     ## these are just for displaying current data name in other tabs##
     output$selecteddatasetID <- renderText({
-      paste0("Current dataset: ", df$DataID[input$availabledatasettable_rows_selected])
+      paste0("Current dataset: ", input$dataselector)
     }) 
     output$selecteddatasetID2 <- renderText({
-      paste0("Current dataset: ", df$DataID[input$availabledatasettable_rows_selected])
+      paste0("Current dataset: ", input$dataselector)
     }) 
     output$selecteddatasetID3 <- renderText({
-      paste0("Current dataset: ", df$DataID[input$availabledatasettable_rows_selected])
+      paste0("Current dataset: ", input$dataselector)
     }) 
    
 
@@ -812,10 +827,9 @@ server <- function(input, output, session) {
       ) # closes renderPlot
   })
   observeEvent(input$runcode,{ 
-
     
     #### NOMENCLATURE UPDATE ####
-    if(df$Species[input$availabledatasettable_rows_selected] == "Human"){
+    if(df$Species[df$DataID == input$dataselector] == "Human"){
       corrected <- str_to_upper(input$genes)
     } else{
       corrected <- str_to_title(input$genes)
@@ -1081,7 +1095,7 @@ server <- function(input, output, session) {
   output$diffbyseurat <- downloadHandler(
     filename = "differential_markergenes_by_seurat_clusters.csv",
     content = function(file) {
-      file.copy(paste("data/", df$DataID[input$availabledatasettable_rows_selected], "/",
+      file.copy(paste("data/", input$dataselector, "/",
                       "diff_by_seurat.csv", sep = ""), file)
       
     }  )# close downloadhandler
@@ -1090,7 +1104,7 @@ server <- function(input, output, session) {
     filename = "differential_markergenes_by_author_annotated_clusters.csv",
     content = function(file) {
       
-      file.copy(paste("data/", df$DataID[input$availabledatasettable_rows_selected], "/",
+      file.copy(paste("data/", input$dataselector, "/",
                       "diff_by_author.csv", sep = ""), file)
       
     }  )# close downloadhandler
@@ -1098,20 +1112,20 @@ server <- function(input, output, session) {
   output$diffbysingleR <- downloadHandler(
     filename = "differential_markergenes_by_singleR_labels.csv",
     content = function(file) {
-      file.copy(paste("data/", df$DataID[input$availabledatasettable_rows_selected], "/",
+      file.copy(paste("data/", input$dataselector, "/",
                       "diff_by_singleR.csv", sep = ""), file)      
     }  )# close downloadhandler
   
   output$diffbyTS <- downloadHandler(
     filename = "differential_markergenes_by_tabulus_sapien_reference.csv",
     content = function(file) {
-      file.copy(paste("data/", df$DataID[input$availabledatasettable_rows_selected], "/",
+      file.copy(paste("data/", input$dataselector, "/",
                       "diff_by_Seurat_with_Tabula_Ref.csv", sep = ""), file)      
     }  )# close downloadhandler
   
   #### SER: CIPR ####
   observeEvent(input$runCIPR, {
-    pathforCIPR <- file.path(paste("data/", df$DataID[input$availabledatasettable_rows_selected], "/",
+    pathforCIPR <- file.path(paste("data/", input$dataselector, "/",
                                    input$CIPRoriginal, sep=""))
     ciprinput <- tryCatch(read.csv(file = pathforCIPR), error=function(e) NULL)
     
@@ -1174,7 +1188,7 @@ server <- function(input, output, session) {
       
       output$download_top5<- downloadHandler(
         filename = function() {
-          paste(df$DataID[input$availabledatasettable_rows_selected], "_",
+          paste(input$dataselector, "_",
                 input$CIPRoriginal, "_", input$CIPRreference, "_", input$CIPRmethod,
                 "_result_tables.csv", sep = "")
         },
@@ -1186,7 +1200,7 @@ server <- function(input, output, session) {
       
       output$download_CIPRplot<- downloadHandler(
         filename = function() {
-          paste(df$DataID[input$availabledatasettable_rows_selected], "_",
+          paste(input$dataselector, "_",
                 input$CIPRoriginal, "_", input$CIPRreference, "_", input$CIPRmethod,
                 "_CIPRplot.pdf", sep = "")
         },
@@ -1272,7 +1286,7 @@ server <- function(input, output, session) {
   #### dot plot metadata ####
   observeEvent(input$run.metadata,{ # observe event puts a pause until pushed
     #### NOMENCLATURE UPDATE ###
-    if(df$Species[input$availabledatasettable_rows_selected] == "Human"){
+    if(df$Species[df$DataID == input$dataselector] == "Human"){
       corrected <- str_to_upper(input$genes.metadata)
     } else{
       corrected <- str_to_title(input$genes.metadata)
@@ -1330,7 +1344,7 @@ server <- function(input, output, session) {
   #### ridge plot metadata ####
   observeEvent(input$run.metadata,{ # observe event puts a pause until pushed
     #### NOMENCLATURE UPDATE ###
-    if(df$Species[input$availabledatasettable_rows_selected] == "Human"){
+    if(df$Species[df$DataID == input$dataselector] == "Human"){
       corrected <- str_to_upper(input$genes.metadata)
     } else{
       corrected <- str_to_title(input$genes.metadata)
@@ -1403,7 +1417,7 @@ server <- function(input, output, session) {
   # this is for the download
   output$downloadoriginaltrajectory<- downloadHandler(
     filename = function() {
-      paste(df$DataID[input$availabledatasettable_rows_selected], "_original_trajectory.pdf", sep = "")
+      paste(input$dataselector, "_original_trajectory.pdf", sep = "")
     },
     content = function(file) {
       pdf(file, paper = "default") # paper = defult is a4 size
@@ -1541,7 +1555,7 @@ server <- function(input, output, session) {
   
   output$downloadsubsettrajectory<- downloadHandler(
     filename = function() {
-      paste(df$DataID[input$availabledatasettable_rows_selected], "_subset_trajectory.pdf", sep = "")
+      paste(input$dataselector, "_subset_trajectory.pdf", sep = "")
     },
     content = function(file) {
       pdf(file, paper = "default") # paper = defult is a4 size
@@ -1576,7 +1590,7 @@ server <- function(input, output, session) {
     
 
     #### NOMENCLATURE UPDATE ###
-    if(df$Species[input$availabledatasettable_rows_selected] == "Human"){
+    if(df$Species[df$DataID == input$dataselector] == "Human"){
       corrected <- str_to_upper(input$druggeneinput)
     } else{
       corrected <- str_to_title(input$druggeneinput)
@@ -1646,7 +1660,7 @@ server <- function(input, output, session) {
     
     output$downloadfeaturefordrugumap<- downloadHandler(
       filename = function() {
-        paste(df$DataID[input$availabledatasettable_rows_selected], "-querydrug_umap.pdf", sep = "")
+        paste(input$dataselector, "-querydrug_umap.pdf", sep = "")
       },
       content = function(file) {
         pdf(file, paper = "default") # paper = defult is a4 size
