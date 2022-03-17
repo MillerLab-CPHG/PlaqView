@@ -753,13 +753,10 @@ server <- function(input, output, session) {
                         #     "}"
                         #   )
                         # ),
-                        options = list(pageLength = 25),
+                        options = list(pageLength = 20),
                         escape = FALSE) # this escapes rendering html (link) literally and makes link clickable
-
-  # output$availabledatasettable <-
-  #   rhandsontable::rhandsontable(df, readOnly = TRUE)
   
-  # start the page with load data disabled until dataset is clicked
+    # start the page with load data disabled until dataset is clicked
   # disable("loaddatabutton")
   # observeEvent(input$availabledatasettable_rows_selected,{
   #   enable("loaddatabutton")
