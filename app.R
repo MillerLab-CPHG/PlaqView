@@ -1187,7 +1187,7 @@ server <- function(input, output, session) {
       }) # renderplot
       
       # table for selected groups
-      output$brushedtop5 <- renderDataTable({
+      output$brushedtop5 <- renderDataTable(server = F, {
         validate(
           need(input$brushtop5, "Select data points for detailed information")
         )
