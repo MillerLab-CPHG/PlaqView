@@ -143,8 +143,7 @@ ui <- fluidPage(
                                                       color = "primary",
                                                       block = T),
                                                     
-                                                    textOutput("loadeddatasetID"),
-                                                    
+                                                  
                                                     br(),
                                                     # jump to page 1 button
                                                     hidden(
@@ -155,6 +154,8 @@ ui <- fluidPage(
                                                         color = "success",
                                                         block = T)
                                                     ),
+                                                    br(),
+                                                    helpText(textOutput("loadeddatasetID")),
                                                     
                                              ),
                                            
@@ -177,6 +178,9 @@ ui <- fluidPage(
                       mainPanel(width = 12,
                                 wellPanel(
                                   h4("Details of Single- Cell Dataset and IDs"),
+                                  actionButton(inputId = "refreshtable", "Fetch Latest Dataset Details"),
+                                  br(),
+                                  br(),
                                   DT::dataTableOutput('availabledatasettable'),
                                   br(),
                                   inlineCSS(list("table" = "font-size: 12px")),
@@ -226,7 +230,7 @@ ui <- fluidPage(
                                         selected = "Seurat_with_Tabula_Ref",
                                         width = '95%' #neeed to fit this
                                       ),
-                                      
+                                      br(),
                                       # 'go' button
                                       actionBttn(
                                         inputId = "runcode",
@@ -657,48 +661,48 @@ ui <- fluidPage(
              tabPanel("Druggable Genome",
                       mainPanel(width = 12,
                                 fluidRow(width = 12,
-                                           column(width = 6,
-                                                  wellPanel(
-                                                    includeMarkdown("descriptionfiles/helptext_druggablegenome.Rmd"),
-                                                    textInput(
-                                                      inputId = "druggeneinput",
-                                                      label = "Gene to Drug",
-                                                      value = "EGFR"
-                                                    ),
-                                                    
-                                                    actionBttn(
-                                                      inputId = "rundgidb",
-                                                      label = "Start Query",
-                                                      style = "unite",
-                                                      color = "success",
-                                                      block = T,
-                                                      size = "lg"),
-                                                    br(),
-                                                    pickerInput("drugcelllabelmethod", 
-                                                                label = "Change Labeling Method",
-                                                                choices = list (
-                                                                  "Seurat_Clusters",
-                                                                  "Author_Provided",
-                                                                  "SingleR_calls" = "SingleR.calls",
-                                                                  "Seurat_with_Tabula_Ref"  
-                                                                ), 
-                                                                selected = "Seurat_with_Tabula_Ref"),
-                                                    pickerInput(
-                                                      inputId = "dgidbdatabase",
-                                                      label = "Choose Database(s)", 
-                                                      inline = TRUE, 
-                                                      selected = c("COSMIC", "DrugBank", "FDA"), # preselect
-                                                      choices = sourceDatabases(),
-                                                      options = list(
-                                                        `actions-box` = TRUE), 
-                                                      multiple = TRUE, width = "100%"
-                                                    ),
-                                                    
-                                                    helpText("You must restart query if you change database. PubMed ID and citations of interactions are available in full download file."),
-                                                    
-                                                  ), # wellpanel
+                                         column(width = 6,
+                                                wellPanel(
+                                                  includeMarkdown("descriptionfiles/helptext_druggablegenome.Rmd"),
+                                                  textInput(
+                                                    inputId = "druggeneinput",
+                                                    label = "Gene to Drug",
+                                                    value = "EGFR"
+                                                  ),
                                                   
-                                           ), 
+                                                  actionBttn(
+                                                    inputId = "rundgidb",
+                                                    label = "Start Query",
+                                                    style = "unite",
+                                                    color = "success",
+                                                    block = T,
+                                                    size = "lg"),
+                                                  br(),
+                                                  pickerInput("drugcelllabelmethod", 
+                                                              label = "Change Labeling Method",
+                                                              choices = list (
+                                                                "Seurat_Clusters",
+                                                                "Author_Provided",
+                                                                "SingleR_calls" = "SingleR.calls",
+                                                                "Seurat_with_Tabula_Ref"  
+                                                              ), 
+                                                              selected = "Seurat_with_Tabula_Ref"),
+                                                  pickerInput(
+                                                    inputId = "dgidbdatabase",
+                                                    label = "Choose Database(s)", 
+                                                    inline = TRUE, 
+                                                    selected = c("COSMIC", "DrugBank", "FDA"), # preselect
+                                                    choices = sourceDatabases(),
+                                                    options = list(
+                                                      `actions-box` = TRUE), 
+                                                    multiple = TRUE, width = "100%"
+                                                  ),
+                                                  
+                                                  helpText("You must restart query if you change database. PubMed ID and citations of interactions are available in full download file."),
+                                                  
+                                                ), # wellpanel
+                                                
+                                         ), 
                                          column(width = 6, 
                                                 wellPanel(plotOutput("featurefordrugs",
                                                                      height = '500px'),
@@ -711,8 +715,8 @@ ui <- fluidPage(
                                          column(width = 12,
                                                 DT::dataTableOutput("dgidboutput", width = "100%"),
                                                 br(),
-                                                disabled(downloadButton("downloaddgidboutput", label = "Download Full Gene-Drug Interaction Table")
-                                                         ),
+                                                disabled(downloadButton("downloadfulltable", label = "Download Full Gene-Drug Interaction Table")
+                                                ),
                                                 
                                          )
                                 )
@@ -748,12 +752,24 @@ server <- function(input, output, session) {
                         options = list(pageLength = 20),
                         escape = FALSE) # this escapes rendering html (link) literally and makes link clickable
   
+  # second of the same code.. may help resolve datatable not loading error
   output$availabledatasettable <-
     DT::renderDataTable(df, server = F, # server is for speed/loading
                         selection = list(mode = 'single'),
                         # options=list(columnDefs = list(list(visible=FALSE, targets=c(10)))), # this hides the #8 col (datasetID)
                         options = list(pageLength = 20),
                         escape = FALSE) # this escapes rendering html (link) literally and makes link clickable
+  
+  # refresh button
+  observeEvent(input$refreshtable, {
+    output$availabledatasettable <-
+      DT::renderDataTable(df, server = F, # server is for speed/loading
+                          selection = list(mode = 'single'),
+                          # options=list(columnDefs = list(list(visible=FALSE, targets=c(10)))), # this hides the #8 col (datasetID)
+                          options = list(pageLength = 20),
+                          escape = FALSE) # this escapes rendering html (link) literally and makes link clickable
+    
+  })
   
     # start the page with load data disabled until dataset is clicked
   # disable("loaddatabutton")
@@ -1591,112 +1607,120 @@ server <- function(input, output, session) {
     })
 
   #### SER: Drugs ####
-  observeEvent(input$rundgidb, {
-    
-
-    #### NOMENCLATURE UPDATE ###
-    if(df$Species[df$DataID == input$dataselector] == "Human"){
-      corrected <- str_to_upper(input$druggeneinput)
-    } else{
-      corrected <- str_to_title(input$druggeneinput)
-    }
-    
-    updateTextInput(getDefaultReactiveDomain(),
-                    "druggeneinput", # input ID of the textinput
-                    value = corrected) # correct to
-    
-    # updated gene name is now here
-    updated_druggeneinput <- input$druggeneinput
-    
-    druggenes <- str_split(updated_druggeneinput, ", ")[[1]]
-    
-    # set active. identity
-    Idents(plaqviewobj) <- input$drugcelllabelmethod
-  
-    
-    result <- queryDGIdb(updated_druggeneinput,
-                         sourceDatabases = input$dgidbdatabase)
-    fulltable <- result@data[["interactions"]][[1]]
-    
-    # show download buttons
-    enable("downloadfeaturefordrugumap")
-    enable("downloaddgidboutput")
-    
-    #fulltable$score <- as.numeric(fulltable$score) # bypass DT error
-    
-    # so if table becomes a list (empty), run the following
-    # this is a table to show no drugs available
-    if (class(fulltable) == "list" ) {
-      nodrug <- matrix(c("No Drugs Found"),ncol=4,byrow=TRUE)
-      colnames(nodrug) <- c("drugName","interactionTypes","score","drugConceptId")
-      nodrug <- as_data_frame(nodrug)
+    observeEvent(input$rundgidb, {
       
-      isolatedtable <- nodrug
-      fulltable <- nodrug
       
-    }
-    
-    if (class(fulltable) == "data.frame" ) {
-      isolatedtable <-  fulltable %>% # reorder columns
-        select("Drug_Name" = drugName, 
-               "Interaction_Types" = interactionTypes, # rename columns might as well :)
-               "Int_Score" = score , 
-               #pmids, 
-               #sources, 
-               "Drug_ConceptID" = drugConceptId
-        )
+      #### NOMENCLATURE UPDATE ###
+      if(df$Species[df$DataID == input$dataselector] == "Human"){
+        corrected <- str_to_upper(input$druggeneinput)
+      } else{
+        corrected <- str_to_title(input$druggeneinput)
+      }
       
-      # these need to be run to 'flatten' the list-type columns
-      fulltable <- fulltable %>% mutate(interactionTypes = map_chr(interactionTypes, toString))
-      fulltable <- fulltable %>% mutate(sources = map_chr(sources, toString))
-      fulltable <<- fulltable %>% mutate(pmids = map_chr(pmids, toString))
-    }
-    
-    # plots
-    output$featurefordrugs <- renderPlot({
-      user_genes <<- str_split(corrected, ", ")[[1]]
-      FeaturePlot(plaqviewobj, 
-                  features = user_genes, label = T, repel = T
-      ) + # a trick to sep long string input
-        theme(legend.position="bottom", legend.box = "vertical") + # group.by is important, use this to call metadata separation
-        theme(plot.title = element_text(hjust = 1)) +
-        theme(plot.title = element_text(hjust =  0.5)) 
-    }) # render plot
-    
-    output$downloadfeaturefordrugumap<- downloadHandler(
-      filename = function() {
-        paste(input$dataselector, "-querydrug_umap.pdf", sep = "")
-      },
-      content = function(file) {
-        pdf(file, paper = "default") # paper = defult is a4 size
+      updateTextInput(getDefaultReactiveDomain(),
+                      "druggeneinput", # input ID of the textinput
+                      value = corrected) # correct to
+      
+      # updated gene name is now here
+      updated_druggeneinput <- input$druggeneinput
+      
+      druggenes <- str_split(updated_druggeneinput, ", ")[[1]]
+      
+      # set active. identity
+      Idents(plaqviewobj) <- input$drugcelllabelmethod
+      
+      
+      result <- queryDGIdb(updated_druggeneinput,
+                           sourceDatabases = input$dgidbdatabase)
+      fulltable <- result@data[["interactions"]][[1]]
+      
+      # show download buttons
+      enable("downloadfeaturefordrugumap")
+      enable("downloadfulltable")
+      
+      #fulltable$score <- as.numeric(fulltable$score) # bypass DT error
+      
+      # so if table becomes a list (empty), run the following
+      # this is a table to show no drugs available
+      if (class(fulltable) == "list" ) {
+        nodrug <- matrix(c("No Drugs Found"),ncol=4,byrow=TRUE)
+        colnames(nodrug) <- c("drugName","interactionTypes","score","drugConceptId")
+        nodrug <- as_data_frame(nodrug)
         
-        temp <- FeaturePlot(plaqviewobj,
-                            order = T,
-                            pt.size = 1,
-                            features = user_genes, label = T, repel = T) + # a trick to sep long string input
+        isolatedtable <- nodrug
+        fulltable <- nodrug
+        
+      }
+      
+      if (class(fulltable) == "data.frame" ) {
+        isolatedtable <-  fulltable %>% # reorder columns
+          select("Drug_Name" = drugName, 
+                 "Interaction_Types" = interactionTypes, # rename columns might as well :)
+                 "Int_Score" = score , 
+                 #pmids, 
+                 #sources, 
+                 "Drug_ConceptID" = drugConceptId
+          )
+        
+        # these need to be run to 'flatten' the list-type columns
+        fulltable <- fulltable %>% mutate(interactionTypes = map_chr(interactionTypes, toString))
+        fulltable <- fulltable %>% mutate(sources = map_chr(sources, toString))
+        fulltable <<- fulltable %>% mutate(pmids = map_chr(pmids, toString))
+      }
+      
+      # plots
+      output$featurefordrugs <- renderPlot({
+        user_genes <<- str_split(corrected, ", ")[[1]]
+        FeaturePlot(plaqviewobj, 
+                    features = user_genes, label = T, repel = T
+        ) + # a trick to sep long string input
           theme(legend.position="bottom", legend.box = "vertical") + # group.by is important, use this to call metadata separation
           theme(plot.title = element_text(hjust = 1)) +
           theme(plot.title = element_text(hjust =  0.5)) 
-        plot(temp)
-        dev.off()
-      }
+      }) # render plot
       
-    )# close downloadhandler
+      output$downloadfeaturefordrugumap<- downloadHandler(
+        filename = function() {
+          paste(input$dataselector, "-querydrug_umap.pdf", sep = "")
+        },
+        content = function(file) {
+          pdf(file, paper = "default") # paper = defult is a4 size
+          
+          temp <- FeaturePlot(plaqviewobj,
+                              order = T,
+                              pt.size = 1,
+                              features = user_genes, label = T, repel = T) + # a trick to sep long string input
+            theme(legend.position="bottom", legend.box = "vertical") + # group.by is important, use this to call metadata separation
+            theme(plot.title = element_text(hjust = 1)) +
+            theme(plot.title = element_text(hjust =  0.5)) 
+          plot(temp)
+          dev.off()
+        }
+        
+      )# close downloadhandler
+      
+      # render table
+      output$dgidboutput <- DT::renderDataTable(isolatedtable,  server = F)
+      
     
+      output$downloadfulltable <- downloadHandler(
+        filename = paste("dgidb_full_output.csv"),
+        content = function(file) {
+          
+          temp <- as.data.frame(fulltable)
+          
+          write_csv(temp, file )
+         # write_csv(temp, file = "Documents/test.csv" )
+          
+         # simplified table worked
+         # write_excel_csv(isolatedtable, file)
+          
+          
+        }  )# close downloadhandler
+      
+      
+    })# observer event
     
-    output$dgidboutput <- DT::renderDataTable(isolatedtable,  server = F)
-    output$downloaddgidboutput <- downloadHandler(
-      filename = function() {
-        paste("complete_drug-gene_interactions.csv", sep = "")
-      },
-      content = function(file) {
-        write.csv(fulltable, file)
-      } 
-    )# close downloadhandler
-    
-  
-  })# observer event
-  
   #### SER: About Functions #### 
   
   output$downloadsessioninfo <- downloadHandler(
