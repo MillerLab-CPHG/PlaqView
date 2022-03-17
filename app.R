@@ -741,18 +741,17 @@ ui <- fluidPage(
 # Define server logic required to draw a histogram
 server <- function(input, output, session) {
   #### SER: Data ####
-
   output$availabledatasettable <-
-    DT::renderDataTable(df, server = T, # server is for speed/loading
+    DT::renderDataTable(df, server = F, # server is for speed/loading
                         selection = list(mode = 'single'),
                         # options=list(columnDefs = list(list(visible=FALSE, targets=c(10)))), # this hides the #8 col (datasetID)
-                        # options = list(
-                        #   headerCallback = DT::JS(
-                        #     "function(thead) {",
-                        #     "  $(thead).css('font-size', '0.9em');",
-                        #     "}"
-                        #   )
-                        # ),
+                        options = list(pageLength = 20),
+                        escape = FALSE) # this escapes rendering html (link) literally and makes link clickable
+  
+  output$availabledatasettable <-
+    DT::renderDataTable(df, server = F, # server is for speed/loading
+                        selection = list(mode = 'single'),
+                        # options=list(columnDefs = list(list(visible=FALSE, targets=c(10)))), # this hides the #8 col (datasetID)
                         options = list(pageLength = 20),
                         escape = FALSE) # this escapes rendering html (link) literally and makes link clickable
   
