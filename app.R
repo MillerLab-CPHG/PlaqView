@@ -762,6 +762,8 @@ server <- function(input, output, session) {
   
   # refresh button
   observeEvent(input$refreshtable, {
+    session$reload()
+    
     output$availabledatasettable <-
       DT::renderDataTable(df, server = F, # server is for speed/loading
                           selection = list(mode = 'single'),
