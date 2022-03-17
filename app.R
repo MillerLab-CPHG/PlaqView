@@ -794,7 +794,7 @@ server <- function(input, output, session) {
     plaqviewobj.cds <<- readRDS(file = pathcds)
     
     # show which data is read
-    loadeddatasetID <<- paste("Dataset Loaded Sucessfully: ", print(input$dataselector))
+    loadeddatasetID <- paste("Dataset Loaded Sucessfully: ", print(input$dataselector))
     output$loadeddatasetID <- renderText(loadeddatasetID)
     
     ## these are just for displaying current data name in other tabs##
@@ -863,14 +863,14 @@ server <- function(input, output, session) {
     
   })# closes observe event
   
-  # this is for the download
+  # download UMAP (basic)
   output$downloadumapplot<- downloadHandler(
     filename = function() {
       paste("UMAP.pdf", sep = "")
     },
     content = function(file) {
       pdf(file, paper = "default") # paper = defult is a4 size
-      user_genes <<- str_split(input$genes, ", ")[[1]]
+      user_genes <- str_split(input$genes, ", ")[[1]]
 
       validate(need(input$selectaplot=="Dot", message=FALSE))
       temp <- DimPlot(
@@ -1193,7 +1193,7 @@ server <- function(input, output, session) {
         )
         brushedtable <- brushedPoints(CIPR_top_results, input$brushtop5)
         
-        brushedtable.cleaned <<- brushedtable %>% 
+        brushedtable.cleaned <- brushedtable %>% 
           select(Cluster = cluster,
                  Reference = reference_cell_type, 
                  Ref.ID = reference_id,
@@ -1203,10 +1203,11 @@ server <- function(input, output, session) {
                  Percent.Pos.Cor. = percent_pos_correlation
           )
         
-        brushedtable.cleaned$Percent.Pos.Cor. <<- paste(round(brushedtable.cleaned$Percent.Pos.Cor., 1), "%")
-        brushedtable.cleaned$Identity.Score <<- paste(round(brushedtable.cleaned$Identity.Score, 1), "")
+        brushedtable.cleaned$Percent.Pos.Cor. <- paste(round(brushedtable.cleaned$Percent.Pos.Cor., 1), "%")
+        brushedtable.cleaned$Identity.Score <- paste(round(brushedtable.cleaned$Identity.Score, 1), "")
         
         brushedtable.cleaned
+        
       })
       
       output$download_top5<- downloadHandler(
@@ -1216,6 +1217,21 @@ server <- function(input, output, session) {
                 "_result_tables.csv", sep = "")
         },
         content = function(file) {
+          brushedtable <- brushedPoints(CIPR_top_results, input$brushtop5)
+          
+          brushedtable.cleaned <- brushedtable %>% 
+            select(Cluster = cluster,
+                   Reference = reference_cell_type, 
+                   Ref.ID = reference_id,
+                   Full.Name = long_name,
+                   Description = description,
+                   Identity.Score = identity_score,
+                   Percent.Pos.Cor. = percent_pos_correlation
+            )
+          
+          brushedtable.cleaned$Percent.Pos.Cor. <- paste(round(brushedtable.cleaned$Percent.Pos.Cor., 1), "%")
+          brushedtable.cleaned$Identity.Score <- paste(round(brushedtable.cleaned$Identity.Score, 1), "")
+        
           write.csv(brushedtable.cleaned, file, row.names = FALSE, col.names = T)
         }
         
@@ -1251,12 +1267,12 @@ server <- function(input, output, session) {
     
     # pull out names of the different classes within meta.data and combine character.factors
     # Cf is the factor type
-    plaqview.metadata.character.type <<- names(plaqviewobj@meta.data %>% select_if(is.character))
-    plaqview.metadata.factor.type <<- names(plaqviewobj@meta.data %>% select_if(is.factor))
-    plaqview.metadata.cf <<- append(plaqview.metadata.character.type, plaqview.metadata.factor.type)
+    plaqview.metadata.character.type <- names(plaqviewobj@meta.data %>% select_if(is.character))
+    plaqview.metadata.factor.type <- names(plaqviewobj@meta.data %>% select_if(is.factor))
+    plaqview.metadata.cf <- append(plaqview.metadata.character.type, plaqview.metadata.factor.type)
     
     # numeric is the continuous type
-    plaqview.metadata.numeric.type <<- names(plaqviewobj@meta.data %>% select_if(is.numeric))
+    plaqview.metadata.numeric.type <- names(plaqviewobj@meta.data %>% select_if(is.numeric))
     
     updatePickerInput(session, "selectlabelmethodforgenequery.metadata",
                       label = "Select Unabridged Metadata Column (may be limited depending on dataset)",
@@ -1463,19 +1479,19 @@ server <- function(input, output, session) {
   reduction_method <- "UMAP"
 
   observeEvent(input$loaddatabutton, {
-    vals <<- reactiveValues(
+    vals <- reactiveValues(
       keeprows = rep(FALSE, nrow(colData(plaqviewobj.cds)))
     )
     reduced_dims <- as.data.frame(reducedDims(plaqviewobj.cds)[[reduction_method]])
     names(reduced_dims)[1:2] <- c("V1", "V2")
     
     
-    vals <<- shiny::reactiveValues(
+    vals <- shiny::reactiveValues(
       keeprows = rep(FALSE, nrow(colData(plaqviewobj.cds)))
     )
     
 
-    output$plot1 <<- renderPlot({
+    output$plot1 <- renderPlot({
       # Plot the kept and excluded points as two separate data sets
       colData(plaqviewobj.cds)$keep <- vals$keeprows
       suppressMessages(plot_cells(plaqviewobj.cds, reduction_method = reduction_method,
@@ -1497,7 +1513,7 @@ server <- function(input, output, session) {
       res <- nearPoints(reduced_dims,
                         xvar = "V1", yvar = "V2", input$plot1_click,
                         allRows = TRUE)
-      vals$keeprows <<- vals$keeprows | res$selected_
+      vals$keeprows <- vals$keeprows | res$selected_
     })
     
     # Toggle points that are brushed, when button is clicked
@@ -1512,101 +1528,101 @@ server <- function(input, output, session) {
     observeEvent(input$reset, {
       vals$keeprows <- rep(FALSE, nrow(colData(plaqviewobj.cds)))
     })
-    
-  })
-  
-  ### selected/recalulated trajectory
-  observeEvent(input$redomonocle3, {
-    
-    # this is the selected cells
-    selectedcells <<- vals$keeprows
-    
-    
-    # get selected cells id
-    cds_subsetIDs <- row.names(colData(plaqviewobj.cds)[selectedcells,])
-    # recreate a cds obj that doesnt contain any prior UMAPS
-    expressiondata <- plaqviewobj@assays[["RNA"]]@data
-    cellmd <- plaqviewobj@meta.data
-    
-    genemd <- data.frame(gene_short_name = row.names(expressiondata), 
-                         row.names = row.names(expressiondata))
-    plaqviewobj.cds_NEW <- new_cell_data_set(expression_data = expressiondata,
-                                         cell_metadata = cellmd,
-                                         gene_metadata = genemd)
-    
-    subsetted <- plaqviewobj.cds[,cds_subsetIDs]
-    
-    subsetted <- preprocess_cds(subsetted, num_dim = 25) # we used 30 in earlier seurat scripts
-    
-    
-    # reproject cells now
-    subsetted <- reduce_dimension(subsetted, reduction_method = "UMAP")
-    subsetted <- cluster_cells(subsetted, reduction_method = "UMAP")
-    
-    subsetted <- learn_graph(subsetted)
-    
-    # a helper function to identify the root principal points:
-    get_earliest_principal_node <- function(cds, assigned_cell_type= "SMCs"){ # change celltype if desired
-      cell_ids <- which(colData(cds)[, "assigned_cell_type"] == assigned_cell_type)
+    ### selected/recalulated trajectory
+    observeEvent(input$redomonocle3, {
       
-      closest_vertex <-
-        cds@principal_graph_aux[["UMAP"]]$pr_graph_cell_proj_closest_vertex
-      closest_vertex <- as.matrix(closest_vertex[colnames(cds), ])
-      root_pr_nodes <-
-        igraph::V(principal_graph(cds)[["UMAP"]])$name[as.numeric(names
-                                                                  (which.max(table(closest_vertex[cell_ids,]))))]
+      # this is the selected cells
+      selectedcells <- vals$keeprows
       
-      root_pr_nodes
-    }
-    
-    subsetted <<- order_cells(subsetted, root_pr_nodes=get_earliest_principal_node(subsetted),
-                                   reduction_method = "UMAP")
-    # plot subset plots 
-    output$subsettrajectory <-
-      renderPlot(
-        plot_cells(subsetted,
-                   color_cells_by = "assigned_cell_type",
-                   label_groups_by_cluster=F,
-                   show_trajectory_graph = T,
-                   trajectory_graph_segment_size = 1,
-                   graph_label_size = 1, # size of # in circle
-                   group_label_size = 4,
-                   cell_size = 1,
-                   alpha = 0.7,
-                   scale_to_range = T)       ) # renderplot
+      
+      # get selected cells id
+      cds_subsetIDs <- row.names(colData(plaqviewobj.cds)[selectedcells,])
+      # recreate a cds obj that doesnt contain any prior UMAPS
+      expressiondata <- plaqviewobj@assays[["RNA"]]@data
+      cellmd <- plaqviewobj@meta.data
+      
+      genemd <- data.frame(gene_short_name = row.names(expressiondata), 
+                           row.names = row.names(expressiondata))
+      plaqviewobj.cds_NEW <- new_cell_data_set(expression_data = expressiondata,
+                                               cell_metadata = cellmd,
+                                               gene_metadata = genemd)
+      
+      subsetted <- plaqviewobj.cds[,cds_subsetIDs]
+      
+      subsetted <- preprocess_cds(subsetted, num_dim = 25) # we used 30 in earlier seurat scripts
+      
+      
+      # reproject cells now
+      subsetted <- reduce_dimension(subsetted, reduction_method = "UMAP")
+      subsetted <- cluster_cells(subsetted, reduction_method = "UMAP")
+      
+      subsetted <- learn_graph(subsetted)
+      
+      # a helper function to identify the root principal points:
+      get_earliest_principal_node <- function(cds, assigned_cell_type= "SMCs"){ # change celltype if desired
+        cell_ids <- which(colData(cds)[, "assigned_cell_type"] == assigned_cell_type)
+        
+        closest_vertex <-
+          cds@principal_graph_aux[["UMAP"]]$pr_graph_cell_proj_closest_vertex
+        closest_vertex <- as.matrix(closest_vertex[colnames(cds), ])
+        root_pr_nodes <-
+          igraph::V(principal_graph(cds)[["UMAP"]])$name[as.numeric(names
+                                                                    (which.max(table(closest_vertex[cell_ids,]))))]
+        
+        root_pr_nodes
+      }
+      
+      subsetted <- order_cells(subsetted, root_pr_nodes=get_earliest_principal_node(subsetted),
+                               reduction_method = "UMAP")
+      # plot subset plots 
+      output$subsettrajectory <-
+        renderPlot(
+          plot_cells(subsetted,
+                     color_cells_by = "assigned_cell_type",
+                     label_groups_by_cluster=F,
+                     show_trajectory_graph = T,
+                     trajectory_graph_segment_size = 1,
+                     graph_label_size = 1, # size of # in circle
+                     group_label_size = 4,
+                     cell_size = 1,
+                     alpha = 0.7,
+                     scale_to_range = T)       ) # renderplot
     }) # observe event
-  
-  output$downloadsubsettrajectory<- downloadHandler(
-    filename = function() {
-      paste(input$dataselector, "_subset_trajectory.pdf", sep = "")
-    },
-    content = function(file) {
-      pdf(file, paper = "default") # paper = defult is a4 size
-      
-      temp <- plot_cells(subsetted,
-                         color_cells_by = "assigned_cell_type",
-                         label_groups_by_cluster=F,
-                         show_trajectory_graph = T,
-                         trajectory_graph_segment_size = 1,
-                         graph_label_size = 1, # size of # in circle
-                         group_label_size = 4,
-                         cell_size = 1,
-                         alpha = 0.7,
-                         scale_to_range = T)
-      plot(temp)
-      dev.off()
-    }
     
-  )# close downloadhandler
-  
-  
-  #### show subset.trajectory 
+    output$downloadsubsettrajectory<- downloadHandler(
+      filename = function() {
+        paste(input$dataselector, "_subset_trajectory.pdf", sep = "")
+      },
+      content = function(file) {
+        pdf(file, paper = "default") # paper = defult is a4 size
+        
+        temp <- plot_cells(subsetted,
+                           color_cells_by = "assigned_cell_type",
+                           label_groups_by_cluster=F,
+                           show_trajectory_graph = T,
+                           trajectory_graph_segment_size = 1,
+                           graph_label_size = 1, # size of # in circle
+                           group_label_size = 4,
+                           cell_size = 1,
+                           alpha = 0.7,
+                           scale_to_range = T)
+        plot(temp)
+        dev.off()
+      }
+      
+    )# close downloadhandler
+    
+    
+    #### show subset.trajectory 
     observeEvent(input$redomonocle3, {
       shinyjs::showElement(id= "subset.trajectory")
     })
     observeEvent(input$redomonocle3, {
       enable("downloadsubsettrajectory")
     })
+  })
+  
+
 
   #### SER: Drugs ####
     observeEvent(input$rundgidb, {
@@ -1667,12 +1683,12 @@ server <- function(input, output, session) {
         # these need to be run to 'flatten' the list-type columns
         fulltable <- fulltable %>% mutate(interactionTypes = map_chr(interactionTypes, toString))
         fulltable <- fulltable %>% mutate(sources = map_chr(sources, toString))
-        fulltable <<- fulltable %>% mutate(pmids = map_chr(pmids, toString))
+        fulltable <- fulltable %>% mutate(pmids = map_chr(pmids, toString))
       }
       
       # plots
       output$featurefordrugs <- renderPlot({
-        user_genes <<- str_split(corrected, ", ")[[1]]
+        user_genes <- str_split(corrected, ", ")[[1]]
         FeaturePlot(plaqviewobj, 
                     features = user_genes, label = T, repel = T
         ) + # a trick to sep long string input
@@ -1687,6 +1703,8 @@ server <- function(input, output, session) {
         },
         content = function(file) {
           pdf(file, paper = "default") # paper = defult is a4 size
+          
+          user_genes <- str_split(corrected, ", ")[[1]]
           
           temp <- FeaturePlot(plaqviewobj,
                               order = T,
