@@ -2,6 +2,7 @@
 ##### Author: Wei Feng Ma, UVA.
 ##### wm5wt@virginia.edu
 
+set.seed(100)
 #### DATABASE NAMES AND COLOR SCHEMES ####
 # below line is commented for shinyapp.io deployment temp
 ### set this once in terminal before deploying to shinyapps.io ###
@@ -45,6 +46,18 @@ color_function <- colorRampPalette(original_color_list)
 # color_function <- colorRampPalette(metcolors)
 
 manual_color_list <- color_function(40) # change this if clusters >40
+
+#### SESSION ID GENERATOR ####
+# to ensure each person gets the correct plots 
+# we assign each person and each session a unique ID
+# this is used for downloading plots etc.
+
+generate.session <- function(n = 5000) {
+  a <- do.call(paste0, replicate(5, sample(LETTERS, n, TRUE), FALSE))
+  paste0(a, sprintf("%04d", sample(9999, n, TRUE)), sample(LETTERS, n, TRUE))
+}
+
+SESSIONID <- generate.session(1)
 
 #### LIBRARIES #### 
 # library(BiocManager)
@@ -788,10 +801,10 @@ server <- function(input, output, session) {
   
    observeEvent(input$loaddatabutton, {
     # create path for loading data
-    path <- file.path(paste("data/", input$dataselector, "/",
+    path <<- file.path(paste("data/", input$dataselector, "/",
                             input$dataselector,
                             ".rds", sep=""))
-    pathcds <- file.path(paste("data/", input$dataselector, "/",
+    pathcds <<- file.path(paste("data/", input$dataselector, "/",
                                input$dataselector,
                             "_cds.rds", sep=""))
   
@@ -799,7 +812,7 @@ server <- function(input, output, session) {
     plaqviewobj.cds <<- readRDS(file = pathcds)
     
     # show which data is read
-    loadeddatasetID <- paste("Dataset Loaded Sucessfully: ", print(input$dataselector))
+    loadeddatasetID <<- paste("Dataset Loaded Sucessfully: ", print(input$dataselector))
     output$loadeddatasetID <- renderText(loadeddatasetID)
     
     ## these are just for displaying current data name in other tabs##
@@ -893,6 +906,26 @@ server <- function(input, output, session) {
         ggtitle("UMAP by Cell Type") +
         theme(plot.title = element_text(hjust =  0.5)) +
         guides(color = guide_legend(nrow = 5))
+      
+    
+      if(is.null(temp) == TRUE) {
+        temp <- DimPlot(
+          plaqviewobj,
+          reduction = "umap",
+          label = TRUE,
+          label.size = 5,
+          repel = T,
+          # repel labels
+          pt.size = 1,
+          cols = color_function(length(unique(plaqviewobj@meta.data[[input$selectlabelmethodforgenequery]]))),
+          group.by = input$selectlabelmethodforgenequery) + # group.by is important, use this to call metadata separation
+          theme(legend.position="bottom", 
+                legend.box = "vertical") +
+          ggtitle("UMAP by Cell Type") +
+          theme(plot.title = element_text(hjust =  0.5)) +
+          guides(color = guide_legend(nrow = 5))
+        
+      }
       
       plot(temp) #this is all you need
       
@@ -1123,6 +1156,7 @@ server <- function(input, output, session) {
   output$diffbyseurat <- downloadHandler(
     filename = "differential_markergenes_by_seurat_clusters.csv",
     content = function(file) {
+      
       file.copy(paste("data/", input$dataselector, "/",
                       "diff_by_seurat.csv", sep = ""), file)
       
