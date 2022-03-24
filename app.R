@@ -801,18 +801,18 @@ server <- function(input, output, session) {
   
    observeEvent(input$loaddatabutton, {
     # create path for loading data
-    path <<- file.path(paste("data/", input$dataselector, "/",
+    path <- file.path(paste("data/", input$dataselector, "/",
                             input$dataselector,
                             ".rds", sep=""))
-    pathcds <<- file.path(paste("data/", input$dataselector, "/",
+    pathcds <- file.path(paste("data/", input$dataselector, "/",
                                input$dataselector,
                             "_cds.rds", sep=""))
   
-    plaqviewobj <<- readRDS(file = path)
-    plaqviewobj.cds <<- readRDS(file = pathcds)
+    plaqviewobj <- readRDS(file = path)
+    plaqviewobj.cds <- readRDS(file = pathcds)
     
     # show which data is read
-    loadeddatasetID <<- paste("Dataset Loaded Sucessfully: ", print(input$dataselector))
+    loadeddatasetID <- paste("Dataset Loaded Sucessfully: ", print(input$dataselector))
     output$loadeddatasetID <- renderText(loadeddatasetID)
     
     ## these are just for displaying current data name in other tabs##
