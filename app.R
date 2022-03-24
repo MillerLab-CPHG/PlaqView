@@ -867,8 +867,6 @@ server <- function(input, output, session) {
           )
       ) # closes renderPlot
   })
-      corrected <- str_to_title(input$genes)
-                    "genes", value = corrected)
   
   # DOWNLOAD-UMAP
   output$downloadumapplot<- downloadHandler(
@@ -876,27 +874,6 @@ server <- function(input, output, session) {
       paste("UMAP.pdf", sep = "")
     },
     content = function(file) {
-<<<<<<< Updated upstream
-      pdf(file, paper = "default") # paper = defult is a4 size
-      user_genes <- str_split(input$genes, ", ")[[1]]
-
-      validate(need(input$selectaplot=="Dot", message=FALSE))
-      temp <- DimPlot(
-        plaqviewobj,
-        reduction = "umap",
-        label = TRUE,
-        label.size = 5,
-        repel = T,
-        # repel labels
-        pt.size = 1,
-        cols = color_function(length(unique(plaqviewobj@meta.data[[input$selectlabelmethodforgenequery]]))),
-        group.by = input$selectlabelmethodforgenequery) + # group.by is important, use this to call metadata separation
-        theme(legend.position="bottom", 
-              legend.box = "vertical") +
-        ggtitle("UMAP by Cell Type") +
-        theme(plot.title = element_text(hjust =  0.5)) +
-        guides(color = guide_legend(nrow = 5))
-=======
       repeat{
         pdf(file, paper = "default") # paper = defult is a4 size
         user_genes <- str_split(input$genes, ", ")[[1]]
@@ -918,13 +895,26 @@ server <- function(input, output, session) {
       
         if (is.null(temp) == FALSE) break
       }# repeat
->>>>>>> Stashed changes
       
       plot(temp) #this is all you need
       
       dev.off()
     } # content
   )# close downloadhandler
+  
+  #### NOMENCLATURE UPDATE ####
+  observeEvent(input$runcode,{ 
+    if(df$Species[df$DataID == input$dataselector] == "Human"){
+      corrected <- str_to_upper(input$genes)
+    } else{
+      corrected <- str_to_title(input$genes)
+    }
+    
+    updateTextInput(getDefaultReactiveDomain(),
+                    "genes", value = corrected)
+    
+  })# closes observe event 
+  
   
   #### dot plot ###
   observeEvent(input$runcode,{ # observe event puts a pause until pushed
