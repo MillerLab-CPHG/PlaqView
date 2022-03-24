@@ -10,7 +10,7 @@ set.seed(100)
 
 # enrichR functions
 # handcurate db names 
-dbs <<- c("KEGG_2019_Human",
+dbs <- c("KEGG_2019_Human",
          "WikiPathways_2019_Human",
          "GO_Biological_Process_2018",
          "ChEA_2016",
@@ -18,10 +18,10 @@ dbs <<- c("KEGG_2019_Human",
          "ENCODE_and_ChEA_Consensus_TFs_from_ChIP-X",
          "Gene_Perturbations_from_GEO_down",
          "Gene_Perturbations_from_GEO_up")
-enrichRdb <<- sort(dbs)
+enrichRdb <- sort(dbs)
 
 # color definitions
-original_color_list <<-
+original_color_list <-
   {c("rosybrown2",
      "cadetblue1",
      "lemonchiffon3",
@@ -42,22 +42,22 @@ original_color_list <<-
      "cadetblue2"
   )}
 
-color_function <<- colorRampPalette(original_color_list)
-# color_function <<- colorRampPalette(metcolors)
+color_function <- colorRampPalette(original_color_list)
+# color_function <- colorRampPalette(metcolors)
 
-manual_color_list <<- color_function(40) # change this if clusters >40
+manual_color_list <- color_function(40) # change this if clusters >40
 
 #### SESSION ID GENERATOR ####
 # to ensure each person gets the correct plots 
 # we assign each person and each session a unique ID
 # this is used for downloading plots etc.
 
-generate.session <<- function(n = 5000) {
-  a <<- do.call(paste0, replicate(5, sample(LETTERS, n, TRUE), FALSE))
+generate.session <- function(n = 5000) {
+  a <- do.call(paste0, replicate(5, sample(LETTERS, n, TRUE), FALSE))
   paste0(a, sprintf("%04d", sample(9999, n, TRUE)), sample(LETTERS, n, TRUE))
 }
 
-SESSIONID <<- generate.session(1)
+SESSIONID <- generate.session(1)
 
 #### LIBRARIES #### 
 # library(BiocManager)
@@ -90,20 +90,20 @@ library(CIPR)
 
 #### READ GOOGLE SHEET ####
 googlesheets4::gs4_deauth() # this tells google sheet to read-only
-df <<- googlesheets4::read_sheet("https://docs.google.com/spreadsheets/d/1hLyjPFA2ZRpBLHnTgUnmDz7kimMZWFbz_ZGTml3-hRA/edit#gid=0")
-# df <<- read.csv("https://docs.google.com/spreadsheets/d/e/2PACX-1vTF5Gw4Dbshlh3wVB8UAMswUEiOn4NEzXaEp8x73NtbWY3n4oIrWEVNMIwNYyInJM7k70G1lUcr7x9g/pub?output=csv")
+df <- googlesheets4::read_sheet("https://docs.google.com/spreadsheets/d/1hLyjPFA2ZRpBLHnTgUnmDz7kimMZWFbz_ZGTml3-hRA/edit#gid=0")
+# df <- read.csv("https://docs.google.com/spreadsheets/d/e/2PACX-1vTF5Gw4Dbshlh3wVB8UAMswUEiOn4NEzXaEp8x73NtbWY3n4oIrWEVNMIwNYyInJM7k70G1lUcr7x9g/pub?output=csv")
 
-df$DOI <<- paste("<a href=",  df$DOI,">", "Link", "</a>") # this converts to clickable format
+df$DOI <- paste("<a href=",  df$DOI,">", "Link", "</a>") # this converts to clickable format
 
 # subset data rows that are marked 'deployed = Yes"
-df <<- filter(df, `Deployed` == "Yes")
-df <<- df %>% 
+df <- filter(df, `Deployed` == "Yes")
+df <- df %>% 
   select('DataID', Year, Journal, DOI, Species, Tissue, Notes, Population, Cells = Cell.Number, `Article.Title` ) 
-df$`Article.Title` <<- str_to_title(df$`Article.Title`) # autocaps
+df$`Article.Title` <- str_to_title(df$`Article.Title`) # autocaps
 
 #### UI ####
 # Define UI for application that draws a histogram
-ui <<- fluidPage(
+ui <- fluidPage(
   
   # Aesthetics ####
   theme = shinytheme("flatly"),
@@ -756,9 +756,9 @@ ui <<- fluidPage(
 
 #### SERVER FUNCTIONS ####
 # Define server logic required to draw a histogram
-server <<- function(input, output, session) {
+server <- function(input, output, session) {
   #### SER: Data ####
-  output$availabledatasettable <<-
+  output$availabledatasettable <-
     DT::renderDataTable(df, server = F, # server is for speed/loading
                         selection = list(mode = 'single'),
                         # options=list(columnDefs = list(list(visible=FALSE, targets=c(10)))), # this hides the #8 col (datasetID)
@@ -766,7 +766,7 @@ server <<- function(input, output, session) {
                         escape = FALSE) # this escapes rendering html (link) literally and makes link clickable
   
   # second of the same code.. may help resolve datatable not loading error
-  output$availabledatasettable <<-
+  output$availabledatasettable <-
     DT::renderDataTable(df, server = F, # server is for speed/loading
                         selection = list(mode = 'single'),
                         # options=list(columnDefs = list(list(visible=FALSE, targets=c(10)))), # this hides the #8 col (datasetID)
@@ -782,7 +782,7 @@ server <<- function(input, output, session) {
     session$reload()
     session$reload()
     
-    output$availabledatasettable <<-
+    output$availabledatasettable <-
       DT::renderDataTable(df, server = F, # server is for speed/loading
                           selection = list(mode = 'single'),
                           # options=list(columnDefs = list(list(visible=FALSE, targets=c(10)))), # this hides the #8 col (datasetID)
@@ -808,21 +808,21 @@ server <<- function(input, output, session) {
                                input$dataselector,
                             "_cds.rds", sep=""))
   
-    plaqviewobj <<<- readRDS(file = pathrna)
-    plaqviewobj.cds <<<- readRDS(file = pathcds)
+    plaqviewobj <<- readRDS(file = pathrna)
+    plaqviewobj.cds <<- readRDS(file = pathcds)
     
     # show which data is read
-    loadeddatasetID <<- paste("Dataset Loaded Sucessfully: ", print(input$dataselector))
-    output$loadeddatasetID <<- renderText(loadeddatasetID)
+    loadeddatasetID <- paste("Dataset Loaded Sucessfully: ", print(input$dataselector))
+    output$loadeddatasetID <- renderText(loadeddatasetID)
     
     ## these are just for displaying current data name in other tabs##
-    output$selecteddatasetID <<- renderText({
+    output$selecteddatasetID <- renderText({
       paste0("Current dataset: ", input$dataselector)
     }) 
-    output$selecteddatasetID2 <<- renderText({
+    output$selecteddatasetID2 <- renderText({
       paste0("Current dataset: ", input$dataselector)
     }) 
-    output$selecteddatasetID3 <<- renderText({
+    output$selecteddatasetID3 <- renderText({
       paste0("Current dataset: ", input$dataselector)
     }) 
    
@@ -846,7 +846,7 @@ server <<- function(input, output, session) {
   #### SER: Genes ####
   # UMAP 
   observeEvent(input$runcode, {
-    output$umaps <<- 
+    output$umaps <- 
       renderPlot(
         DimPlot(
           plaqviewobj,
@@ -871,9 +871,9 @@ server <<- function(input, output, session) {
     
     #### NOMENCLATURE UPDATE ####
     if(df$Species[df$DataID == input$dataselector] == "Human"){
-      corrected <<- str_to_upper(input$genes)
+      corrected <- str_to_upper(input$genes)
     } else{
-      corrected <<- str_to_title(input$genes)
+      corrected <- str_to_title(input$genes)
     }
     
     updateTextInput(getDefaultReactiveDomain(),
@@ -882,16 +882,16 @@ server <<- function(input, output, session) {
   })# closes observe event
   
   # download UMAP (basic)
-  output$downloadumapplot<<- downloadHandler(
+  output$downloadumapplot<- downloadHandler(
     filename = function() {
       paste("UMAP.pdf", sep = "")
     },
     content = function(file) {
       pdf(file, paper = "default") # paper = defult is a4 size
-      user_genes <<- str_split(input$genes, ", ")[[1]]
+      user_genes <- str_split(input$genes, ", ")[[1]]
 
       validate(need(input$selectaplot=="Dot", message=FALSE))
-      temp <<- DimPlot(
+      temp <- DimPlot(
         plaqviewobj,
         reduction = "umap",
         label = TRUE,
@@ -918,9 +918,9 @@ server <<- function(input, output, session) {
   observeEvent(input$runcode,{ # observe event puts a pause until pushed
     
     # this is for the display
-    output$Dot <<- renderPlot({
+    output$Dot <- renderPlot({
       # parse string input 
-      user_genes <<- str_split(input$genes, ", ")[[1]]
+      user_genes <- str_split(input$genes, ", ")[[1]]
       validate(need(input$selectaplot=="Dot", message=FALSE))
       DotPlot(plaqviewobj, 
               group.by = input$selectlabelmethodforgenequery,
@@ -932,15 +932,15 @@ server <<- function(input, output, session) {
     })
     
     # this is for the download
-    output$downloaddotplot<<- downloadHandler(
+    output$downloaddotplot<- downloadHandler(
       filename = function() {
         paste("dotplot.pdf", sep = "")
       },
       content = function(file) {
         pdf(file, paper = "default") # paper = defult is a4 size
-        user_genes <<- str_split(input$genes, ", ")[[1]]
+        user_genes <- str_split(input$genes, ", ")[[1]]
         validate(need(input$selectaplot=="Dot", message=FALSE))
-        temp <<- DotPlot(plaqviewobj, 
+        temp <- DotPlot(plaqviewobj, 
                         group.by = input$selectlabelmethodforgenequery,
                         features = user_genes) + # a trick to sep long string input
           ggtitle("Expression Dot Plot") +
@@ -955,9 +955,9 @@ server <<- function(input, output, session) {
     )# close downloadhandler
     
     #### feature plot ####
-    parsed.genes <<- str_split(input$genes, ", ")[[1]]
-    output$Feature <<- renderPlot({
-      user_genes <<- str_split(input$genes, ", ")[[1]]
+    parsed.genes <- str_split(input$genes, ", ")[[1]]
+    output$Feature <- renderPlot({
+      user_genes <- str_split(input$genes, ", ")[[1]]
       validate(need(input$selectaplot=="Feature", message=FALSE))
       FeaturePlot(plaqviewobj, 
                   order = T,
@@ -969,15 +969,15 @@ server <<- function(input, output, session) {
     }) 
     
     # this is for the download
-    output$downloadfeatureplot<<- downloadHandler(
+    output$downloadfeatureplot<- downloadHandler(
       filename = function() {
         paste("featureplot.pdf", sep = "")
       },
       content = function(file) {
         pdf(file, paper = "default") # paper = defult is a4 size
-        user_genes <<- str_split(input$genes, ", ")[[1]]
+        user_genes <- str_split(input$genes, ", ")[[1]]
         validate(need(input$selectaplot=="Feature", message=FALSE))
-        temp <<- FeaturePlot(plaqviewobj, 
+        temp <- FeaturePlot(plaqviewobj, 
                             order = T,
                             pt.size = 1,
                             features = user_genes[1:4]) + # a trick to sep long string input
@@ -993,8 +993,8 @@ server <<- function(input, output, session) {
     )# close downloadhandler
     
     #### ridge plot ####
-    output$Ridge <<- renderPlot({
-      user_genes <<- str_split(input$genes, ", ")[[1]]
+    output$Ridge <- renderPlot({
+      user_genes <- str_split(input$genes, ", ")[[1]]
       validate(need(input$selectaplot=="Ridge", message=FALSE))
       RidgePlot(plaqviewobj,
                 cols = color_function(length(unique(plaqviewobj@meta.data[[input$selectlabelmethodforgenequery]]))),
@@ -1008,15 +1008,15 @@ server <<- function(input, output, session) {
     })
     
     
-    output$downloadridgeplot<<- downloadHandler(
+    output$downloadridgeplot<- downloadHandler(
       filename = function() {
         paste("ridgeplot.pdf", sep = "")
       },
       content = function(file) {
         pdf(file, paper = "default") # paper = defult is a4 size
-        user_genes <<- str_split(input$genes, ", ")[[1]]
+        user_genes <- str_split(input$genes, ", ")[[1]]
         validate(need(input$selectaplot=="Ridge", message=FALSE))
-        temp <<- RidgePlot(plaqviewobj,
+        temp <- RidgePlot(plaqviewobj,
                           cols = color_function(length(unique(plaqviewobj@meta.data[[input$selectlabelmethodforgenequery]]))),
                           group.by = input$selectlabelmethodforgenequery,
                           features =  user_genes[1:1]
@@ -1033,22 +1033,22 @@ server <<- function(input, output, session) {
     )# close downloadhandler
     
     #### cell population ####
-    output$cellpopulation <<- renderPlot({
+    output$cellpopulation <- renderPlot({
       # this chunk is to calculate population statistics 
-      cellcounts <<- plaqviewobj@meta.data[[input$selectlabelmethodforgenequery]] # extract cell names
-      cellcounts <<- as.factor(cellcounts) # convert to factors
+      cellcounts <- plaqviewobj@meta.data[[input$selectlabelmethodforgenequery]] # extract cell names
+      cellcounts <- as.factor(cellcounts) # convert to factors
       
-      cellcounts.summary <<- as.data.frame(summary(cellcounts)) # for levels laters
+      cellcounts.summary <- as.data.frame(summary(cellcounts)) # for levels laters
       
-      cellcounts <<- as.data.frame((cellcounts)) # summarize factors into table
-      cellcounts <<- dplyr::rename(cellcounts, Celltype = '(cellcounts)' ) # just to rename the columns
+      cellcounts <- as.data.frame((cellcounts)) # summarize factors into table
+      cellcounts <- dplyr::rename(cellcounts, Celltype = '(cellcounts)' ) # just to rename the columns
       
       # this is to create levels so i can flip the graph to the way i want
-      cellcounts.summary <<- rownames_to_column(cellcounts.summary)
-      cellcounts.summary <<- reorder(cellcounts.summary$rowname, cellcounts.summary$`summary(cellcounts)`)
-      sortedlevel <<- levels(cellcounts.summary)
+      cellcounts.summary <- rownames_to_column(cellcounts.summary)
+      cellcounts.summary <- reorder(cellcounts.summary$rowname, cellcounts.summary$`summary(cellcounts)`)
+      sortedlevel <- levels(cellcounts.summary)
       
-      cellpop <<- ggplot(data = cellcounts, aes(y = Celltype)) +
+      cellpop <- ggplot(data = cellcounts, aes(y = Celltype)) +
         geom_bar(fill = manual_color_list) +
         xlab("Counts") +
         ylab("Cell Types") +
@@ -1062,23 +1062,23 @@ server <<- function(input, output, session) {
     
     ### GSEA #####
     
-      parsed.genes <<- str_split(input$genes, ", ")[[1]]
-      enriched <<- enrichr(genes = parsed.genes, 
+      parsed.genes <- str_split(input$genes, ", ")[[1]]
+      enriched <- enrichr(genes = parsed.genes, 
                           database = enrichRdb) # this queries all of them
-      cleanedenrichedtable <<- select(enriched[[input$selectedenrichRdb]], -Old.Adjusted.P.value, -Old.P.value,)
-      cleanedenrichedtable <<- top_n(cleanedenrichedtable, 100) # top 100 will be rendered
+      cleanedenrichedtable <- select(enriched[[input$selectedenrichRdb]], -Old.Adjusted.P.value, -Old.P.value,)
+      cleanedenrichedtable <- top_n(cleanedenrichedtable, 100) # top 100 will be rendered
       
       #select columns to display
-      cleanedenrichedtable <<- cleanedenrichedtable %>% select(Term, Overlap, Adjusted.P.value, Combined.Score, Genes)
+      cleanedenrichedtable <- cleanedenrichedtable %>% select(Term, Overlap, Adjusted.P.value, Combined.Score, Genes)
       
       # force as.numeric to remove a bug in DT pkg
-      #cleanedenrichedtable$Adjusted.P.value <<- as.numeric(cleanedenrichedtable$Adjusted.P.value)
-      #cleanedenrichedtable$Adjusted.P.value <<- as.numeric(cleanedenrichedtable$Combined.Score)
+      #cleanedenrichedtable$Adjusted.P.value <- as.numeric(cleanedenrichedtable$Adjusted.P.value)
+      #cleanedenrichedtable$Adjusted.P.value <- as.numeric(cleanedenrichedtable$Combined.Score)
       
-      output$enrichtable <<- DT::renderDataTable(cleanedenrichedtable, server = F)
+      output$enrichtable <- DT::renderDataTable(cleanedenrichedtable, server = F)
       
       # Downloadable csv of selected dataset
-      output$downloadenrichRdata <<- downloadHandler(
+      output$downloadenrichRdata <- downloadHandler(
         filename = function() {
           paste(input$genes, "_pathwayenrichment.csv", sep = "")
         },
@@ -1094,7 +1094,7 @@ server <<- function(input, output, session) {
   
   
   #### SER: Labels ####
-  output$leftlabelplot <<-
+  output$leftlabelplot <-
     renderPlot(
       DimPlot(
         plaqviewobj,
@@ -1113,7 +1113,7 @@ server <<- function(input, output, session) {
         guides(color = guide_legend(nrow = 5))
     )# render plot
   
-  output$rightlabelplot <<- 
+  output$rightlabelplot <- 
     renderPlot(
       DimPlot(
         plaqviewobj,
@@ -1133,7 +1133,7 @@ server <<- function(input, output, session) {
     )# render plot
   
   ## download diffex
-  output$diffbyseurat <<- downloadHandler(
+  output$diffbyseurat <- downloadHandler(
     filename = "differential_markergenes_by_seurat_clusters.csv",
     content = function(file) {
       
@@ -1142,7 +1142,7 @@ server <<- function(input, output, session) {
       
     }  )# close downloadhandler
   
-  output$diffbyauthor <<- downloadHandler(
+  output$diffbyauthor <- downloadHandler(
     filename = "differential_markergenes_by_author_annotated_clusters.csv",
     content = function(file) {
       
@@ -1151,14 +1151,14 @@ server <<- function(input, output, session) {
       
     }  )# close downloadhandler
   
-  output$diffbysingleR <<- downloadHandler(
+  output$diffbysingleR <- downloadHandler(
     filename = "differential_markergenes_by_singleR_labels.csv",
     content = function(file) {
       file.copy(paste("data/", input$dataselector, "/",
                       "diff_by_singleR.csv", sep = ""), file)      
     }  )# close downloadhandler
   
-  output$diffbyTS <<- downloadHandler(
+  output$diffbyTS <- downloadHandler(
     filename = "differential_markergenes_by_tabulus_sapien_reference.csv",
     content = function(file) {
       file.copy(paste("data/", input$dataselector, "/",
@@ -1167,15 +1167,15 @@ server <<- function(input, output, session) {
   
   #### SER: CIPR ####
   observeEvent(input$runCIPR, {
-    pathforCIPR <<- file.path(paste("data/", input$dataselector, "/",
+    pathforCIPR <- file.path(paste("data/", input$dataselector, "/",
                                    input$CIPRoriginal, sep=""))
-    ciprinput <<- tryCatch(read.csv(file = pathforCIPR), error=function(e) NULL)
+    ciprinput <- tryCatch(read.csv(file = pathforCIPR), error=function(e) NULL)
     
     # this line is for wei's trouble shooting only
-    # ciprinput <<- tryCatch(read.csv(file = "../DataProcessing/data/Wirka_2019/diff_by_singleR.csv"), error=function(e) NULL)
+    # ciprinput <- tryCatch(read.csv(file = "../DataProcessing/data/Wirka_2019/diff_by_singleR.csv"), error=function(e) NULL)
     
     if(is.null(ciprinput) == TRUE){ # if author did not provide annotation
-      output$CIPRplot <<- 
+      output$CIPRplot <- 
         renderPlot({
           plot.new()
           par(bg = "#f7f7f7")
@@ -1187,10 +1187,10 @@ server <<- function(input, output, session) {
       
     } else { # if its not empty
       
-      ciprinput$gene <<- str_to_lower(ciprinput$gene)
+      ciprinput$gene <- str_to_lower(ciprinput$gene)
       
       # actual CIPR calculation
-      CIPR <<- CIPR(input_dat = ciprinput,
+      CIPR <- CIPR(input_dat = ciprinput,
                    comp_method = "logfc_dot_product", 
                    reference = input$CIPRreference, 
                    plot_ind = F,
@@ -1201,18 +1201,18 @@ server <<- function(input, output, session) {
       
       
       # plot
-      output$CIPRplot <<- renderPlot({
+      output$CIPRplot <- renderPlot({
         CIPR
       }) # renderplot
       
       # table for selected groups
-      output$brushedtop5 <<- renderDataTable(server = F, {
+      output$brushedtop5 <- renderDataTable(server = F, {
         validate(
           need(input$brushtop5, "Select data points for detailed information")
         )
-        brushedtable <<- brushedPoints(CIPR_top_results, input$brushtop5)
+        brushedtable <- brushedPoints(CIPR_top_results, input$brushtop5)
         
-        brushedtable.cleaned <<- brushedtable %>% 
+        brushedtable.cleaned <- brushedtable %>% 
           select(Cluster = cluster,
                  Reference = reference_cell_type, 
                  Ref.ID = reference_id,
@@ -1222,23 +1222,23 @@ server <<- function(input, output, session) {
                  Percent.Pos.Cor. = percent_pos_correlation
           )
         
-        brushedtable.cleaned$Percent.Pos.Cor. <<- paste(round(brushedtable.cleaned$Percent.Pos.Cor., 1), "%")
-        brushedtable.cleaned$Identity.Score <<- paste(round(brushedtable.cleaned$Identity.Score, 1), "")
+        brushedtable.cleaned$Percent.Pos.Cor. <- paste(round(brushedtable.cleaned$Percent.Pos.Cor., 1), "%")
+        brushedtable.cleaned$Identity.Score <- paste(round(brushedtable.cleaned$Identity.Score, 1), "")
         
         brushedtable.cleaned
         
       })
       
-      output$download_top5<<- downloadHandler(
+      output$download_top5<- downloadHandler(
         filename = function() {
           paste(input$dataselector, "_",
                 input$CIPRoriginal, "_", input$CIPRreference, "_", input$CIPRmethod,
                 "_result_tables.csv", sep = "")
         },
         content = function(file) {
-          brushedtable <<- brushedPoints(CIPR_top_results, input$brushtop5)
+          brushedtable <- brushedPoints(CIPR_top_results, input$brushtop5)
           
-          brushedtable.cleaned <<- brushedtable %>% 
+          brushedtable.cleaned <- brushedtable %>% 
             select(Cluster = cluster,
                    Reference = reference_cell_type, 
                    Ref.ID = reference_id,
@@ -1248,15 +1248,15 @@ server <<- function(input, output, session) {
                    Percent.Pos.Cor. = percent_pos_correlation
             )
           
-          brushedtable.cleaned$Percent.Pos.Cor. <<- paste(round(brushedtable.cleaned$Percent.Pos.Cor., 1), "%")
-          brushedtable.cleaned$Identity.Score <<- paste(round(brushedtable.cleaned$Identity.Score, 1), "")
+          brushedtable.cleaned$Percent.Pos.Cor. <- paste(round(brushedtable.cleaned$Percent.Pos.Cor., 1), "%")
+          brushedtable.cleaned$Identity.Score <- paste(round(brushedtable.cleaned$Identity.Score, 1), "")
         
           write.csv(brushedtable.cleaned, file, row.names = FALSE, col.names = T)
         }
         
       )# close downloadhandler
       
-      output$download_CIPRplot<<- downloadHandler(
+      output$download_CIPRplot<- downloadHandler(
         filename = function() {
           paste(input$dataselector, "_",
                 input$CIPRoriginal, "_", input$CIPRreference, "_", input$CIPRmethod,
@@ -1286,12 +1286,12 @@ server <<- function(input, output, session) {
     
     # pull out names of the different classes within meta.data and combine character.factors
     # Cf is the factor type
-    plaqview.metadata.character.type <<- names(plaqviewobj@meta.data %>% select_if(is.character))
-    plaqview.metadata.factor.type <<- names(plaqviewobj@meta.data %>% select_if(is.factor))
-    plaqview.metadata.cf <<- append(plaqview.metadata.character.type, plaqview.metadata.factor.type)
+    plaqview.metadata.character.type <- names(plaqviewobj@meta.data %>% select_if(is.character))
+    plaqview.metadata.factor.type <- names(plaqviewobj@meta.data %>% select_if(is.factor))
+    plaqview.metadata.cf <- append(plaqview.metadata.character.type, plaqview.metadata.factor.type)
     
     # numeric is the continuous type
-    plaqview.metadata.numeric.type <<- names(plaqviewobj@meta.data %>% select_if(is.numeric))
+    plaqview.metadata.numeric.type <- names(plaqviewobj@meta.data %>% select_if(is.numeric))
     
     updatePickerInput(session, "selectlabelmethodforgenequery.metadata",
                       label = "Select Unabridged Metadata Column (may be limited depending on dataset)",
@@ -1314,7 +1314,7 @@ server <<- function(input, output, session) {
                       selected = plaqview.metadata.cf[1])
   })
   #### factor variable plots ####
-  output$plot.factor.variables <<-
+  output$plot.factor.variables <-
     renderPlot(
       DimPlot(
         plaqviewobj,
@@ -1334,7 +1334,7 @@ server <<- function(input, output, session) {
     )# render plot
   
   #### cont. variable plots ####
-  output$plot.continuous.variables <<-
+  output$plot.continuous.variables <-
     renderPlot(
       VlnPlot(plaqviewobj, features = input$select.continuous.variables,
               group.by = input$select.continuous.variables.dependency)
@@ -1345,18 +1345,18 @@ server <<- function(input, output, session) {
   observeEvent(input$run.metadata,{ # observe event puts a pause until pushed
     #### NOMENCLATURE UPDATE ###
     if(df$Species[df$DataID == input$dataselector] == "Human"){
-      corrected <<- str_to_upper(input$genes.metadata)
+      corrected <- str_to_upper(input$genes.metadata)
     } else{
-      corrected <<- str_to_title(input$genes.metadata)
+      corrected <- str_to_title(input$genes.metadata)
     }
     
     updateTextInput(getDefaultReactiveDomain(),
                     "genes.metadata", value = corrected)
     
     # this is for the display
-    output$Dot.metadata <<- renderPlot({
+    output$Dot.metadata <- renderPlot({
       # parse string input 
-      user_genes.metadata <<- str_split(input$genes.metadata, ", ")[[1]]
+      user_genes.metadata <- str_split(input$genes.metadata, ", ")[[1]]
       validate(need(input$selectaplot_metadata=="Dot", message=FALSE))
       DotPlot(plaqviewobj, 
               group.by = input$selectlabelmethodforgenequery.metadata,
@@ -1368,7 +1368,7 @@ server <<- function(input, output, session) {
     })
     
     # this is for the download
-    output$download.Dot.metadata<<- downloadHandler(
+    output$download.Dot.metadata<- downloadHandler(
       filename = function() {
         paste("dotplotmetadata.pdf", sep = "")
       },
@@ -1376,9 +1376,9 @@ server <<- function(input, output, session) {
         pdf(file, width = 10, height = 6 ) # paper = defult is a4 size
         
         # parse string input 
-        user_genes.metadata <<- str_split(input$genes.metadata, ", ")[[1]]
+        user_genes.metadata <- str_split(input$genes.metadata, ", ")[[1]]
         validate(need(input$selectaplot_metadata=="Dot", message=FALSE))
-        temp <<- DotPlot(plaqviewobj, 
+        temp <- DotPlot(plaqviewobj, 
                 group.by = input$selectlabelmethodforgenequery.metadata,
                 features = user_genes.metadata) + # a trick to sep long string input
           ggtitle("Expression Dot Plot") +
@@ -1403,18 +1403,18 @@ server <<- function(input, output, session) {
   observeEvent(input$run.metadata,{ # observe event puts a pause until pushed
     #### NOMENCLATURE UPDATE ###
     if(df$Species[df$DataID == input$dataselector] == "Human"){
-      corrected <<- str_to_upper(input$genes.metadata)
+      corrected <- str_to_upper(input$genes.metadata)
     } else{
-      corrected <<- str_to_title(input$genes.metadata)
+      corrected <- str_to_title(input$genes.metadata)
     }
     
     updateTextInput(getDefaultReactiveDomain(),
                     "genes.metadata", value = corrected)
     
     # this is for the display
-    output$Ridge.metadata <<- renderPlot({
+    output$Ridge.metadata <- renderPlot({
       # parse string input 
-      user_genes.metadata <<- str_split(input$genes.metadata, ", ")[[1]]
+      user_genes.metadata <- str_split(input$genes.metadata, ", ")[[1]]
       validate(need(input$selectaplot_metadata=="Ridge", message=FALSE))
       RidgePlot(plaqviewobj, 
               group.by = input$selectlabelmethodforgenequery.metadata,
@@ -1426,7 +1426,7 @@ server <<- function(input, output, session) {
     })
     
     # this is for the download
-    output$download.Ridge.metadata<<- downloadHandler(
+    output$download.Ridge.metadata<- downloadHandler(
       filename = function() {
         paste("ridgeplotmetadata.pdf", sep = "")
       },
@@ -1435,9 +1435,9 @@ server <<- function(input, output, session) {
         pdf(file, width = 10, height = 6 )
         
         
-        user_genes.metadata <<- str_split(input$genes.metadata, ", ")[[1]]
+        user_genes.metadata <- str_split(input$genes.metadata, ", ")[[1]]
         validate(need(input$selectaplot_metadata=="Ridge", message=FALSE))
-        temp <<- RidgePlot(plaqviewobj, 
+        temp <- RidgePlot(plaqviewobj, 
                         group.by = input$selectlabelmethodforgenequery.metadata,
                         features = user_genes.metadata) + # a trick to sep long string input
           ggtitle("Expression Ridge Plot") +
@@ -1460,7 +1460,7 @@ server <<- function(input, output, session) {
   
   
   #### SER: RNATraject ####
-  output$originaltrajectory <<- 
+  output$originaltrajectory <- 
     renderPlot(
       plot_cells(plaqviewobj.cds,
                  color_cells_by = "assigned_cell_type",
@@ -1473,14 +1473,14 @@ server <<- function(input, output, session) {
       ) # renderplot
   
   # this is for the download
-  output$downloadoriginaltrajectory<<- downloadHandler(
+  output$downloadoriginaltrajectory<- downloadHandler(
     filename = function() {
       paste(input$dataselector, "_original_trajectory.pdf", sep = "")
     },
     content = function(file) {
       pdf(file, paper = "default") # paper = defult is a4 size
     
-      temp <<- plot_cells(plaqviewobj.cds,
+      temp <- plot_cells(plaqviewobj.cds,
                  color_cells_by = "assigned_cell_type",
                  label_groups_by_cluster=F,
                  show_trajectory_graph = T,
@@ -1495,24 +1495,24 @@ server <<- function(input, output, session) {
   
   
   #### subset plot
-  reduction_method <<- "UMAP"
+  reduction_method <- "UMAP"
 
   observeEvent(input$loaddatabutton, {
-    vals <<- reactiveValues(
+    vals <- reactiveValues(
       keeprows = rep(FALSE, nrow(colData(plaqviewobj.cds)))
     )
-    reduced_dims <<- as.data.frame(reducedDims(plaqviewobj.cds)[[reduction_method]])
-    names(reduced_dims)[1:2] <<- c("V1", "V2")
+    reduced_dims <- as.data.frame(reducedDims(plaqviewobj.cds)[[reduction_method]])
+    names(reduced_dims)[1:2] <- c("V1", "V2")
     
     
-    vals <<- shiny::reactiveValues(
+    vals <- shiny::reactiveValues(
       keeprows = rep(FALSE, nrow(colData(plaqviewobj.cds)))
     )
     
 
-    output$plot1 <<- renderPlot({
+    output$plot1 <- renderPlot({
       # Plot the kept and excluded points as two separate data sets
-      colData(plaqviewobj.cds)$keep <<- vals$keeprows
+      colData(plaqviewobj.cds)$keep <- vals$keeprows
       suppressMessages(plot_cells(plaqviewobj.cds, reduction_method = reduction_method,
                                   color_cells_by = "assigned_cell_type",
                                   label_groups_by_cluster=F,
@@ -1529,72 +1529,72 @@ server <<- function(input, output, session) {
     
     # Toggle points that are clicked
     observeEvent(input$plot1_click, {
-      res <<- nearPoints(reduced_dims,
+      res <- nearPoints(reduced_dims,
                         xvar = "V1", yvar = "V2", input$plot1_click,
                         allRows = TRUE)
-      vals$keeprows <<- vals$keeprows | res$selected_
+      vals$keeprows <- vals$keeprows | res$selected_
     })
     
     # Toggle points that are brushed, when button is clicked
     observeEvent(input$choose_toggle, {
-      res <<- brushedPoints(reduced_dims,
+      res <- brushedPoints(reduced_dims,
                            xvar = "V1", yvar = "V2", input$plot1_brush,
                            allRows = TRUE)
-      vals$keeprows <<- vals$keeprows | res$selected_
+      vals$keeprows <- vals$keeprows | res$selected_
     })
     
     # Reset all points
     observeEvent(input$reset, {
-      vals$keeprows <<- rep(FALSE, nrow(colData(plaqviewobj.cds)))
+      vals$keeprows <- rep(FALSE, nrow(colData(plaqviewobj.cds)))
     })
     ### selected/recalulated trajectory
     observeEvent(input$redomonocle3, {
       
       # this is the selected cells
-      selectedcells <<- vals$keeprows
+      selectedcells <- vals$keeprows
       
       
       # get selected cells id
-      cds_subsetIDs <<- row.names(colData(plaqviewobj.cds)[selectedcells,])
+      cds_subsetIDs <- row.names(colData(plaqviewobj.cds)[selectedcells,])
       # recreate a cds obj that doesnt contain any prior UMAPS
-      expressiondata <<- plaqviewobj@assays[["RNA"]]@data
-      cellmd <<- plaqviewobj@meta.data
+      expressiondata <- plaqviewobj@assays[["RNA"]]@data
+      cellmd <- plaqviewobj@meta.data
       
-      genemd <<- data.frame(gene_short_name = row.names(expressiondata), 
+      genemd <- data.frame(gene_short_name = row.names(expressiondata), 
                            row.names = row.names(expressiondata))
-      plaqviewobj.cds_NEW <<- new_cell_data_set(expression_data = expressiondata,
+      plaqviewobj.cds_NEW <- new_cell_data_set(expression_data = expressiondata,
                                                cell_metadata = cellmd,
                                                gene_metadata = genemd)
       
-      subsetted <<- plaqviewobj.cds[,cds_subsetIDs]
+      subsetted <- plaqviewobj.cds[,cds_subsetIDs]
       
-      subsetted <<- preprocess_cds(subsetted, num_dim = 25) # we used 30 in earlier seurat scripts
+      subsetted <- preprocess_cds(subsetted, num_dim = 25) # we used 30 in earlier seurat scripts
       
       
       # reproject cells now
-      subsetted <<- reduce_dimension(subsetted, reduction_method = "UMAP")
-      subsetted <<- cluster_cells(subsetted, reduction_method = "UMAP")
+      subsetted <- reduce_dimension(subsetted, reduction_method = "UMAP")
+      subsetted <- cluster_cells(subsetted, reduction_method = "UMAP")
       
-      subsetted <<- learn_graph(subsetted)
+      subsetted <- learn_graph(subsetted)
       
       # a helper function to identify the root principal points:
-      get_earliest_principal_node <<- function(cds, assigned_cell_type= "SMCs"){ # change celltype if desired
-        cell_ids <<- which(colData(cds)[, "assigned_cell_type"] == assigned_cell_type)
+      get_earliest_principal_node <- function(cds, assigned_cell_type= "SMCs"){ # change celltype if desired
+        cell_ids <- which(colData(cds)[, "assigned_cell_type"] == assigned_cell_type)
         
-        closest_vertex <<-
+        closest_vertex <-
           cds@principal_graph_aux[["UMAP"]]$pr_graph_cell_proj_closest_vertex
-        closest_vertex <<- as.matrix(closest_vertex[colnames(cds), ])
-        root_pr_nodes <<-
+        closest_vertex <- as.matrix(closest_vertex[colnames(cds), ])
+        root_pr_nodes <-
           igraph::V(principal_graph(cds)[["UMAP"]])$name[as.numeric(names
                                                                     (which.max(table(closest_vertex[cell_ids,]))))]
         
         root_pr_nodes
       }
       
-      subsetted <<- order_cells(subsetted, root_pr_nodes=get_earliest_principal_node(subsetted),
+      subsetted <- order_cells(subsetted, root_pr_nodes=get_earliest_principal_node(subsetted),
                                reduction_method = "UMAP")
       # plot subset plots 
-      output$subsettrajectory <<-
+      output$subsettrajectory <-
         renderPlot(
           plot_cells(subsetted,
                      color_cells_by = "assigned_cell_type",
@@ -1608,14 +1608,14 @@ server <<- function(input, output, session) {
                      scale_to_range = T)       ) # renderplot
     }) # observe event
     
-    output$downloadsubsettrajectory<<- downloadHandler(
+    output$downloadsubsettrajectory<- downloadHandler(
       filename = function() {
         paste(input$dataselector, "_subset_trajectory.pdf", sep = "")
       },
       content = function(file) {
         pdf(file, paper = "default") # paper = defult is a4 size
         
-        temp <<- plot_cells(subsetted,
+        temp <- plot_cells(subsetted,
                            color_cells_by = "assigned_cell_type",
                            label_groups_by_cluster=F,
                            show_trajectory_graph = T,
@@ -1649,9 +1649,9 @@ server <<- function(input, output, session) {
       
       #### NOMENCLATURE UPDATE ###
       if(df$Species[df$DataID == input$dataselector] == "Human"){
-        corrected <<- str_to_upper(input$druggeneinput)
+        corrected <- str_to_upper(input$druggeneinput)
       } else{
-        corrected <<- str_to_title(input$druggeneinput)
+        corrected <- str_to_title(input$druggeneinput)
       }
       
       updateTextInput(getDefaultReactiveDomain(),
@@ -1659,38 +1659,38 @@ server <<- function(input, output, session) {
                       value = corrected) # correct to
       
       # updated gene name is now here
-      updated_druggeneinput <<- input$druggeneinput
+      updated_druggeneinput <- input$druggeneinput
       
-      druggenes <<- str_split(updated_druggeneinput, ", ")[[1]]
+      druggenes <- str_split(updated_druggeneinput, ", ")[[1]]
       
       # set active. identity
-      Idents(plaqviewobj) <<- input$drugcelllabelmethod
+      Idents(plaqviewobj) <- input$drugcelllabelmethod
       
       
-      result <<- queryDGIdb(updated_druggeneinput,
+      result <- queryDGIdb(updated_druggeneinput,
                            sourceDatabases = input$dgidbdatabase)
-      fulltable <<- result@data[["interactions"]][[1]]
+      fulltable <- result@data[["interactions"]][[1]]
       
       # show download buttons
       enable("downloadfeaturefordrugumap")
       enable("downloadfulltable")
       
-      #fulltable$score <<- as.numeric(fulltable$score) # bypass DT error
+      #fulltable$score <- as.numeric(fulltable$score) # bypass DT error
       
       # so if table becomes a list (empty), run the following
       # this is a table to show no drugs available
       if (class(fulltable) == "list" ) {
-        nodrug <<- matrix(c("No Drugs Found"),ncol=4,byrow=TRUE)
-        colnames(nodrug) <<- c("drugName","interactionTypes","score","drugConceptId")
-        nodrug <<- as_data_frame(nodrug)
+        nodrug <- matrix(c("No Drugs Found"),ncol=4,byrow=TRUE)
+        colnames(nodrug) <- c("drugName","interactionTypes","score","drugConceptId")
+        nodrug <- as_data_frame(nodrug)
         
-        isolatedtable <<- nodrug
-        fulltable <<- nodrug
+        isolatedtable <- nodrug
+        fulltable <- nodrug
         
       }
       
       if (class(fulltable) == "data.frame" ) {
-        isolatedtable <<-  fulltable %>% # reorder columns
+        isolatedtable <-  fulltable %>% # reorder columns
           select("Drug_Name" = drugName, 
                  "Interaction_Types" = interactionTypes, # rename columns might as well :)
                  "Int_Score" = score , 
@@ -1700,14 +1700,14 @@ server <<- function(input, output, session) {
           )
         
         # these need to be run to 'flatten' the list-type columns
-        fulltable <<- fulltable %>% mutate(interactionTypes = map_chr(interactionTypes, toString))
-        fulltable <<- fulltable %>% mutate(sources = map_chr(sources, toString))
-        fulltable <<- fulltable %>% mutate(pmids = map_chr(pmids, toString))
+        fulltable <- fulltable %>% mutate(interactionTypes = map_chr(interactionTypes, toString))
+        fulltable <- fulltable %>% mutate(sources = map_chr(sources, toString))
+        fulltable <- fulltable %>% mutate(pmids = map_chr(pmids, toString))
       }
       
       # plots
-      output$featurefordrugs <<- renderPlot({
-        user_genes <<- str_split(corrected, ", ")[[1]]
+      output$featurefordrugs <- renderPlot({
+        user_genes <- str_split(corrected, ", ")[[1]]
         FeaturePlot(plaqviewobj, 
                     features = user_genes, label = T, repel = T
         ) + # a trick to sep long string input
@@ -1716,16 +1716,16 @@ server <<- function(input, output, session) {
           theme(plot.title = element_text(hjust =  0.5)) 
       }) # render plot
       
-      output$downloadfeaturefordrugumap<<- downloadHandler(
+      output$downloadfeaturefordrugumap<- downloadHandler(
         filename = function() {
           paste(input$dataselector, "-querydrug_umap.pdf", sep = "")
         },
         content = function(file) {
           pdf(file, paper = "default") # paper = defult is a4 size
           
-          user_genes <<- str_split(corrected, ", ")[[1]]
+          user_genes <- str_split(corrected, ", ")[[1]]
           
-          temp <<- FeaturePlot(plaqviewobj,
+          temp <- FeaturePlot(plaqviewobj,
                               order = T,
                               pt.size = 1,
                               features = user_genes, label = T, repel = T) + # a trick to sep long string input
@@ -1739,14 +1739,14 @@ server <<- function(input, output, session) {
       )# close downloadhandler
       
       # render table
-      output$dgidboutput <<- DT::renderDataTable(isolatedtable,  server = F)
+      output$dgidboutput <- DT::renderDataTable(isolatedtable,  server = F)
       
     
-      output$downloadfulltable <<- downloadHandler(
+      output$downloadfulltable <- downloadHandler(
         filename = paste("dgidb_full_output.csv"),
         content = function(file) {
           
-          temp <<- as.data.frame(fulltable)
+          temp <- as.data.frame(fulltable)
           
           write_csv(temp, file )
          # write_csv(temp, file = "Documents/test.csv" )
@@ -1762,7 +1762,7 @@ server <<- function(input, output, session) {
     
   #### SER: About Functions #### 
   
-  output$downloadsessioninfo <<- downloadHandler(
+  output$downloadsessioninfo <- downloadHandler(
     filename = paste(date(), "sesssioninfo.txt"),
     content = function(file) {
       write_lines(sessionInfo(), file)
