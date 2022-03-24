@@ -867,26 +867,16 @@ server <- function(input, output, session) {
           )
       ) # closes renderPlot
   })
-  observeEvent(input$runcode,{ 
-    
-    #### NOMENCLATURE UPDATE ####
-    if(df$Species[df$DataID == input$dataselector] == "Human"){
-      corrected <- str_to_upper(input$genes)
-    } else{
       corrected <- str_to_title(input$genes)
-    }
-    
-    updateTextInput(getDefaultReactiveDomain(),
                     "genes", value = corrected)
-    
-  })# closes observe event
   
-  # download UMAP (basic)
+  # DOWNLOAD-UMAP
   output$downloadumapplot<- downloadHandler(
     filename = function() {
       paste("UMAP.pdf", sep = "")
     },
     content = function(file) {
+<<<<<<< Updated upstream
       pdf(file, paper = "default") # paper = defult is a4 size
       user_genes <- str_split(input$genes, ", ")[[1]]
 
@@ -906,12 +896,34 @@ server <- function(input, output, session) {
         ggtitle("UMAP by Cell Type") +
         theme(plot.title = element_text(hjust =  0.5)) +
         guides(color = guide_legend(nrow = 5))
+=======
+      repeat{
+        pdf(file, paper = "default") # paper = defult is a4 size
+        user_genes <- str_split(input$genes, ", ")[[1]]
+        temp <- DimPlot(
+          plaqviewobj,
+          reduction = "umap",
+          label = TRUE,
+          label.size = 5,
+          repel = T,
+          # repel labels
+          pt.size = 1,
+          cols = color_function(length(unique(plaqviewobj@meta.data[[input$selectlabelmethodforgenequery]]))),
+          group.by = input$selectlabelmethodforgenequery) + # group.by is important, use this to call metadata separation
+          theme(legend.position="bottom", 
+                legend.box = "vertical") +
+          ggtitle("UMAP by Cell Type") +
+          theme(plot.title = element_text(hjust =  0.5)) +
+          guides(color = guide_legend(nrow = 5))
+      
+        if (is.null(temp) == FALSE) break
+      }# repeat
+>>>>>>> Stashed changes
       
       plot(temp) #this is all you need
       
       dev.off()
-    }
-    
+    } # content
   )# close downloadhandler
   
   #### dot plot ###
