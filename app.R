@@ -887,6 +887,7 @@ server <- function(input, output, session) {
       paste("UMAP.pdf", sep = "")
     },
     content = function(file) {
+      download.UMAP.
       pdf(file, paper = "default") # paper = defult is a4 size
       user_genes <- str_split(input$genes, ", ")[[1]]
 
