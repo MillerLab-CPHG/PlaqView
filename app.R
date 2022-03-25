@@ -874,9 +874,10 @@ server <- function(input, output, session) {
       paste("UMAP.pdf", sep = "")
     },
     content = function(file) {
+      pdf(file, paper = "default") # paper = defult is a4 size
+      user_genes <- str_split(input$genes, ", ")[[1]]
+      
       repeat{
-        pdf(file, paper = "default") # paper = defult is a4 size
-        user_genes <- str_split(input$genes, ", ")[[1]]
         temp <- DimPlot(
           plaqviewobj,
           reduction = "umap",
@@ -893,7 +894,7 @@ server <- function(input, output, session) {
           theme(plot.title = element_text(hjust =  0.5)) +
           guides(color = guide_legend(nrow = 5))
       
-        if (is.null(temp) == FALSE) break
+        if (exists("temp") == TRUE ) break
       }# repeat
       
       plot(temp) #this is all you need
