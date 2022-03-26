@@ -79,6 +79,7 @@ library(monocle3)
 library(ggpubr)
 library(gtools)
 library(CIPR)
+library(reactable)
 # library(reactlog)
 # library(future)
 # 
