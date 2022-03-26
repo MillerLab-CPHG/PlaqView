@@ -1,5 +1,5 @@
 # Install R version 4.0.5
-FROM wfma888/plaqviewmaster:testing_archr_03162022   
+FROM wfma888/plaqviewmaster:testing_archr_03262022   
 
 # Install Shiny server
 RUN wget --no-verbose https://s3.amazonaws.com/rstudio-shiny-server-os-build/ubuntu-12.04/x86_64/VERSION -O "version.txt" && \

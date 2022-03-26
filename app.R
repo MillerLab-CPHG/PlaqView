@@ -93,14 +93,14 @@ googlesheets4::gs4_deauth() # this tells google sheet to read-only
 df <- googlesheets4::read_sheet("https://docs.google.com/spreadsheets/d/1hLyjPFA2ZRpBLHnTgUnmDz7kimMZWFbz_ZGTml3-hRA/edit#gid=0")
 # df <- read.csv("https://docs.google.com/spreadsheets/d/e/2PACX-1vTF5Gw4Dbshlh3wVB8UAMswUEiOn4NEzXaEp8x73NtbWY3n4oIrWEVNMIwNYyInJM7k70G1lUcr7x9g/pub?output=csv")
 
-df$DOI <- paste("<a href=",  df$DOI,">", "Link", "</a>") # this converts to clickable format
+# df$DOI <- paste("<a href=",  df$DOI,">", "Link", "</a>") # this converts to clickable format
 
 # subset data rows that are marked 'deployed = Yes"
 df <- filter(df, `Deployed` == "Yes")
 df <- df %>% 
   select('DataID', Year, Journal, DOI, Species, Tissue, Notes, Population, Cells = Cell.Number, `Article.Title` ) 
 df$`Article.Title` <- str_to_title(df$`Article.Title`) # autocaps
-
+df$Cells <- as.numeric(df$Cells)
 #### UI ####
 # Define UI for application that draws a histogram
 ui <- fluidPage(
@@ -189,15 +189,13 @@ ui <- fluidPage(
                                 ) # fluid row 
                                 ), # mainpanel
                       mainPanel(width = 12,
-                                wellPanel(
+                               
                                   h4("Details of Single- Cell Dataset and IDs"),
                                   actionButton(inputId = "refreshtable", "Fetch Latest Dataset Details"),
-                                  br(),
-                                  br(),
-                                  DT::dataTableOutput('availabledatasettable'),
+                                  reactableOutput("availabledatasettable"),
                                   br(),
                                   inlineCSS(list("table" = "font-size: 12px")),
-                                          ),
+                                        
                               
                       )
              ),
@@ -758,22 +756,69 @@ ui <- fluidPage(
 # Define server logic required to draw a histogram
 server <- function(input, output, session) {
   #### SER: Data ####
+  # output$availabledatasettable <-
+  #   DT::renderDataTable(df, server = F, # server is for speed/loading
+  #                       selection = list(mode = 'single'),
+  #                       # options=list(columnDefs = list(list(visible=FALSE, targets=c(10)))), # this hides the #8 col (datasetID)
+  #                       options = list(pageLength = 20),
+  #                       escape = FALSE) # this escapes rendering html (link) literally and makes link clickable
+  # 
   output$availabledatasettable <-
-    DT::renderDataTable(df, server = F, # server is for speed/loading
-                        selection = list(mode = 'single'),
-                        # options=list(columnDefs = list(list(visible=FALSE, targets=c(10)))), # this hides the #8 col (datasetID)
-                        options = list(pageLength = 20),
-                        escape = FALSE) # this escapes rendering html (link) literally and makes link clickable
+    renderReactable({
+      reactable(df, compact = T, searchable = T, defaultPageSize = 20,
+                defaultColDef = colDef(
+                  header = function(value) gsub(".", " ", value, fixed = TRUE),
+                  # ell = function(value) format(value, nsmall = 1),
+                  align = "center",
+                  minWidth  = 50,
+                  headerStyle = list(background = "#f7f7f8")
+                ),
+                columns = list(
+                  'Article.Title' = colDef(minWidth = 200,
+                  ),
+                  # DOI = colDef(html = TRUE, cell = function(value, index) {
+                  #   # this is raw html
+                  #   sprintf('<a href="%s" target="_blank">LINK</a>', df$DOI[index], value)
+                  #   }),
+                  Cells = colDef(format = colFormat(separators = TRUE),
+                                 footer = paste0("Total Cells: ", sum(as.numeric(df$Cells)))
+                  ),
+                  
+                  Journal = colDef(html = TRUE, cell = function(value, index) {
+                    sprintf('<a href="%s" target="_blank">%s</a>', df$DOI[index], value)
+                  }),       
+                  Year = colDef(show = T),
+                  DOI = colDef(show = F),
+                  
+                  Tissue = colDef(show = F),
+                  Notes = colDef(show = F),
+                  Species = colDef(show = T),
+                  DataID = colDef(
+                    minWidth = 100,
+                    name = "Data ID",
+                    html = TRUE,
+                    cell = function(value, index){
+                      species <- df$Species[index]
+                      year <- df$Year[index]
+                      tissue <- df$Tissue[index]
+                      Notes <- df$Notes[index]
+                      DOI <- df$DOI[index]
+                      div(
+                        div(style = list(fontWeight = 600), value),
+                        #div(style = list(fontSize = 12), species),
+                        #div(style = list(fontSize = 12), year),
+                        div(style = list(fontSize = 12), tissue),
+                        div(style = list(fontSize = 12), Notes)
+                      )# div
+                    }
+                  )
+                )
+      )
+      
+      
+    })
   
-  # second of the same code.. may help resolve datatable not loading error
-  output$availabledatasettable <-
-    DT::renderDataTable(df, server = F, # server is for speed/loading
-                        selection = list(mode = 'single'),
-                        # options=list(columnDefs = list(list(visible=FALSE, targets=c(10)))), # this hides the #8 col (datasetID)
-                        options = list(pageLength = 20),
-                        escape = FALSE) # this escapes rendering html (link) literally and makes link clickable
-  
-  # refresh button
+   # refresh button
   observeEvent(input$refreshtable, {
     session$reload()
     session$reload()
