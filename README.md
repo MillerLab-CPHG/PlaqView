@@ -1,4 +1,4 @@
-## PlaqView is LIVE! Check it out at [plaqview.com](www.plaqview.com)
+## PlaqView is LIVE! Check it out at [plaqview.com](https://plaqview.com)
 
 ## News
 
