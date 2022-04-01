@@ -122,7 +122,7 @@ ui <- fluidPage(
              tabPanel("Select Dataset", 
                       mainPanel(width = 12,
                                 fluidRow(
-                                  column(width = 7,
+                                  column(width = 6,
                                          wellPanel(
                                            img(src = "logo.png", width = '100%'),
                                            br(),
@@ -177,11 +177,11 @@ ui <- fluidPage(
                                            ),
                                            )
                                   ),
-                                  column(width = 5,
+                                  column(width = 6,
                                          wellPanel(
                   
                                            includeMarkdown("descriptionfiles/helptext_welcome.Rmd"),
-                                           img(src = "abstract.png", width = '100%'),
+                                           img(src = "ab.png", width = '100%'),
                                          )
                                          ), # column
                                   
