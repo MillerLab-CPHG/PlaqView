@@ -80,6 +80,7 @@ library(ggpubr)
 library(gtools)
 library(CIPR)
 library(reactable)
+library(markdown)
 # library(reactlog)
 # library(future)
 # 
@@ -121,9 +122,10 @@ ui <- fluidPage(
              tabPanel("Select Dataset", 
                       mainPanel(width = 12,
                                 fluidRow(
-                                  column(width = 5,
+                                  column(width = 7,
                                          wellPanel(
                                            img(src = "logo.png", width = '100%'),
+                                           br(),
                                            h3("Instructions:"),
                                            tags$ol(
                                              tags$li("Select a dataset from the BLUE drop-down Menu."),
@@ -132,7 +134,6 @@ ui <- fluidPage(
                                              tags$li("(Optional) come back to this page to load another dataset.")
                                              
                                            ),
-                                           br(),
                                            fluidRow(
                                              column(width = 12,
                                                     # load data button
@@ -173,13 +174,12 @@ ui <- fluidPage(
                                                     
                                              ),
                                            
-                                                    
-                                             
                                            ),
                                            )
                                   ),
-                                  column(width = 7,
+                                  column(width = 5,
                                          wellPanel(
+                  
                                            includeMarkdown("descriptionfiles/helptext_welcome.Rmd"),
                                            img(src = "abstract.png", width = '100%'),
                                          )
@@ -190,8 +190,9 @@ ui <- fluidPage(
                                 ) # fluid row 
                                 ), # mainpanel
                       mainPanel(width = 12,
-                               
-                                  h4("Details of Single- Cell Dataset and IDs"),
+                               wellPanel(  
+                                 h4("Details of Single- Cell Dataset and IDs"),
+                                           ),
                                   actionButton(inputId = "refreshtable", "Fetch Latest Dataset Details"),
                                   reactableOutput("availabledatasettable"),
                                   br(),
@@ -828,12 +829,6 @@ server <- function(input, output, session) {
     session$reload()
     session$reload()
     
-    output$availabledatasettable <-
-      DT::renderDataTable(df, server = F, # server is for speed/loading
-                          selection = list(mode = 'single'),
-                          # options=list(columnDefs = list(list(visible=FALSE, targets=c(10)))), # this hides the #8 col (datasetID)
-                          options = list(pageLength = 20),
-                          escape = FALSE) # this escapes rendering html (link) literally and makes link clickable
     
   })
   

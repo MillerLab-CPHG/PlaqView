@@ -1,7 +1,6 @@
 reactable(df, compact = T, searchable = T, defaultPageSize = 20,
           defaultColDef = colDef(
             header = function(value) gsub(".", " ", value, fixed = TRUE),
-           # ell = function(value) format(value, nsmall = 1),
             align = "center",
             minWidth  = 50,
             headerStyle = list(background = "#f7f7f8")
