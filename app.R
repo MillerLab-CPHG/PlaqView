@@ -137,7 +137,7 @@ ui <- fluidPage(
                                            fluidRow(
                                              column(width = 12,
                                                     # load data button
-                                                    h4("Select a Dataset"),
+                                                    h3("Select a Dataset"),
                                                     pickerInput(
                                                       inputId = "dataselector",
                                                       #label = "Select a Dataset", 
@@ -190,12 +190,15 @@ ui <- fluidPage(
                                 ) # fluid row 
                                 ), # mainpanel
                       mainPanel(width = 12,
-                               wellPanel(  
+                               wellPanel(
+                                 #style = "background: white",
                                  h4("Details of Single- Cell Dataset and IDs"),
+                                 reactableOutput("availabledatasettable"),
+                                 
                                            ),
-                                  actionButton(inputId = "refreshtable", "Fetch Latest Dataset Details"),
-                                  reactableOutput("availabledatasettable"),
                                   br(),
+                                  actionButton(inputId = "refreshtable", "Fetch Latest Dataset Details"),
+                               
                                   inlineCSS(list("table" = "font-size: 12px")),
                                         
                               
@@ -765,9 +768,13 @@ server <- function(input, output, session) {
   #                       options = list(pageLength = 20),
   #                       escape = FALSE) # this escapes rendering html (link) literally and makes link clickable
   # 
+  
+  
   output$availabledatasettable <-
     renderReactable({
-      reactable(df, compact = T, searchable = T, defaultPageSize = 20,
+      reactable(df, compact = T, searchable = T, defaultPageSize = 20, resizable = T,
+                theme = reactableTheme(
+                  backgroundColor = "#f0f4f4"),
                 defaultColDef = colDef(
                   header = function(value) gsub(".", " ", value, fixed = TRUE),
                   # ell = function(value) format(value, nsmall = 1),
