@@ -7,4 +7,4 @@ output: html_document
 
 This is an additional tool to help users further asset the quality of the current annotation or to further explore differential gene expressions.
 
-We acknowledge and thank [Ekiz *et al.* (2020)](https://bmcbioinformatics.biomedcentral.com/articles/10.1186/s12859-020-3538-2) for their publication and development of CIPR. By default,PlaqView will run CIPR with the **LogFC Dot Product Method** (LogFC values of the matching genes are mutliplied and added together to yield an aggregate identity score). **For details about CIPR, definitions, and references, please see their [website](https://github.com/atakanekiz/CIPR-Package "CIPR GitHub").**
+We acknowledge and thank [Ekiz *et al.* (2020)](https://bmcbioinformatics.biomedcentral.com/articles/10.1186/s12859-020-3538-2) for their publication and development of CIPR. By default, PlaqView will run CIPR with the **LogFC Dot Product Method** (LogFC values of the matching genes are mutliplied and added together to yield an aggregate identity score). **For details about CIPR, definitions, and references, please see their [website](https://github.com/atakanekiz/CIPR-Package "CIPR GitHub").**

@@ -772,7 +772,7 @@ server <- function(input, output, session) {
   
   output$availabledatasettable <-
     renderReactable({
-      reactable(df, compact = T, searchable = T, defaultPageSize = 20, resizable = T,
+      reactable(df, compact = T, searchable = T, defaultPageSize = 10, resizable = T,
                 theme = reactableTheme(
                   backgroundColor = "#f0f4f4"),
                 defaultColDef = colDef(
