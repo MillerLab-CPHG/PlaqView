@@ -903,7 +903,7 @@ server <- function(input, output, session) {
           label.size = 5,
           repel = T,
           # repel labels
-          pt.size = 1,
+          pt.size = 1, raster = F,
           cols = color_function(length(unique(plaqviewobj@meta.data[[input$selectlabelmethodforgenequery]]))),
           # this enables dynamic # of colors based on # of labels given, sorry about the horrible nesting
           group.by = input$selectlabelmethodforgenequery) + # group.by is important, use this to call metadata separation
@@ -933,7 +933,7 @@ server <- function(input, output, session) {
           label.size = 5,
           repel = T,
           # repel labels
-          pt.size = 1,
+          pt.size = 1, raster = F,
           cols = color_function(length(unique(plaqviewobj@meta.data[[input$selectlabelmethodforgenequery]]))),
           group.by = input$selectlabelmethodforgenequery) + # group.by is important, use this to call metadata separation
           theme(legend.position="bottom", 
@@ -1154,7 +1154,7 @@ server <- function(input, output, session) {
         label.size = 5,
         repel = T,
         # repel labels
-        pt.size = 1,
+        pt.size = 1, raster = F,
         cols = color_function(length(unique(plaqviewobj@meta.data[[input$leftlabeltype]]))),
         group.by = input$leftlabeltype ) + # group.by is important, use this to call metadata separation
         theme(legend.position="bottom", 
@@ -1173,7 +1173,7 @@ server <- function(input, output, session) {
         label.size = 5,
         repel = T,
         # repel labels
-        pt.size = 1,
+        pt.size = 1, raster = F,
         cols = color_function(length(unique(plaqviewobj@meta.data[[input$rightlabeltype]]))),
         group.by = input$rightlabeltype ) + # group.by is important, use this to call metadata separation
         theme(legend.position="bottom", 
@@ -1374,7 +1374,7 @@ server <- function(input, output, session) {
         label.size = 5,
         repel = T,
         # repel labels
-        pt.size = 1,
+        pt.size = 1, raster = F,
         cols = color_function(length(unique(plaqviewobj@meta.data[[input$select.factor.variables]]))),
         group.by = input$select.factor.variables ) + # group.by is important, use this to call metadata separation
         theme(legend.position="bottom", 
