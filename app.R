@@ -102,7 +102,7 @@ df <- filter(df, `Deployed` == "Yes")
 df <- df %>% 
   select('DataID', Year, Journal, DOI, Species, Tissue, Notes, Population, Cells = Cell.Number, `Article.Title` ) 
 df$`Article.Title` <- str_to_title(df$`Article.Title`) # autocaps
-df$Cells <- as.numeric(df$Cells)
+df$Cells <- as.numeric(df$Cells) 
 #### UI ####
 # Define UI for application that draws a histogram
 ui <- fluidPage(
