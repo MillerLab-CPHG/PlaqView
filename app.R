@@ -98,9 +98,9 @@ df <- googlesheets4::read_sheet("https://docs.google.com/spreadsheets/d/1hLyjPFA
 # df$DOI <- paste("<a href=",  df$DOI,">", "Link", "</a>") # this converts to clickable format
 
 # subset data rows that are marked 'deployed = Yes"
-df <- filter(df, `Deployed` == "Yes")
+df <- dplyr::filter(df, `Deployed` == "Yes")
 df <- df %>% 
-  select('DataID', Year, Journal, DOI, Species, Tissue, Notes, Population, Cells = Cell.Number, `Article.Title` ) 
+  dplyr::select('DataID', Year, Journal, DOI, Species, Tissue, Notes, Population, Cells = Cell.Number, `Article.Title` ) 
 df$`Article.Title` <- str_to_title(df$`Article.Title`) # autocaps
 df$Cells <- as.numeric(df$Cells) 
 #### UI ####
@@ -1116,11 +1116,11 @@ server <- function(input, output, session) {
       parsed.genes <- str_split(input$genes, ", ")[[1]]
       enriched <- enrichr(genes = parsed.genes, 
                           database = enrichRdb) # this queries all of them
-      cleanedenrichedtable <- select(enriched[[input$selectedenrichRdb]], -Old.Adjusted.P.value, -Old.P.value,)
+      cleanedenrichedtable <- dplyr::select(enriched[[input$selectedenrichRdb]], -Old.Adjusted.P.value, -Old.P.value,)
       cleanedenrichedtable <- top_n(cleanedenrichedtable, 100) # top 100 will be rendered
       
       #select columns to display
-      cleanedenrichedtable <- cleanedenrichedtable %>% select(Term, Overlap, Adjusted.P.value, Combined.Score, Genes)
+      cleanedenrichedtable <- cleanedenrichedtable %>% dplyr::select(Term, Overlap, Adjusted.P.value, Combined.Score, Genes)
       
       # force as.numeric to remove a bug in DT pkg
       #cleanedenrichedtable$Adjusted.P.value <- as.numeric(cleanedenrichedtable$Adjusted.P.value)
@@ -1264,7 +1264,7 @@ server <- function(input, output, session) {
         brushedtable <- brushedPoints(CIPR_top_results, input$brushtop5)
         
         brushedtable.cleaned <- brushedtable %>% 
-          select(Cluster = cluster,
+          dplyr::select(Cluster = cluster,
                  Reference = reference_cell_type, 
                  Ref.ID = reference_id,
                  Full.Name = long_name,
@@ -1290,7 +1290,7 @@ server <- function(input, output, session) {
           brushedtable <- brushedPoints(CIPR_top_results, input$brushtop5)
           
           brushedtable.cleaned <- brushedtable %>% 
-            select(Cluster = cluster,
+            dplyr::select(Cluster = cluster,
                    Reference = reference_cell_type, 
                    Ref.ID = reference_id,
                    Full.Name = long_name,
@@ -1371,7 +1371,7 @@ server <- function(input, output, session) {
         plaqviewobj,
         reduction = "umap",
         label = TRUE,
-        label.size = 5,
+        label.size = 6,
         repel = T,
         # repel labels
         pt.size = 1, raster = F,
@@ -1387,7 +1387,7 @@ server <- function(input, output, session) {
   #### cont. variable plots ####
   output$plot.continuous.variables <-
     renderPlot(
-      VlnPlot(plaqviewobj, features = input$select.continuous.variables,
+      VlnPlot(plaqviewobj, features = input$select.continuous.variables,pt.size = 0,
               group.by = input$select.continuous.variables.dependency)
       
     )# render plot
@@ -1415,7 +1415,12 @@ server <- function(input, output, session) {
         ggtitle("Expression Dot Plot") +
         theme(plot.title = element_text(hjust = 1)) +
         theme(plot.title = element_text(hjust = 0.5)) +
-        theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1))
+        theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1, size = 18)) +
+        theme(axis.text.y = element_text(size = 18)) +
+        theme(axis.title = element_text(size = 18)) 
+        
+      
+      
     })
     
     # this is for the download
@@ -1742,7 +1747,7 @@ server <- function(input, output, session) {
       
       if (class(fulltable) == "data.frame" ) {
         isolatedtable <-  fulltable %>% # reorder columns
-          select("Drug_Name" = drugName, 
+          dplyr::select("Drug_Name" = drugName, 
                  "Interaction_Types" = interactionTypes, # rename columns might as well :)
                  "Int_Score" = score , 
                  #pmids, 
