@@ -4,6 +4,8 @@
 
 Our publication introducing PlaqView has been accepted at [Atherosclerosis](https://www.atherosclerosis-journal.com/article/S0021-9150(21)01464-7/fulltext). 
 
+Our second publication detailing extensive update and improvement to PlaqView can be found at [Frontiers in Cardiovascular Medicine](https://www.frontiersin.org/articles/10.3389/fcvm.2022.969421/full)
+
 PlaqView for scATAC-seq is coming in 2022!
 
 ## About *PlaqView*
